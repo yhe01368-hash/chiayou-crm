@@ -1,7 +1,20 @@
--- 嘉祐資訊 CRM 資料庫結構
+-- 嘉祐資訊 CRM 資料庫結構（可重複執行）
 
 -- 啟用 UUID 擴展
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 建立 enum 類型（如果已存在會忽略錯誤）
+DO $$ BEGIN
+    CREATE TYPE repair_status AS ENUM ('pending', 'processing', 'completed', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE shipment_status AS ENUM ('draft', 'completed', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- 客戶資料表
 CREATE TABLE IF NOT EXISTS customers (
@@ -15,9 +28,6 @@ CREATE TABLE IF NOT EXISTS customers (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
-
--- 維修狀態枚舉
-CREATE TYPE repair_status AS ENUM ('pending', 'processing', 'completed', 'cancelled');
 
 -- 維修資料表
 CREATE TABLE IF NOT EXISTS repairs (
@@ -53,9 +63,6 @@ CREATE TABLE IF NOT EXISTS inventory (
     updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- 出貨單狀態枚舉
-CREATE TYPE shipment_status AS ENUM ('draft', 'completed', 'cancelled');
-
 -- 出貨單資料表
 CREATE TABLE IF NOT EXISTS shipments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -89,15 +96,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS customers_updated_at ON customers;
 CREATE TRIGGER customers_updated_at BEFORE UPDATE ON customers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS repairs_updated_at ON repairs;
 CREATE TRIGGER repairs_updated_at BEFORE UPDATE ON repairs
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS inventory_updated_at ON inventory;
 CREATE TRIGGER inventory_updated_at BEFORE UPDATE ON inventory
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
+DROP TRIGGER IF EXISTS shipments_updated_at ON shipments;
 CREATE TRIGGER shipments_updated_at BEFORE UPDATE ON shipments
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
