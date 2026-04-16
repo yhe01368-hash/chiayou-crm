@@ -3,6 +3,9 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+# 先升級 pip
+RUN pip install --upgrade pip
+
 # 安裝依賴
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
