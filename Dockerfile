@@ -3,13 +3,12 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# 複製 backend 目錄
-COPY backend/requirements.txt ./requirements.txt
+# 安裝依賴
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY backend/ ./backend/
-
-WORKDIR /app/backend
+# 複製應用程式
+COPY backend/ .
 
 ENV PYTHONUNBUFFERED=1
 
