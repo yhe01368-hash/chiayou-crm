@@ -7,8 +7,10 @@ WORKDIR /app
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 複製應用程式到 /app
-COPY backend/ ./ 
+# 複製應用程式
+COPY backend/ ./backend/
+
+WORKDIR /app/backend
 
 ENV PYTHONUNBUFFERED=1
 
