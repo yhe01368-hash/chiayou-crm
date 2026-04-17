@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { repairApi, customerApi } from '../services/api';
 import type { RepairFormData } from '../types';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, X } from 'lucide-react';
 
 const deviceTypes = ['筆電', '桌機', '螢幕', '印表機', '其他'];
 const statusOptions = [
@@ -31,6 +31,10 @@ export default function RepairForm() {
     cost: undefined,
   });
 
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const { data: customers = [] } = useQuery({
     queryKey: ['customers'],
     queryFn: () => customerApi.getAll().then(res => res.data),
@@ -41,6 +45,24 @@ export default function RepairForm() {
     queryFn: () => repairApi.getById(id!).then(res => res.data),
     enabled: isEdit,
   });
+
+  const selectedCustomer = customers.find((c: any) => c.id === form.customer_id);
+
+  const filteredCustomers = customers.filter((c: any) => {
+    const term = customerSearch.toLowerCase();
+    return c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term));
+  });
+
+  // 點外面關閉下拉
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (editData) {
@@ -55,8 +77,11 @@ export default function RepairForm() {
         repair_detail: editData.repair_detail || '',
         cost: editData.cost,
       });
+      // 編輯模式時也要設定搜尋框顯示值
+      const cust = customers.find((c: any) => c.id === editData.customer_id);
+      if (cust) setCustomerSearch(cust.name);
     }
-  }, [editData]);
+  }, [editData, customers]);
 
   const mutation = useMutation({
     mutationFn: (data: RepairFormData) => 
@@ -84,17 +109,61 @@ export default function RepairForm() {
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">客戶 *</label>
-          <select
-            className="input"
-            value={form.customer_id}
-            onChange={(e) => setForm({...form, customer_id: e.target.value})}
-            required
-          >
-            <option value="">請選擇客戶</option>
-            {customers.map((c: any) => (
-              <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>
-            ))}
-          </select>
+          <div className="relative" ref={dropdownRef}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <input
+                type="text"
+                className="input pl-9 pr-8"
+                placeholder="搜尋客戶姓名或電話..."
+                value={showDropdown || customerSearch ? customerSearch : ''}
+                onChange={(e) => {
+                  setCustomerSearch(e.target.value);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => setShowDropdown(true)}
+                required={!form.customer_id}
+              />
+              {customerSearch && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCustomerSearch('');
+                    setForm({ ...form, customer_id: '' });
+                    setShowDropdown(false);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+            {showDropdown && (
+              <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                {filteredCustomers.length === 0 ? (
+                  <li className="px-4 py-2 text-gray-500 text-sm">找不到客戶</li>
+                ) : (
+                  filteredCustomers.map((c: any) => (
+                    <li
+                      key={c.id}
+                      className="px-4 py-2 hover:bg-gray-50 cursor-pointer text-sm"
+                      onClick={() => {
+                        setForm({ ...form, customer_id: c.id });
+                        setCustomerSearch(c.name);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <span className="font-medium">{c.name}</span>
+                      <span className="text-gray-400 ml-2">{c.phone}</span>
+                    </li>
+                  ))
+                )}
+              </ul>
+            )}
+          </div>
+          {!form.customer_id && (
+            <p className="text-xs text-red-500 mt-1">請選擇客戶</p>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
