@@ -53,7 +53,7 @@ def get_customers(
     return rows
 
 
-@router.get("/{customer_id}", response_model=CustomerResponse)
+@router.get("/{customer_id}")
 def get_customer(customer_id: UUID):
     sb = get_client()
     try:
