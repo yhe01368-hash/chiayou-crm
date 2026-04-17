@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS customers (
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     phone2 VARCHAR(20),
+    tax_id VARCHAR(20),
     address TEXT,
     email VARCHAR(100),
     note TEXT,

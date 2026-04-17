@@ -19,6 +19,7 @@
 | name | VARCHAR(100) | 姓名 |
 | phone | VARCHAR(20) | 電話 |
 | phone2 | VARCHAR(20) | 行動電話（選填）|
+| tax_id | VARCHAR(20) | 統一編號（選填，8碼）|
 | address | TEXT | 地址 |
 | email | VARCHAR(100) | Email（選填）|
 | note | TEXT | 備註（選填）|

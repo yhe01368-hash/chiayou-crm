@@ -8,6 +8,7 @@ export interface Customer {
   name: string;
   phone: string;
   phone2?: string;
+  tax_id?: string;
   address?: string;
   email?: string;
   note?: string;
@@ -92,6 +93,7 @@ export interface CustomerFormData {
   name: string;
   phone: string;
   phone2?: string;
+  tax_id?: string;
   address?: string;
   email?: string;
   note?: string;

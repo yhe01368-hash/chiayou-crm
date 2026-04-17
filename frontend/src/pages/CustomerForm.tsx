@@ -13,6 +13,7 @@ export default function CustomerForm() {
     name: '',
     phone: '',
     phone2: '',
+    tax_id: '',
     address: '',
     email: '',
     note: '',
@@ -68,6 +69,17 @@ export default function CustomerForm() {
             className="input"
             value={form.phone2}
             onChange={(e) => setForm({...form, phone2: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">統一編號</label>
+          <input
+            type="text"
+            className="input"
+            value={form.tax_id}
+            onChange={(e) => setForm({...form, tax_id: e.target.value})}
+            maxLength={8}
+            placeholder="8碼"
           />
         </div>
         <div>

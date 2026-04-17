@@ -24,6 +24,7 @@ class Customer(Base):
     name = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=False)
     phone2 = Column(String(20), nullable=True)
+    tax_id = Column(String(20), nullable=True)
     address = Column(Text, nullable=True)
     email = Column(String(100), nullable=True)
     note = Column(Text, nullable=True)
