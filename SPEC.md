@@ -18,7 +18,7 @@
 | id | UUID | 主鍵 |
 | name | VARCHAR(100) | 姓名 |
 | phone | VARCHAR(20) | 電話 |
-| phone2 | VARCHAR(20) | 第二電話（選填）|
+| phone2 | VARCHAR(20) | 行動電話（選填）|
 | address | TEXT | 地址 |
 | email | VARCHAR(100) | Email（選填）|
 | note | TEXT | 備註（選填）|

@@ -62,7 +62,7 @@ export default function CustomerForm() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">第二電話</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">行動電話</label>
           <input
             type="tel"
             className="input"
