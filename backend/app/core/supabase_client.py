@@ -68,7 +68,8 @@ class SupabaseClient:
 
         if single:
             data = resp.json()
-            return data if data else None
+            # single=true 時 PostgREST 仍回 [] 或 [{...}]，取第一筆
+            return data[0] if isinstance(data, list) and data else (data if data else None)
 
         # 陣列
         result = resp.json()
