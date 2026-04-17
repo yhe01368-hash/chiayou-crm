@@ -1,67 +1,125 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from fastapi import APIRouter, HTTPException, Query
 from typing import List, Optional
 from uuid import UUID
+import httpx
 
-from app.core.database import get_db
-from app.models.models import Customer
-from app.schemas.schemas import (
-    CustomerCreate, CustomerUpdate, CustomerResponse
-)
+from app.core.supabase_client import get_client
+from app.schemas.schemas import CustomerCreate, CustomerUpdate, CustomerResponse
 
 router = APIRouter(prefix="/api/customers", tags=["客戶管理"])
+
 
 @router.get("", response_model=List[CustomerResponse])
 def get_customers(
     search: Optional[str] = Query(None, description="搜尋姓名或電話"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    db: Session = Depends(get_db)
 ):
-    query = db.query(Customer)
+    sb = get_client()
+    filters = {}
+
     if search:
-        query = query.filter(
-            or_(
-                Customer.name.ilike(f"%{search}%"),
-                Customer.phone.ilike(f"%{search}%")
+        # PostgREST or filter — name.ilike or phone.ilike
+        # 用 text search 用 or 串接
+        try:
+            rows = sb.select(
+                "customers",
+                select="*",
+                order="created_at.desc",
+                limit=limit,
             )
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=str(e))
+
+        # client-side filter（簡單做法，rows 不多時可接受）
+        q = search.lower()
+        rows = [r for r in rows if q in (r.get("name") or "").lower() or q in (r.get("phone") or "").lower()]
+        return rows
+
+    try:
+        rows = sb.select(
+            "customers",
+            select="*",
+            order="created_at.desc",
+            limit=limit,
         )
-    customers = query.order_by(Customer.created_at.desc()).offset(skip).limit(limit).all()
-    return customers
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    return rows
+
 
 @router.get("/{customer_id}", response_model=CustomerResponse)
-def get_customer(customer_id: UUID, db: Session = Depends(get_db)):
-    customer = db.query(Customer).filter(Customer.id == customer_id).first()
-    if not customer:
+def get_customer(customer_id: UUID):
+    sb = get_client()
+    try:
+        row = sb.select(
+            "customers",
+            select="*",
+            filters={"id": str(customer_id)},
+            single=True,
+        )
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    if not row:
         raise HTTPException(status_code=404, detail="客戶不存在")
-    return customer
+    return row
+
 
 @router.post("", response_model=CustomerResponse, status_code=201)
-def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
-    db_customer = Customer(**customer.model_dump())
-    db.add(db_customer)
-    db.commit()
-    db.refresh(db_customer)
-    return db_customer
+def create_customer(customer: CustomerCreate):
+    sb = get_client()
+    payload = customer.model_dump()
+
+    try:
+        row = sb.insert("customers", payload)
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    return row
+
 
 @router.put("/{customer_id}", response_model=CustomerResponse)
-def update_customer(customer_id: UUID, customer: CustomerUpdate, db: Session = Depends(get_db)):
-    db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
-    if not db_customer:
+def update_customer(customer_id: UUID, customer: CustomerUpdate):
+    sb = get_client()
+    payload = customer.model_dump(exclude_unset=True)
+    if not payload:
+        # No fields to update, just return the current customer
+        return get_customer(customer_id)
+
+    try:
+        row = sb.update(
+            "customers",
+            payload,
+            filters={"id": str(customer_id)},
+        )
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
+    if not row:
         raise HTTPException(status_code=404, detail="客戶不存在")
-    update_data = customer.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_customer, key, value)
-    db.commit()
-    db.refresh(db_customer)
-    return db_customer
+    return row
+
 
 @router.delete("/{customer_id}", status_code=204)
-def delete_customer(customer_id: UUID, db: Session = Depends(get_db)):
-    db_customer = db.query(Customer).filter(Customer.id == customer_id).first()
-    if not db_customer:
-        raise HTTPException(status_code=404, detail="客戶不存在")
-    db.delete(db_customer)
-    db.commit()
+def delete_customer(customer_id: UUID):
+    sb = get_client()
+    try:
+        sb.delete("customers", filters={"id": str(customer_id)})
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
     return None

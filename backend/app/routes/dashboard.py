@@ -1,44 +1,78 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from sqlalchemy import func
-from datetime import datetime, timedelta
+from fastapi import APIRouter, HTTPException
+from datetime import datetime
 from decimal import Decimal
+import httpx
 
-from app.core.database import get_db
-from app.models.models import Repair, Inventory, Shipment, RepairStatus, ShipmentStatus
+from app.core.supabase_client import get_client
 from app.schemas.schemas import DashboardResponse
 
 router = APIRouter(prefix="/api/dashboard", tags=["儀表板"])
 
+
 @router.get("", response_model=DashboardResponse)
-def get_dashboard(db: Session = Depends(get_db)):
-    # Pending repairs count
-    pending_repairs = db.query(func.count(Repair.id)).filter(
-        Repair.status.in_([RepairStatus.pending, RepairStatus.processing])
-    ).scalar()
-    
-    # Low stock items count
-    low_stock = db.query(func.count(Inventory.id)).filter(
-        Inventory.quantity <= Inventory.min_stock
-    ).scalar()
-    
-    # Monthly revenue (current month)
-    now = datetime.now()
-    first_day_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    
-    monthly_revenue = db.query(func.coalesce(func.sum(Shipment.total_amount), Decimal("0"))).filter(
-        Shipment.status == ShipmentStatus.completed,
-        Shipment.shipment_date >= first_day_of_month.date()
-    ).scalar()
-    
-    # Recent shipments (last 5)
-    recent_shipments = db.query(Shipment).order_by(
-        Shipment.created_at.desc()
-    ).limit(5).all()
-    
+def get_dashboard():
+    sb = get_client()
+
+    try:
+        # 1. 待處理維修數量 (pending + processing)
+        pending_rows = sb.select(
+            "repairs",
+            select="id",
+            filters={"status": "in.(pending,processing)"},
+        )
+        pending_repairs = len(pending_rows) if pending_rows else 0
+
+        # 2. 低庫存商品數量
+        low_rows = sb.select(
+            "inventory",
+            select="id",
+        )
+        low_stock_items = len([r for r in low_rows if r.get("quantity", 0) <= r.get("min_stock", 0)]) if low_rows else 0
+
+        # 3. 本月營收 (completed shipments，日期 >= 本月1號)
+        first_day = datetime.now().replace(day=1).date().isoformat()
+        completed_rows = sb.select(
+            "shipments",
+            select="total_amount",
+            filters={"status": "eq.completed", "shipment_date": f"gte.{first_day}"},
+        )
+        monthly_revenue = Decimal("0")
+        if completed_rows:
+            for r in completed_rows:
+                amt = r.get("total_amount") or 0
+                if isinstance(amt, (int, float)):
+                    monthly_revenue += Decimal(str(amt))
+
+        # 4. 最近五筆出貨單
+        recent = sb.select(
+            "shipments",
+            select="*",
+            order="created_at.desc",
+            limit=5,
+        )
+
+        # 附加 customer + items
+        result_shipments = []
+        for row in (recent or []):
+            sid = row.get("id")
+            if sid:
+                # customer
+                if row.get("customer_id"):
+                    cust = sb.select("customers", select="*", filters={"id": row["customer_id"]}, single=True)
+                    row["customer"] = cust
+                # items
+                items = sb.select("shipment_items", select="*", filters={"shipment_id": sid})
+                row["items"] = items or []
+            result_shipments.append(row)
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=str(e))
+
     return DashboardResponse(
-        pending_repairs=pending_repairs or 0,
-        low_stock_items=low_stock or 0,
-        monthly_revenue=monthly_revenue or Decimal("0"),
-        recent_shipments=recent_shipments
+        pending_repairs=pending_repairs,
+        low_stock_items=low_stock_items,
+        monthly_revenue=monthly_revenue,
+        recent_shipments=result_shipments,
     )
