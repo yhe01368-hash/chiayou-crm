@@ -8,7 +8,7 @@ from app.core.database import get_db
 from app.models.models import Repair, Inventory, Shipment, RepairStatus, ShipmentStatus
 from app.schemas.schemas import DashboardResponse
 
-router = APIRouter(prefix="/dashboard", tags=["儀表板"])
+router = APIRouter(prefix="/api/dashboard", tags=["儀表板"])
 
 @router.get("", response_model=DashboardResponse)
 def get_dashboard(db: Session = Depends(get_db)):

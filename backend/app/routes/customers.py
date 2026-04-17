@@ -10,7 +10,7 @@ from app.schemas.schemas import (
     CustomerCreate, CustomerUpdate, CustomerResponse
 )
 
-router = APIRouter(prefix="/customers", tags=["客戶管理"])
+router = APIRouter(prefix="/api/customers", tags=["客戶管理"])
 
 @router.get("", response_model=List[CustomerResponse])
 def get_customers(

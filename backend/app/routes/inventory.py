@@ -9,7 +9,7 @@ from app.schemas.schemas import (
     InventoryCreate, InventoryUpdate, InventoryResponse, StockAdjust
 )
 
-router = APIRouter(prefix="/inventory", tags=["庫存管理"])
+router = APIRouter(prefix="/api/inventory", tags=["庫存管理"])
 
 @router.get("", response_model=List[InventoryResponse])
 def get_inventory(

@@ -10,7 +10,7 @@ from app.schemas.schemas import (
     RepairCreate, RepairUpdate, RepairResponse, RepairStatusUpdate, RepairStatusEnum
 )
 
-router = APIRouter(prefix="/repairs", tags=["維修管理"])
+router = APIRouter(prefix="/api/repairs", tags=["維修管理"])
 
 @router.get("", response_model=List[RepairResponse])
 def get_repairs(

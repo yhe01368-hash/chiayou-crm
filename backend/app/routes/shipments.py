@@ -11,7 +11,7 @@ from app.schemas.schemas import (
     ShipmentCreate, ShipmentUpdate, ShipmentResponse, ShipmentItemResponse, ShipmentStatusEnum
 )
 
-router = APIRouter(prefix="/shipments", tags=["出貨單管理"])
+router = APIRouter(prefix="/api/shipments", tags=["出貨單管理"])
 
 def generate_shipment_number():
     from datetime import datetime
