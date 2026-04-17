@@ -1,14 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { customerApi } from '../services/api';
 import type { CustomerFormData } from '../types';
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export default function CustomerForm() {
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const { data: existingCustomer } = useQuery({
+    queryKey: ['customer', id],
+    queryFn: () => customerApi.getById(id!).then(res => res.data),
+    enabled: isEditMode,
+  });
+
   const [form, setForm] = useState<CustomerFormData>({
     name: '',
     phone: '',
@@ -19,8 +27,23 @@ export default function CustomerForm() {
     note: '',
   });
 
+  useEffect(() => {
+    if (existingCustomer) {
+      setForm({
+        name: existingCustomer.name || '',
+        phone: existingCustomer.phone || '',
+        phone2: existingCustomer.phone2 || '',
+        tax_id: existingCustomer.tax_id || '',
+        address: existingCustomer.address || '',
+        email: existingCustomer.email || '',
+        note: existingCustomer.note || '',
+      });
+    }
+  }, [existingCustomer]);
+
   const mutation = useMutation({
-    mutationFn: (data: CustomerFormData) => customerApi.create(data),
+    mutationFn: (data: CustomerFormData) =>
+      isEditMode ? customerApi.update(id!, data) : customerApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       navigate('/customers');
@@ -38,7 +61,7 @@ export default function CustomerForm() {
         <Link to="/customers" className="p-2 hover:bg-gray-100 rounded-lg">
           <ArrowLeft size={24} />
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">新增客戶</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{isEditMode ? '編輯客戶' : '新增客戶'}</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
