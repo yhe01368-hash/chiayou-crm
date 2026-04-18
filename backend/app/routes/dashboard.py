@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
-from decimal import Decimal
 import httpx
 
 from app.core.supabase_client import get_client
@@ -9,7 +8,7 @@ from app.schemas.schemas import DashboardResponse
 router = APIRouter(prefix="/api/dashboard", tags=["儀表板"])
 
 
-@router.get("", response_model=DashboardResponse)
+@router.get("")
 def get_dashboard():
     sb = get_client()
 
@@ -32,14 +31,13 @@ def get_dashboard():
         completed_rows = sb.select(
             "shipments",
             select="total_amount",
-            filters={"status": "eq.completed", "shipment_date": f"gte.{first_day}"},
+            filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
         )
-        monthly_revenue = Decimal("0")
-        if completed_rows:
-            for r in completed_rows:
-                amt = r.get("total_amount") or 0
-                if isinstance(amt, (int, float)):
-                    monthly_revenue += Decimal(str(amt))
+        monthly_revenue = float(sum(
+            r.get("total_amount", 0) or 0
+            for r in (completed_rows or [])
+            if isinstance(r.get("total_amount"), (int, float))
+        ))
 
         # 4. 最近五筆出貨單
         recent = sb.select(
