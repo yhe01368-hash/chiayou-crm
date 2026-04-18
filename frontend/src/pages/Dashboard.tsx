@@ -20,8 +20,8 @@ export default function Dashboard() {
   }
 
   const stats = [
-    { label: '待處理維修', value: data?.pending_repairs ?? 0, icon: Wrench, color: 'bg-orange-500', textColor: 'text-orange-600' },
-    { label: '低庫存商品', value: data?.low_stock_items ?? 0, icon: AlertTriangle, color: 'bg-red-500', textColor: 'text-red-600' },
+    { label: '待處理維修', value: data?.pending_repairs ?? 0, icon: Wrench, color: 'bg-orange-500', textColor: 'text-orange-600', link: '/repairs?status=pending' },
+    { label: '低庫存商品', value: data?.low_stock_items ?? 0, icon: AlertTriangle, color: 'bg-red-500', textColor: 'text-red-600', link: '/inventory?low_stock=true' },
     { label: '本月營收', value: `$${Number(data?.monthly_revenue ?? 0).toLocaleString()}`, icon: DollarSign, color: 'bg-green-500', textColor: 'text-green-600' },
     { label: '近期出貨', value: data?.recent_shipments?.length ?? 0, icon: Truck, color: 'bg-blue-500', textColor: 'text-blue-600' },
   ];
@@ -37,7 +37,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
-          return (
+          const card = (
             <div key={stat.label} className="card p-5">
               <div className="flex items-center justify-between">
                 <div>
@@ -49,6 +49,11 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+          );
+          return stat.link ? (
+            <Link key={stat.label} to={stat.link} className="block">{card}</Link>
+          ) : (
+            <div key={stat.label}>{card}</div>
           );
         })}
       </div>

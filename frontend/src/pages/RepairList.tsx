@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { repairApi } from '../services/api';
@@ -13,7 +14,8 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 };
 
 export default function RepairList() {
-  const [statusFilter, setStatusFilter] = useState('');
+  const [searchParams] = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const queryClient = useQueryClient();
 
   const { data: repairs = [], isLoading } = useQuery({
