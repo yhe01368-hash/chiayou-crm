@@ -15,12 +15,10 @@ def get_dashboard():
 
     try:
         # 1. 待處理維修數量 (pending + processing)
-        pending_rows = sb.select(
-            "repairs",
-            select="id",
-            filters={"status": "in.(pending,processing)"},
-        )
-        pending_repairs = len(pending_rows) if pending_rows else 0
+        pending_repairs = 0
+        for s in ("pending", "processing"):
+            rows = sb.select("repairs", select="id", filters={"status": s}) or []
+            pending_repairs += len(rows)
 
         # 2. 低庫存商品數量
         low_rows = sb.select(
