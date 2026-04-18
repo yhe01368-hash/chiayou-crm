@@ -46,8 +46,6 @@ export default function RepairForm() {
     enabled: isEdit,
   });
 
-  const selectedCustomer = customers.find((c: any) => c.id === form.customer_id);
-
   const filteredCustomers = customers.filter((c: any) => {
     const term = customerSearch.toLowerCase();
     return c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term));
