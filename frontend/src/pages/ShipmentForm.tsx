@@ -209,7 +209,7 @@ export default function ShipmentForm() {
                       min="1"
                     />
                     <span className="text-sm text-gray-600 w-24 text-right">
-                      ${product ? (Number(product.selling_price) * item.quantity).toLocaleString() : 0}
+                      NT${product ? (Number(product.selling_price) * item.quantity).toLocaleString() : 0}
                     </span>
                     <button
                       type="button"

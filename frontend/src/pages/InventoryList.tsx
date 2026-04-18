@@ -122,9 +122,9 @@ export default function InventoryList() {
                     </span>
                   </td>
                   <td className="py-3 text-right text-gray-500">
-                    {item.cost_price ? `$${Number(item.cost_price).toLocaleString()}` : '-'}
+                    {item.cost_price ? `NT$${Number(item.cost_price).toLocaleString()}` : '-'}
                   </td>
-                  <td className="py-3 text-right font-medium">${Number(item.selling_price).toLocaleString()}</td>
+                  <td className="py-3 text-right font-medium">NT${Number(item.selling_price).toLocaleString()}</td>
                   <td className="py-3">
                     <div className="flex items-center gap-1">
                       <button
