@@ -50,8 +50,12 @@ class SupabaseClient:
         params = {"select": select}
         if filters:
             for field, value in filters.items():
-                if isinstance(value, list):
-                    # in 查詢
+                if isinstance(value, str) and value.startswith("in."):
+                    # in 查詢：in.(v1,v2,...)
+                    inner = value[3:]  # 拿掉 "in."
+                    params[f"{field}"] = f"in.({inner})"
+                elif isinstance(value, list):
+                    # in 查詢：['a','b'] → in.(a,b)
                     params[f"{field}"] = f"in.({','.join(str(v) for v in value)})"
                 else:
                     params[f"{field}"] = f"eq.{value}"
