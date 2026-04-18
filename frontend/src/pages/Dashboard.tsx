@@ -20,10 +20,10 @@ export default function Dashboard() {
   }
 
   const stats = [
-    { label: '待處理維修', value: data?.pending_repairs ?? 0, icon: Wrench, color: 'bg-orange-500', textColor: 'text-orange-600', link: '/repairs?status=pending' },
+    { label: '待處理維修', value: data?.pending_repairs ?? 0, icon: Wrench, color: 'bg-orange-500', textColor: 'text-orange-600' },
     { label: '低庫存商品', value: data?.low_stock_items ?? 0, icon: AlertTriangle, color: 'bg-red-500', textColor: 'text-red-600', link: '/inventory?low_stock=true' },
     { label: '本月營收', value: `$${Number(data?.monthly_revenue ?? 0).toLocaleString()}`, icon: DollarSign, color: 'bg-green-500', textColor: 'text-green-600' },
-    { label: '近期出貨', value: data?.recent_shipments?.length ?? 0, icon: Truck, color: 'bg-blue-500', textColor: 'text-blue-600' },
+    { label: '近期出貨', value: data?.recent_shipments?.length ?? 0, icon: Truck, color: 'bg-blue-500', textColor: 'text-blue-600', link: '/shipments' },
   ];
 
   return (
@@ -99,6 +99,17 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Pending repairs panel */}
+      {data?.pending_repairs > 0 && (
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-900">待處理維修</h2>
+            <Link to="/repairs?status=pending" className="text-sm text-primary-600 hover:underline">查看待處理</Link>
+          </div>
+          <p className="text-gray-500 text-sm">目前有 {data.pending_repairs} 筆待處理維修</p>
+        </div>
+      )}
     </div>
   );
 }
