@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { repairApi, customerApi } from '../services/api';
 import type { RepairFormData } from '../types';
 import { ArrowLeft, Search, X } from 'lucide-react';
@@ -216,19 +218,36 @@ export default function RepairForm() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">問題描述 *</label>
-          <textarea
-            className="input min-h-[80px]"
+          <ReactQuill
+            theme="snow"
             value={form.problem}
-            onChange={(e) => setForm({...form, problem: e.target.value})}
-            required
+            onChange={(value) => setForm({ ...form, problem: value })}
+            className="bg-white rounded-lg mb-10"
+            modules={{
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link', 'image'],
+                ['clean'],
+              ],
+            }}
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">維修過程</label>
-          <textarea
-            className="input min-h-[80px]"
+          <ReactQuill
+            theme="snow"
             value={form.repair_detail}
-            onChange={(e) => setForm({...form, repair_detail: e.target.value})}
+            onChange={(value) => setForm({ ...form, repair_detail: value })}
+            className="bg-white rounded-lg mb-10"
+            modules={{
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link', 'image'],
+                ['clean'],
+              ],
+            }}
           />
         </div>
         <div>

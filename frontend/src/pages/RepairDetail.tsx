@@ -104,12 +104,12 @@ export default function RepairDetail() {
         <div className="space-y-4">
           <div>
             <div className="text-sm text-gray-500 mb-1">問題描述</div>
-            <div className="p-3 bg-gray-50 rounded-lg">{repair.problem}</div>
+            <div className="p-3 bg-gray-50 rounded-lg prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: repair.problem }} />
           </div>
           {repair.repair_detail && (
             <div>
               <div className="text-sm text-gray-500 mb-1">維修過程</div>
-              <div className="p-3 bg-gray-50 rounded-lg">{repair.repair_detail}</div>
+              <div className="p-3 bg-gray-50 rounded-lg prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: repair.repair_detail }} />
             </div>
           )}
           {repair.cost && (

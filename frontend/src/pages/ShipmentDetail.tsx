@@ -133,7 +133,7 @@ export default function ShipmentDetail() {
       {shipment.note && (
         <div className="card p-6">
           <h2 className="font-semibold text-gray-900 mb-2">備註</h2>
-          <p className="text-gray-600">{shipment.note}</p>
+          <div className="prose prose-sm max-w-none text-gray-600" dangerouslySetInnerHTML={{ __html: shipment.note }} />
         </div>
       )}
 

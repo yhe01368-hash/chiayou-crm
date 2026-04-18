@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { shipmentApi, customerApi, inventoryApi } from '../services/api';
 import { ArrowLeft, Plus, Trash2, Search, X } from 'lucide-react';
 
@@ -230,10 +232,19 @@ export default function ShipmentForm() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">備註</label>
-          <textarea
-            className="input min-h-[80px]"
+          <ReactQuill
+            theme="snow"
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={setNote}
+            className="bg-white rounded-lg"
+            modules={{
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link', 'image'],
+                ['clean'],
+              ],
+            }}
           />
         </div>
 

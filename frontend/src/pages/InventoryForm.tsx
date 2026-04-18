@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { inventoryApi } from '../services/api';
 import type { InventoryFormData } from '../types';
 import { ArrowLeft } from 'lucide-react';
@@ -174,10 +176,19 @@ export default function InventoryForm() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">備註</label>
-          <textarea
-            className="input min-h-[80px]"
+          <ReactQuill
+            theme="snow"
             value={form.note}
-            onChange={(e) => setForm({...form, note: e.target.value})}
+            onChange={(value) => setForm({ ...form, note: value })}
+            className="bg-white rounded-lg"
+            modules={{
+              toolbar: [
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link', 'image'],
+                ['clean'],
+              ],
+            }}
           />
         </div>
         <div className="flex gap-3 pt-4">

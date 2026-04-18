@@ -84,7 +84,7 @@ export default function CustomerDetail() {
               <FileText size={18} className="text-gray-400 mt-0.5" />
               <div>
                 <div className="text-sm text-gray-500">備註</div>
-                <div>{customer.note}</div>
+                <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: customer.note }} />
               </div>
             </div>
           </div>
