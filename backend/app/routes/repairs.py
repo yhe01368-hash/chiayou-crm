@@ -94,6 +94,10 @@ def create_repair(repair: RepairCreate):
         raise HTTPException(status_code=404, detail="客戶不存在")
 
     payload = repair.model_dump()
+    # UUID -> str (否則 JSON 序列化失敗)
+    for k, v in list(payload.items()):
+        if v is not None and not isinstance(v, (str, int, float, bool)):
+            payload[k] = str(v)
     # 處理 Decimal -> float (Supabase JSON 不接受 Decimal)
     if payload.get("cost") is not None:
         payload["cost"] = float(payload["cost"])
