@@ -258,26 +258,32 @@ export default function ShipmentPrint() {
 
       {/* Print styles */}
       <style>{`
-        @media print {
-          @page {
-            size: 215.9mm 139.7mm landscape;
-            margin: 0;
-          }
-          body {
-            background: #fff !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .no-print {
-            display: none !important;
-          }
-          .print-paper {
-            width: 215.9mm !important;
-            min-height: 139.7mm !important;
-            padding: 4mm 5mm !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-          }
+        @page {
+          size: 215.9mm 139.7mm landscape;
+          margin: 0;
+        }
+        * {
+          box-sizing: border-box !important;
+        }
+        body {
+          margin: 0 !important;
+          padding: 0 !important;
+          background: #fff !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .print-paper {
+          width: 215.9mm !important;
+          min-height: 139.7mm !important;
+          max-height: 139.7mm !important;
+          padding: 4mm 5mm !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+          overflow: hidden !important;
+          border: none !important;
         }
       `}</style>
     </div>
