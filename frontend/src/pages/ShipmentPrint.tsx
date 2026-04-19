@@ -264,24 +264,24 @@ export default function ShipmentPrint() {
           size: 215.9mm 139.7mm landscape;
           margin: 0;
         }
-        * {
-          box-sizing: border-box !important;
-        }
-        body {
+        html, body {
           margin: 0 !important;
           padding: 0 !important;
           background: #fff !important;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
+        * {
+          box-sizing: border-box !important;
+        }
         .no-print {
           display: none !important;
         }
         .print-paper {
-          width: 215.9mm !important;
+          width: 200mm !important;
           min-height: 139.7mm !important;
           max-height: 139.7mm !important;
-          padding: 4mm 5mm !important;
+          padding: 4mm 6mm !important;
           margin: 0 !important;
           box-shadow: none !important;
           overflow: hidden !important;
