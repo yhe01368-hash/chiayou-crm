@@ -310,7 +310,7 @@ export default function ShipmentPrint() {
       {/* 列印樣式 */}
       <style>{`
         @page {
-          size: 8.5in 5.5in portrait;
+          size: 9.5in 5.5in;
           margin: 0;
         }
         @media print {
@@ -321,8 +321,9 @@ export default function ShipmentPrint() {
             height: 100% !important;
             background: #fff !important;
             display: flex !important;
+            flex-direction: column !important;
             justify-content: center !important;
-            align-items: flex-start !important;
+            align-items: center !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
