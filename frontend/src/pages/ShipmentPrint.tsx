@@ -1,13 +1,17 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { shipmentApi } from '../services/api';
-import { ArrowLeft, Printer } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArrowLeft, Printer, Download } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export default function ShipmentPrint() {
   const { id } = useParams();
+  const paperRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const { data: shipment, isLoading } = useQuery({
     queryKey: ['shipment', id],
@@ -20,6 +24,32 @@ export default function ShipmentPrint() {
       return () => clearTimeout(timer);
     }
   }, [shipment]);
+
+  const handleDownloadPDF = async () => {
+    if (!paperRef.current) return;
+    setDownloading(true);
+    try {
+      const canvas = await html2canvas(paperRef.current, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+      // 8.5in x 5.5in at 72 points per inch
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'in',
+        format: [8.5, 5.5],
+      });
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, 8.5, 5.5);
+      pdf.save(`出貨單_${shipment?.shipment_number || id}.pdf`);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -62,12 +92,21 @@ export default function ShipmentPrint() {
         <button onClick={() => window.print()} className="btn btn-primary flex items-center gap-2">
           <Printer size={16} /> 列印
         </button>
+        <button
+          onClick={handleDownloadPDF}
+          disabled={downloading}
+          className="btn btn-secondary flex items-center gap-2"
+        >
+          <Download size={16} />
+          {downloading ? '生成中...' : '下載 PDF'}
+        </button>
       </div>
 
       {/* Printable wrapper — scale container */}
       <div className="print-scale-wrapper">
         {/* ── Printable paper (8.5" x 5.5") ── */}
         <div
+          ref={paperRef}
           className="print-paper"
           style={{
             width: '8.5in',
@@ -272,12 +311,9 @@ export default function ShipmentPrint() {
           .no-print {
             display: none !important;
           }
-          /* Scale wrapper: scale the content to fit within 5.5in height */
           .print-scale-wrapper {
             transform-origin: top center !important;
             width: 8.5in !important;
-            /* Scale to fit 5.5in - the actual content height is ~303px at 96dpi ≈ 3.15in,
-               so we use scale(1) but constrain the paper height explicitly */
           }
           .print-paper {
             width: 8.5in !important;
@@ -286,7 +322,6 @@ export default function ShipmentPrint() {
             box-shadow: none !important;
             overflow: hidden !important;
             border: none !important;
-            /* Constrain height to 5.5in - this forces content to fit */
             max-height: 5.5in !important;
             height: auto !important;
           }
