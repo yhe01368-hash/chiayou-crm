@@ -14,7 +14,6 @@ export default function ShipmentPrint() {
     queryFn: () => shipmentApi.getById(id!).then(res => res.data),
   });
 
-  // Auto-trigger print dialog when data loads
   useEffect(() => {
     if (shipment) {
       const timer = setTimeout(() => window.print(), 300);
@@ -53,12 +52,10 @@ export default function ShipmentPrint() {
   const totalAmount = items.reduce((sum: number, item: any) => sum + Number(item.subtotal || 0), 0);
   const totalQty = items.reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
 
-  // 中一刀尺寸：9.5" x 5.5" = 241.3mm x 139.7mm 直印（Portrait）
-  // 單位用英吋，與印表機driver設定一致
-  const PAPER_W = '9.5in';
+  // 紙張尺寸：8.5" x 5.5" = 215.9mm x 139.7mm 直印（Portrait）
+  // 與印表機 driver 設定一致（Width=850, Height=550，1/100 英吋）
+  const PAPER_W = '8.5in';
   const PAPER_H = '5.5in';
-  const PAD_H = '0.2in';
-  const PAD_V = '0.15in';
 
   return (
     <div
@@ -75,114 +72,129 @@ export default function ShipmentPrint() {
         </button>
       </div>
 
-      {/* ── Printable 中一刀 paper ── */}
+      {/* ── Printable paper (8.5" x 5.5") ── */}
       <div
         className="print-paper"
         style={{
-          width: 9.5in,
+          width: PAPER_W,
           backgroundColor: '#fff',
-          padding: `${PAD_V} ${PAD_H}`,
+          padding: '0.12in 0.18in',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC","Microsoft JhengHei","Heiti TC",sans-serif',
-          fontSize: '9.5px',
+          fontSize: '8.5px',
           color: '#1a1a1a',
-          lineHeight: 1.45,
+          lineHeight: 1.4,
         }}
       >
-        {/* ── 頁面標題 ── */}
-        <div style={{
-          textAlign: 'center',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          letterSpacing: '4px',
-          border: '2px solid #1a1a1a',
-          padding: '2px 0',
-          marginBottom: '3px',
-        }}>
-          出　貨　單
-        </div>
-
-        {/* ── 公司資訊列 ── */}
+        {/* ── 公司列 + 單號 ── */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          borderBottom: '1px solid #1a1a1a',
-          paddingBottom: '2px',
-          marginBottom: '2px',
-          fontSize: '8.5px',
+          marginBottom: '1px',
+          fontSize: '8px',
           color: '#444',
-          lineHeight: 1.4,
+          lineHeight: 1.35,
         }}>
           <div>
-            <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
+            <div style={{ fontSize: '9px', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
             <div>台中市豐原區中正路 737 巷 23 弄 2 號</div>
-          </div>
-          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-            電話：04-25279968　傳真：04-25279997
-          </div>
-        </div>
-
-        {/* ── 單號 + 日期列 ── */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2px',
-        }}>
-          <div style={{ fontSize: '9px' }}>
-            <span style={{ fontWeight: 'bold' }}>日　期：</span>
-            {shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}
+            <div>電話：04-25279968　傳真：04-25279997</div>
           </div>
           <div style={{
             background: '#1a1a1a',
             color: '#fff',
-            padding: '1px 5px',
-            fontSize: '9px',
+            padding: '1px 4px',
+            fontSize: '8px',
             fontWeight: 'bold',
-            letterSpacing: '1px',
+            letterSpacing: '0.5px',
+            whiteSpace: 'nowrap',
+            marginTop: '2px',
           }}>
             貨單號碼：{shipment.shipment_number}
           </div>
         </div>
 
-        {/* ── 客戶資料 ── */}
+        {/* ── 頁面標題 ── */}
         <div style={{
-          border: '1px solid #1a1a1a',
-          padding: '2px 4px',
-          marginBottom: '2px',
+          textAlign: 'center',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          letterSpacing: '4px',
+          border: '1.5px solid #1a1a1a',
+          padding: '1.5px 0',
+          marginBottom: '1px',
         }}>
-          <div style={{ display: 'flex', gap: '4px', fontSize: '8.5px', lineHeight: 1.7 }}>
+          出　貨　單
+        </div>
+
+        {/* ── 客戶資料 ── */}
+        <div style={{ border: '1px solid #1a1a1a', padding: '1.5px 3px', marginBottom: '1px' }}>
+          <div style={{ display: 'flex', gap: '3px', fontSize: '8px', lineHeight: 1.65, flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
-            <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.name || '-'}</span>
+            <span style={{ borderBottom: '1px dotted #aaa', flex: 1, minWidth: '120px' }}>{shipment.customer?.name || '-'}</span>
             <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
             <span style={{ borderBottom: '1px dotted #aaa', flex: 1.5 }}>{shipment.customer?.address || '-'}</span>
           </div>
-          <div style={{ display: 'flex', gap: '4px', fontSize: '8.5px', lineHeight: 1.7 }}>
+          <div style={{ display: 'flex', gap: '3px', fontSize: '8px', lineHeight: 1.65, flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電　話：</span>
-            <span style={{ borderBottom: '1px dotted #aaa' }}>{shipment.customer?.phone || '-'}</span>
+            <span style={{ borderBottom: '1px dotted #aaa', minWidth: '80px' }}>{shipment.customer?.phone || '-'}</span>
             <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>手　機：</span>
-            <span style={{ borderBottom: '1px dotted #aaa' }}>{shipment.customer?.phone2 || '-'}</span>
+            <span style={{ borderBottom: '1px dotted #aaa', minWidth: '85px' }}>{shipment.customer?.phone2 || '-'}</span>
             <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統　編：</span>
-            <span style={{ borderBottom: '1px dotted #aaa' }}>{shipment.customer?.tax_id || '-'}</span>
+            <span style={{ borderBottom: '1px dotted #aaa', minWidth: '75px' }}>{shipment.customer?.tax_id || '-'}</span>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
+            <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.contact || '-'}</span>
           </div>
         </div>
 
+        {/* ── 收費標準 ── */}
+        <div style={{
+          border: '1px solid #1a1a1a',
+          padding: '1.5px 3px',
+          marginBottom: '1px',
+          fontSize: '7.5px',
+          lineHeight: 1.5,
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '1px' }}>收費標準：</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 6px' }}>
+            <span>□ 診斷檢測費 —— 免費</span>
+            <span>□ 車馬費 —— 300</span>
+            <span>□ 系統重灌 —— 800</span>
+            <span>□ 硬體安裝（單項）—— 300</span>
+            <span>□ 軟體設定、調整 —— 300</span>
+            <span>□ 網路架設（材料另計）—— 1000</span>
+          </div>
+        </div>
+
+        {/* ── 日期列 ── */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '1px',
+          fontSize: '8.5px',
+          fontWeight: 'bold',
+        }}>
+          <span>日　期：{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}</span>
+          <span>　</span>
+        </div>
+
         {/* ── 商品明細表格 ── */}
-        <div style={{ marginBottom: '2px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9px' }}>
+        <div style={{ marginBottom: '1px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8.5px' }}>
             <thead>
               <tr>
                 <th style={th}>項 目 名 稱</th>
                 <th style={{ ...th, width: '8%', textAlign: 'center' }}>數量</th>
-                <th style={{ ...th, width: '8%', textAlign: 'center' }}>單位</th>
+                <th style={{ ...th, width: '7%', textAlign: 'center' }}>單位</th>
                 <th style={{ ...th, width: '16%', textAlign: 'right' }}>單　價</th>
                 <th style={{ ...th, width: '16%', textAlign: 'right' }}>金　額</th>
               </tr>
             </thead>
             <tbody>
               {items.length === 0 ? (
-                Array.from({ length: 3 }).map((_, i) => (
+                Array.from({ length: 4 }).map((_, i) => (
                   <tr key={i}>
                     <td style={td}></td>
                     <td style={{ ...td, textAlign: 'center' }}></td>
@@ -202,24 +214,22 @@ export default function ShipmentPrint() {
                   </tr>
                 ))
               )}
-              {/* 空行填滿 */}
-              {items.length < 3 && Array.from({ length: Math.max(0, 3 - items.length) }).map((_, i) => (
+              {items.length < 4 && Array.from({ length: Math.max(0, 4 - items.length) }).map((_, i) => (
                 <tr key={`e${i}`}>
-                  <td style={{ ...td, height: '14px' }}></td>
-                  <td style={{ ...td, height: '14px', textAlign: 'center' }}></td>
-                  <td style={{ ...td, height: '14px', textAlign: 'center' }}></td>
-                  <td style={{ ...td, height: '14px', textAlign: 'right' }}></td>
-                  <td style={{ ...td, height: '14px', textAlign: 'right' }}></td>
+                  <td style={{ ...td, height: '13px' }}></td>
+                  <td style={{ ...td, height: '13px', textAlign: 'center' }}></td>
+                  <td style={{ ...td, height: '13px', textAlign: 'center' }}></td>
+                  <td style={{ ...td, height: '13px', textAlign: 'right' }}></td>
+                  <td style={{ ...td, height: '13px', textAlign: 'right' }}></td>
                 </tr>
               ))}
-              {/* 合計列 */}
               <tr>
                 <td colSpan={2} style={{ ...td, fontWeight: 'bold', textAlign: 'right', paddingRight: '4px' }}>
                   合計：共 {totalQty} 項
                 </td>
-                <td style={{ ...td, textAlign: 'center' }}></td>
-                <td style={{ ...td, textAlign: 'right' }}></td>
-                <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '10px' }}>
+                <td style={td}></td>
+                <td style={td}></td>
+                <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '9.5px' }}>
                   {formatCurrency(totalAmount)}
                 </td>
               </tr>
@@ -228,30 +238,30 @@ export default function ShipmentPrint() {
         </div>
 
         {/* ── 備註 ── */}
-        <div style={{ border: '1px solid #1a1a1a', padding: '2px 4px', marginBottom: '2px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '1px', fontSize: '8.5px' }}>備　註：</div>
-          <div style={{ fontSize: '8px', lineHeight: 1.4 }}>
+        <div style={{ border: '1px solid #1a1a1a', padding: '1.5px 3px', marginBottom: '1px' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '1px', fontSize: '8px' }}>備　註：</div>
+          <div style={{ fontSize: '7.5px', lineHeight: 1.35 }}>
             玉山銀行（808）豐原分行　帳號：0381440003611　戶名：嘉祐資訊企業有限公司
           </div>
           {shipment.note && (
-            <div style={{ fontSize: '8px', marginTop: '1px', lineHeight: 1.4, color: '#444' }}
+            <div style={{ fontSize: '7.5px', marginTop: '1px', lineHeight: 1.35, color: '#444' }}
               dangerouslySetInnerHTML={{ __html: shipment.note }} />
           )}
         </div>
 
         {/* ── 簽收欄 ── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid #1a1a1a' }}>
-          <div style={{ padding: '2px 4px', borderRight: '1px solid #1a1a1a' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '8.5px', letterSpacing: '2px' }}>工程師</div>
-            <div style={{ borderBottom: '1px solid #1a1a1a', height: '12px', marginTop: '2px' }}></div>
+          <div style={{ padding: '1.5px 3px', borderRight: '1px solid #1a1a1a' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '8px', letterSpacing: '2px' }}>工程師</div>
+            <div style={{ borderBottom: '1px solid #1a1a1a', height: '11px', marginTop: '1px' }}></div>
           </div>
-          <div style={{ padding: '2px 4px', borderRight: '1px solid #1a1a1a' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '8.5px', letterSpacing: '2px' }}>客戶簽名</div>
-            <div style={{ borderBottom: '1px solid #1a1a1a', height: '12px', marginTop: '2px' }}></div>
+          <div style={{ padding: '1.5px 3px', borderRight: '1px solid #1a1a1a' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '8px', letterSpacing: '2px' }}>客戶簽名</div>
+            <div style={{ borderBottom: '1px solid #1a1a1a', height: '11px', marginTop: '1px' }}></div>
           </div>
-          <div style={{ padding: '2px 4px' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '8.5px', letterSpacing: '2px' }}>日　期</div>
-            <div style={{ borderBottom: '1px solid #1a1a1a', height: '12px', marginTop: '2px' }}></div>
+          <div style={{ padding: '1.5px 3px' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '8px', letterSpacing: '2px' }}>日　期</div>
+            <div style={{ borderBottom: '1px solid #1a1a1a', height: '11px', marginTop: '1px' }}></div>
           </div>
         </div>
       </div>
@@ -259,7 +269,7 @@ export default function ShipmentPrint() {
       {/* Print styles */}
       <style>{`
         @page {
-          size: 9.5in 5.5in portrait;
+          size: 8.5in 5.5in portrait;
           margin: 0;
         }
         @media print {
@@ -281,7 +291,7 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .print-paper {
-            width: 9.4in !important;
+            width: 8.5in !important;
             padding: 0.12in 0.18in !important;
             margin: 0 auto !important;
             box-shadow: none !important;
@@ -297,17 +307,17 @@ export default function ShipmentPrint() {
 const th: React.CSSProperties = {
   background: '#1a1a1a',
   color: '#fff',
-  padding: '2px 4px',
+  padding: '1.5px 3px',
   textAlign: 'left',
-  fontSize: '9px',
-  letterSpacing: '1px',
+  fontSize: '8px',
+  letterSpacing: '0.5px',
   border: '1px solid #1a1a1a',
   fontWeight: 'bold',
 };
 
 const td: React.CSSProperties = {
   border: '1px solid #1a1a1a',
-  padding: '2px 4px',
+  padding: '1.5px 3px',
   verticalAlign: 'middle',
-  lineHeight: 1.4,
+  lineHeight: 1.35,
 };
