@@ -88,9 +88,10 @@ export default function ShipmentPrint() {
  const totalAmount = items.reduce((sum: number, item: any) => sum + Number(item.subtotal || 0), 0);
 
  const border = '1px solid #1a1a1a';
- const F = '7px';
- const FF = '6.5px';
  const LP = '1.2';
+
+ // 根據是否是預覽模式調整字體大小
+ const isScreen = true; // 預覽模式用大字體
 
  return (
  <>
@@ -100,7 +101,7 @@ export default function ShipmentPrint() {
  <div className="min-h-screen bg-gray-100 print:bg-white flex flex-col items-center pt-4">
 
  {/* 控制列（不列印） */}
- <div className="no-print flex gap-2 mb-4">
+ <div className="no-print flex gap-2 mb-4 sticky top-0 z-50 bg-white p-2 shadow-md">
  <Link to="/shipments" className="btn btn-secondary flex items-center gap-2">
  <ArrowLeft size={16} /> 返回列表
  </Link>
@@ -123,39 +124,39 @@ export default function ShipmentPrint() {
  padding: '0.10in 0.14in',
  boxSizing: 'border-box',
  fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", "Heiti TC", sans-serif',
- fontSize: F,
+ fontSize: isScreen ? '14px' : '7px', // 預覽用14px，列印用7px
  color: '#1a1a1a',
  lineHeight: LP,
  }}
  >
  {/* 公司抬頭列 */}
- <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1px' }}>
+ <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: isScreen ? '4px' : '1px' }}>
  <div>
- <div style={{ fontSize: '8.5px', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
- <div style={{ fontSize: '6.5px', color: '#444', lineHeight: 1.3 }}>台中市豐原區中正路 737 巷 23 弄 2 號</div>
+ <div style={{ fontSize: isScreen ? '18px' : '8.5px', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
+ <div style={{ fontSize: isScreen ? '14px' : '6.5px', color: '#444', lineHeight: 1.3 }}>台中市豐原區中正路 737 巷 23 弄 2 號</div>
  </div>
- <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5px', fontSize: '6.5px' }}>
+ <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: isScreen ? '2px' : '0.5px', fontSize: isScreen ? '14px' : '6.5px' }}>
  <div>電話：04-25279968 傳真：04-25279997</div>
- <div style={{ background: '#1a1a1a', color: '#fff', padding: '0.5px 4px', fontSize: '7px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
+ <div style={{ background: '#1a1a1a', color: '#fff', padding: isScreen ? '2px 8px' : '0.5px 4px', fontSize: isScreen ? '14px' : '7px', fontWeight: 'bold', letterSpacing: '0.5px' }}>
  貨單號碼：{shipment.shipment_number}
  </div>
  </div>
  </div>
 
  {/* 頁面大標題 */}
- <div style={{ textAlign: 'center', fontSize: '13px', fontWeight: 'bold', letterSpacing: '5px', border: '2px solid #1a1a1a', padding: '1.5px 0', marginBottom: '1px' }}>
+ <div style={{ textAlign: 'center', fontSize: isScreen ? '26px' : '13px', fontWeight: 'bold', letterSpacing: '5px', border: '2px solid #1a1a1a', padding: isScreen ? '4px 0' : '1.5px 0', marginBottom: isScreen ? '4px' : '1px' }}>
  出 貨 單
  </div>
 
  {/* 客戶資料區 */}
- <div style={{ border, padding: '1.5px 3px', marginBottom: '1px' }}>
- <div style={{ display: 'flex', gap: '2px', fontSize: '6.5px', lineHeight: 1.7, alignItems: 'center', flexWrap: 'wrap' }}>
+ <div style={{ border, padding: isScreen ? '6px 8px' : '1.5px 3px', marginBottom: isScreen ? '4px' : '1px' }}>
+ <div style={{ display: 'flex', gap: '2px', fontSize: isScreen ? '14px' : '6.5px', lineHeight: 1.7, alignItems: 'center', flexWrap: 'wrap' }}>
  <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
  <span style={{ borderBottom: '1px dotted #aaa', minWidth: '80px', paddingRight: '4px' }}>{shipment.customer?.name || '-'}</span>
  <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
  <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.address || '-'}</span>
  </div>
- <div style={{ display: 'flex', gap: '2px', fontSize: '6.5px', lineHeight: 1.7, alignItems: 'center', flexWrap: 'wrap' }}>
+ <div style={{ display: 'flex', gap: '2px', fontSize: isScreen ? '14px' : '6.5px', lineHeight: 1.7, alignItems: 'center', flexWrap: 'wrap' }}>
  <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
  <span style={{ borderBottom: '1px dotted #aaa', minWidth: '72px' }}>{shipment.customer?.phone || '-'}</span>
  <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>傳 真：</span>
@@ -172,9 +173,9 @@ export default function ShipmentPrint() {
  </div>
 
  {/* 收費標準 */}
- <div style={{ border, padding: '1.5px 3px', marginBottom: '1px' }}>
- <div style={{ fontWeight: 'bold', marginBottom: '0.5px', fontSize: '6.5px' }}>收費標準：</div>
- <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 8px', fontSize: FF, lineHeight: 1.5 }}>
+ <div style={{ border, padding: isScreen ? '6px 8px' : '1.5px 3px', marginBottom: isScreen ? '4px' : '1px' }}>
+ <div style={{ fontWeight: 'bold', marginBottom: isScreen ? '2px' : '0.5px', fontSize: isScreen ? '14px' : '6.5px' }}>收費標準：</div>
+ <div style={{ display: 'flex', flexWrap: 'wrap', gap: isScreen ? '4px 16px' : '0 8px', fontSize: isScreen ? '13px' : '6.5px', lineHeight: 1.5 }}>
  <span>□ 診斷檢測費——免費</span>
  <span>□ 車馬費——300元</span>
  <span>□ 系統重灌——800元</span>
@@ -185,70 +186,70 @@ export default function ShipmentPrint() {
  </div>
 
  {/* 商品明細 */}
- <div style={{ marginBottom: '1px' }}>
- <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: F }}>
+ <div style={{ marginBottom: isScreen ? '4px' : '1px' }}>
+ <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: isScreen ? '14px' : '7px' }}>
  <thead><tr>
- <th style={th}>項 目 名 稱</th>
- <th style={{ ...th, width: '7%', textAlign: 'center' }}>數量</th>
- <th style={{ ...th, width: '6%', textAlign: 'center' }}>單位</th>
- <th style={{ ...th, width: '15%', textAlign: 'right' }}>單 價</th>
- <th style={{ ...th, width: '16%', textAlign: 'right' }}>金 額</th>
+ <th style={isScreen ? { ...th, fontSize: '14px', padding: '4px 6px' } : th}>項 目 名 稱</th>
+ <th style={isScreen ? { ...th, fontSize: '14px', padding: '4px 6px', width: '7%', textAlign: 'center' } : { ...th, width: '7%', textAlign: 'center' }}>數量</th>
+ <th style={isScreen ? { ...th, fontSize: '14px', padding: '4px 6px', width: '6%', textAlign: 'center' } : { ...th, width: '6%', textAlign: 'center' }}>單位</th>
+ <th style={isScreen ? { ...th, fontSize: '14px', padding: '4px 6px', width: '15%', textAlign: 'right' } : { ...th, width: '15%', textAlign: 'right' }}>單 價</th>
+ <th style={isScreen ? { ...th, fontSize: '14px', padding: '4px 6px', width: '16%', textAlign: 'right' } : { ...th, width: '16%', textAlign: 'right' }}>金 額</th>
  </tr>
  </thead>
  <tbody>
  {items.length === 0 ? (
  Array.from({ length: 3 }).map((_, i) => (
  <tr key={i}>
- <td style={td}></td>
- <td style={{ ...td, textAlign: 'center' }}></td>
- <td style={{ ...td, textAlign: 'center' }}></td>
- <td style={{ ...td, textAlign: 'right' }}></td>
- <td style={{ ...td, textAlign: 'right' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px' } : td}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'center' } : { ...td, textAlign: 'center' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'center' } : { ...td, textAlign: 'center' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'right' } : { ...td, textAlign: 'right' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'right' } : { ...td, textAlign: 'right' }}></td>
  </tr>
  ))
  ) : (
  items.map((item: any, idx: number) => (
  <tr key={item.id || idx}>
- <td style={td}>{item.product_name || item.product_id}</td>
- <td style={{ ...td, textAlign: 'center' }}>{item.quantity}</td>
- <td style={{ ...td, textAlign: 'center' }}>組</td>
- <td style={{ ...td, textAlign: 'right' }}>{formatCurrency(item.unit_price)}</td>
- <td style={{ ...td, textAlign: 'right' }}>{formatCurrency(item.subtotal)}</td>
+ <td style={isScreen ? { ...td, padding: '4px 6px' } : td}>{item.product_name || item.product_id}</td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'center' } : { ...td, textAlign: 'center' }}>{item.quantity}</td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'center' } : { ...td, textAlign: 'center' }}>組</td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'right' } : { ...td, textAlign: 'right' }}>{formatCurrency(item.unit_price)}</td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'right' } : { ...td, textAlign: 'right' }}>{formatCurrency(item.subtotal)}</td>
  </tr>
  ))
  )}
  {items.length < 4 && Array.from({ length: Math.max(0, 4 - items.length - 1) }).map((_, i) => (
  <tr key={`e${i}`}>
- <td style={{ ...td, height: '11px' }}></td>
- <td style={{ ...td, height: '11px', textAlign: 'center' }}></td>
- <td style={{ ...td, height: '11px', textAlign: 'center' }}></td>
- <td style={{ ...td, height: '11px', textAlign: 'right' }}></td>
- <td style={{ ...td, height: '11px', textAlign: 'right' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', height: '20px' } : { ...td, height: '11px' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', height: '20px', textAlign: 'center' } : { ...td, height: '11px', textAlign: 'center' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', height: '20px', textAlign: 'center' } : { ...td, height: '11px', textAlign: 'center' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', height: '20px', textAlign: 'right' } : { ...td, height: '11px', textAlign: 'right' }}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', height: '20px', textAlign: 'right' } : { ...td, height: '11px', textAlign: 'right' }}></td>
  </tr>
  ))}
  <tr>
- <td colSpan={3} style={{ ...td, fontWeight: 'bold', textAlign: 'right', paddingRight: '4px' }}>合計：</td>
- <td style={td}></td>
- <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '8px' }}>{formatCurrency(totalAmount)}</td>
+ <td colSpan={3} style={isScreen ? { ...td, padding: '4px 6px', fontWeight: 'bold', textAlign: 'right', paddingRight: '4px' } : { ...td, fontWeight: 'bold', textAlign: 'right', paddingRight: '4px' }}>合計：</td>
+ <td style={isScreen ? { ...td, padding: '4px 6px' } : td}></td>
+ <td style={isScreen ? { ...td, padding: '4px 6px', textAlign: 'right', fontWeight: 'bold', fontSize: isScreen ? '16px' : '8px' } : { ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '8px' }}>{formatCurrency(totalAmount)}</td>
  </tr>
  </tbody>
  </table>
  </div>
 
  {/* 備註（玉山銀行） */}
- <div style={{ border, padding: '1.5px 3px', marginBottom: '1px' }}>
- <div style={{ fontWeight: 'bold', marginBottom: '0.5px', fontSize: '6.5px' }}>備 註：</div>
- <div style={{ fontSize: FF, lineHeight: 1.4 }}>
+ <div style={{ border, padding: isScreen ? '6px 8px' : '1.5px 3px', marginBottom: isScreen ? '4px' : '1px' }}>
+ <div style={{ fontWeight: 'bold', marginBottom: isScreen ? '2px' : '0.5px', fontSize: isScreen ? '14px' : '6.5px' }}>備 註：</div>
+ <div style={{ fontSize: isScreen ? '13px' : '6.5px', lineHeight: 1.4 }}>
  玉山銀行（銀行代號 808） 分行別：豐原分行 帳號：0381440003611 戶名：嘉祐資訊企業有限公司
  </div>
  {shipment.note && (
- <div style={{ fontSize: FF, marginTop: '1px', lineHeight: 1.4, color: '#444' }} dangerouslySetInnerHTML={{ __html: shipment.note }} />
+ <div style={{ fontSize: isScreen ? '13px' : '6.5px', marginTop: '1px', lineHeight: 1.4, color: '#444' }} dangerouslySetInnerHTML={{ __html: shipment.note }} />
  )}
  </div>
 
  {/* 注意事項 */}
- <div style={{ border, padding: '1.5px 4px', marginBottom: '1px', fontSize: FF, lineHeight: 1.5 }}>
- <div style={{ fontWeight: 'bold', marginBottom: '0.5px', fontSize: '6.5px' }}>注意事項：</div>
+ <div style={{ border, padding: isScreen ? '6px 8px' : '1.5px 4px', marginBottom: isScreen ? '4px' : '1px', fontSize: isScreen ? '13px' : '6.5px', lineHeight: 1.5 }}>
+ <div style={{ fontWeight: 'bold', marginBottom: isScreen ? '2px' : '0.5px', fontSize: isScreen ? '14px' : '6.5px' }}>注意事項：</div>
  <div>1. 請注意客戶送修電腦其內裝所有軟體，有關版權問題一律與本公司無關，特此聲明！</div>
  <div>2. 如有需要安裝新軟體，請客戶自備版權軟體，或由本公司代購。</div>
  <div>3. 客戶取回之產品，三日內同問題應立即告知，逾期無效；不同原因之問題視為計費維修。</div>
@@ -258,16 +259,16 @@ export default function ShipmentPrint() {
 
  {/* 簽收欄 */}
  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border }}>
- <div style={{ padding: '1.5px 3px', borderRight: '1px solid #1a1a1a' }}>
- <div style={{ fontWeight: 'bold', fontSize: '7px', letterSpacing: '2px' }}>工程師</div>
- <div style={{ borderBottom: '1px solid #1a1a1a', height: '10px', marginTop: '1px' }}></div>
+ <div style={{ padding: isScreen ? '6px 8px' : '1.5px 3px', borderRight: '1px solid #1a1a1a' }}>
+ <div style={{ fontWeight: 'bold', fontSize: isScreen ? '14px' : '7px', letterSpacing: '2px' }}>工程師</div>
+ <div style={{ borderBottom: '1px solid #1a1a1a', height: isScreen ? '20px' : '10px', marginTop: '1px' }}></div>
  </div>
- <div style={{ padding: '1.5px 3px', borderRight: '1px solid #1a1a1a' }}><div style={{ fontWeight: 'bold', fontSize: '7px', letterSpacing: '2px' }}>客戶簽名</div>
- <div style={{ borderBottom: '1px solid #1a1a1a', height: '10px', marginTop: '1px' }}></div>
+ <div style={{ padding: isScreen ? '6px 8px' : '1.5px 3px', borderRight: '1px solid #1a1a1a' }}><div style={{ fontWeight: 'bold', fontSize: isScreen ? '14px' : '7px', letterSpacing: '2px' }}>客戶簽名</div>
+ <div style={{ borderBottom: '1px solid #1a1a1a', height: isScreen ? '20px' : '10px', marginTop: '1px' }}></div>
  </div>
- <div style={{ padding: '1.5px 3px' }}>
- <div style={{ fontWeight: 'bold', fontSize: '7px', letterSpacing: '2px' }}>日 期</div>
- <div style={{ borderBottom: '1px solid #1a1a1a', height: '10px', marginTop: '1px' }}></div>
+ <div style={{ padding: isScreen ? '6px 8px' : '1.5px 3px' }}>
+ <div style={{ fontWeight: 'bold', fontSize: isScreen ? '14px' : '7px', letterSpacing: '2px' }}>日 期</div>
+ <div style={{ borderBottom: '1px solid #1a1a1a', height: isScreen ? '20px' : '10px', marginTop: '1px' }}></div>
  </div>
  </div>
  </div>
@@ -283,15 +284,15 @@ export default function ShipmentPrint() {
  @media screen {
  .shipment-paper {
  width: 100% !important;
- max-width: 100vw !important;
- min-height: calc(100vh - 120px) !important;
+ max-width: 900px !important;
+ min-height: calc(100vh - 150px) !important;
  transform: none !important;
  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
  border-radius: 8px !important;
  margin: 0 auto !important;
  }
  
- /* 讓控制列不要擋到 */
+ /* 讓控制列固定 */
  .no-print {
  position: sticky;
  top: 0;
@@ -301,7 +302,7 @@ export default function ShipmentPrint() {
  }
  }
  
- /* 列印時隱藏控制列 */
+ /* 列印時 */
  @media print {
  html, body {
  margin: 0 !important;
@@ -320,6 +321,13 @@ export default function ShipmentPrint() {
  border-radius: 0 !important;
  margin: 0 !important;
  padding: 0 !important;
+ font-size: 7px !important;
+ }
+ .shipment-paper div,
+ .shipment-paper span,
+ .shipment-paper td,
+ .shipment-paper th {
+ font-size: 7px !important;
  }
  * {
  box-sizing: border-box !important;
