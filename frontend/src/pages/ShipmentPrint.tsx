@@ -267,10 +267,10 @@ export default function ShipmentPrint() {
           html, body {
             margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
+            height: 5.5in !important;
             background: #fff !important;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: flex-start !important;
+            display: block !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -281,9 +281,9 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .print-paper {
-            width: 9.5in !important;
-            padding: 0.15in 0.2in !important;
-            margin: 0 !important;
+            width: 9in !important;
+            padding: 0.15in 0.18in !important;
+            margin: 0 auto !important;
             box-shadow: none !important;
             overflow: hidden !important;
             border: none !important;
