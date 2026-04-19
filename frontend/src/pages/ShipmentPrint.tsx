@@ -79,8 +79,7 @@ export default function ShipmentPrint() {
       <div
         className="print-paper"
         style={{
-          width: PAPER_W,
-          minHeight: PAPER_H,
+          width: 9.5in,
           backgroundColor: '#fff',
           padding: `${PAD_V} ${PAD_H}`,
           boxSizing: 'border-box',
@@ -268,9 +267,10 @@ export default function ShipmentPrint() {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
-            height: 5.5in !important;
+            height: 100% !important;
             background: #fff !important;
             display: block !important;
+            overflow: hidden !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -281,8 +281,8 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .print-paper {
-            width: 9in !important;
-            padding: 0.15in 0.18in !important;
+            width: 9.4in !important;
+            padding: 0.12in 0.18in !important;
             margin: 0 auto !important;
             box-shadow: none !important;
             overflow: hidden !important;
