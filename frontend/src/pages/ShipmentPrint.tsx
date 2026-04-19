@@ -29,21 +29,22 @@ export default function ShipmentPrint() {
     if (!paperRef.current) return;
     setDownloading(true);
     try {
+      // Fixed paper size: 8.5in x 5.5in at 96dpi screen
+      const PAPER_W_PX = Math.round(8.5 * 96); // 816px
+      const PAPER_H_PX = Math.round(5.5 * 96); // 528px
       const canvas = await html2canvas(paperRef.current, {
-        scale: 3,
+        scale: 1,
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
-        width: paperRef.current.scrollWidth,
-        height: paperRef.current.scrollHeight,
+        width: PAPER_W_PX,
+        height: PAPER_H_PX,
       });
-      const pxWidth = canvas.width;
-      const pxHeight = canvas.height;
-      // Convert pixels (at 96dpi screen scale) to PDF points (72dpi)
-      const pdfW = (pxWidth / 96) * 72;
-      const pdfH = (pxHeight / 96) * 72;
+      // PDF at 72dpi: 8.5in x 72 = 612pt, 5.5in x 72 = 396pt
+      const pdfW = 612;
+      const pdfH = 396;
       const pdf = new jsPDF({
-        orientation: pdfW > pdfH ? 'landscape' : 'portrait',
+        orientation: 'portrait',
         unit: 'pt',
         format: [pdfW, pdfH],
       });
