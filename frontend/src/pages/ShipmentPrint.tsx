@@ -279,8 +279,8 @@ export default function ShipmentPrint() {
             width: 100% !important;
             height: 100% !important;
             background: #fff !important;
-            display: block !important;
-            overflow: hidden !important;
+            display: flex !important;
+            justify-content: center !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -293,7 +293,7 @@ export default function ShipmentPrint() {
           .print-paper {
             width: 8.5in !important;
             padding: 0.12in 0.18in !important;
-            margin: 0 auto !important;
+            margin: 0 !important;
             box-shadow: none !important;
             overflow: hidden !important;
             border: none !important;
