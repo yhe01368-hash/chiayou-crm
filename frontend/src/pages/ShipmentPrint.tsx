@@ -260,7 +260,7 @@ export default function ShipmentPrint() {
       {/* Print styles */}
       <style>{`
         @page {
-          size: 9.5in 5.5in;
+          size: 9.5in 5.5in portrait;
           margin: 0;
         }
         @media print {
