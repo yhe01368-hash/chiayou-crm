@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
+
 import { repairApi, customerApi } from '../services/api';
 import type { RepairFormData } from '../types';
 import { ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
@@ -57,7 +57,6 @@ export default function RepairForm() {
         blockquote: false,
         horizontalRule: false,
       }),
-      Underline,
     ],
     content: form.problem,
     onUpdate: ({ editor }) => {
@@ -73,7 +72,6 @@ export default function RepairForm() {
         blockquote: false,
         horizontalRule: false,
       }),
-      Underline,
     ],
     content: form.repair_detail,
     onUpdate: ({ editor }) => {

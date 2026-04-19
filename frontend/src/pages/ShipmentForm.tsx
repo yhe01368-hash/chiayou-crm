@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
+
 import { shipmentApi, customerApi, inventoryApi } from '../services/api';
 import { ArrowLeft, Plus, Trash2, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 
@@ -49,7 +49,6 @@ export default function ShipmentForm() {
         blockquote: false,
         horizontalRule: false,
       }),
-      Underline,
     ],
     content: note,
     onUpdate: ({ editor }) => {

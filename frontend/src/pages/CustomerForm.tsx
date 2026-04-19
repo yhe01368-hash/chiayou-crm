@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
+
 import { customerApi } from '../services/api';
 import type { CustomerFormData } from '../types';
 import { ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
@@ -38,7 +38,6 @@ export default function CustomerForm() {
         blockquote: false,
         horizontalRule: false,
       }),
-      Underline,
     ],
     content: form.note,
     onUpdate: ({ editor }) => {
