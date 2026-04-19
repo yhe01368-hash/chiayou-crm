@@ -40,13 +40,15 @@ export default function ShipmentPrint() {
         width: PAPER_W_PX,
         height: PAPER_H_PX,
       });
-      // PDF at 72dpi: 8.5in x 72 = 612pt, 5.5in x 72 = 396pt
-      const pdfW = 612;
-      const pdfH = 396;
+      // 8.5 x 5.5 inches portrait at 72dpi
+      // jsPDF format:[w,h] creates page of w x h
+      // Canvas is 816x528 px (8.5x5.5 at 96dpi)
+      const pdfW = 612;   // 8.5in * 72
+      const pdfH = 396;   // 5.5in * 72
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'pt',
-        format: [pdfW, pdfH],
+        format: [pdfH, pdfW],
       });
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
