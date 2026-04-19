@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import { repairApi, customerApi } from '../services/api';
 import type { RepairFormData } from '../types';
-import { ArrowLeft, Search, X } from 'lucide-react';
+import { ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 
 const deviceTypes = ['筆電', '桌機', '螢幕', '印表機', '其他'];
 const statusOptions = [
@@ -48,6 +49,38 @@ export default function RepairForm() {
     enabled: isEdit,
   });
 
+  const problemEditor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        horizontalRule: false,
+      }),
+      Underline,
+    ],
+    content: form.problem,
+    onUpdate: ({ editor }) => {
+      setForm(prev => ({ ...prev, problem: editor.getHTML() }));
+    },
+  });
+
+  const repairDetailEditor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        horizontalRule: false,
+      }),
+      Underline,
+    ],
+    content: form.repair_detail,
+    onUpdate: ({ editor }) => {
+      setForm(prev => ({ ...prev, repair_detail: editor.getHTML() }));
+    },
+  });
+
   const filteredCustomers = customers.filter((c: any) => {
     const term = customerSearch.toLowerCase();
     return c.name.toLowerCase().includes(term) || (c.phone && c.phone.includes(term));
@@ -77,14 +110,16 @@ export default function RepairForm() {
         repair_detail: editData.repair_detail || '',
         cost: editData.cost,
       });
+      if (problemEditor) problemEditor.commands.setContent(editData.problem || '');
+      if (repairDetailEditor) repairDetailEditor.commands.setContent(editData.repair_detail || '');
       // 編輯模式時也要設定搜尋框顯示值
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
     }
-  }, [editData, customers]);
+  }, [editData, customers, problemEditor, repairDetailEditor]);
 
   const mutation = useMutation({
-    mutationFn: (data: RepairFormData) => 
+    mutationFn: (data: RepairFormData) =>
       isEdit ? repairApi.update(id!, data) : repairApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['repairs'] });
@@ -96,6 +131,56 @@ export default function RepairForm() {
     e.preventDefault();
     mutation.mutate(form);
   };
+
+  const ToolbarButton = ({ onClick, active, children, title }: { onClick: () => void; active?: boolean; children: React.ReactNode; title?: string }) => (
+    <button
+      type="button"
+      onMouseDown={(e) => { e.preventDefault(); onClick(); }}
+      className={`p-1.5 rounded hover:bg-gray-100 ${active ? 'bg-gray-200 text-blue-600' : 'text-gray-600'}`}
+      title={title}
+    >
+      {children}
+    </button>
+  );
+
+  const RichTextField = ({ editor, label }: { editor: ReturnType<typeof useEditor>; label: string }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      {editor && (
+        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10">
+          <div className="flex items-center gap-0.5 border-b border-gray-200 p-1.5 bg-gray-50 flex-wrap">
+            <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="粗體">
+              <Bold size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="斜體">
+              <Italic size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="底線">
+              <UnderlineIcon size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title="刪除線">
+              <Strikethrough size={16} />
+            </ToolbarButton>
+            <span className="w-px h-5 bg-gray-300 mx-1" />
+            <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="項目符號">
+              <List size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="編號">
+              <ListOrdered size={16} />
+            </ToolbarButton>
+            <span className="w-px h-5 bg-gray-300 mx-1" />
+            <ToolbarButton onClick={() => {
+              const url = window.prompt('輸入連結 URL');
+              if (url) editor.chain().focus().setLink({ href: url }).run();
+            }} active={editor.isActive('link')} title="連結">
+              <LinkIcon size={16} />
+            </ToolbarButton>
+          </div>
+          <EditorContent editor={editor} className="prose prose-sm max-w-none p-3 min-h-[120px]" />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -216,40 +301,8 @@ export default function RepairForm() {
             onChange={(e) => setForm({...form, serial_number: e.target.value})}
           />
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">問題描述 *</label>
-          <ReactQuill
-            theme="snow"
-            value={form.problem}
-            onChange={(value) => setForm({ ...form, problem: value })}
-            className="bg-white rounded-lg mb-10"
-            modules={{
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['link', 'image'],
-                ['clean'],
-              ],
-            }}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">維修過程</label>
-          <ReactQuill
-            theme="snow"
-            value={form.repair_detail}
-            onChange={(value) => setForm({ ...form, repair_detail: value })}
-            className="bg-white rounded-lg mb-10"
-            modules={{
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['link', 'image'],
-                ['clean'],
-              ],
-            }}
-          />
-        </div>
+        <RichTextField editor={problemEditor} label="問題描述 *" />
+        <RichTextField editor={repairDetailEditor} label="維修過程" />
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">維修費用</label>
           <input

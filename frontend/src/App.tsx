@@ -13,6 +13,7 @@ import InventoryForm from './pages/InventoryForm';
 import ShipmentList from './pages/ShipmentList';
 import ShipmentForm from './pages/ShipmentForm';
 import ShipmentDetail from './pages/ShipmentDetail';
+import ShipmentPrint from './pages/ShipmentPrint';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/shipments/new" element={<ShipmentForm />} />
             <Route path="/shipments/:id" element={<ShipmentDetail />} />
             <Route path="/shipments/:id/edit" element={<ShipmentForm />} />
+            <Route path="/shipments/:id/print" element={<ShipmentPrint />} />
           </Routes>
         </Layout>
       </BrowserRouter>

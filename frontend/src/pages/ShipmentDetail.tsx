@@ -141,6 +141,7 @@ export default function ShipmentDetail() {
       <div className="flex gap-3">
         <Link to="/shipments" className="btn btn-secondary">返回列表</Link>
         <Link to={`/shipments/${id}/edit`} className="btn btn-primary">編輯</Link>
+        <Link to={`/shipments/${id}/print`} target="_blank" className="btn btn-secondary">列印出貨單</Link>
       </div>
     </div>
   );

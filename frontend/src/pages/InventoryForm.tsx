@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import { inventoryApi } from '../services/api';
 import type { InventoryFormData } from '../types';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 
 const categories = ['CPU', '硬碟', '記憶體', '顯示卡', '主機板', '電源供應器', '機殼', '其他'];
 const units = ['個', '片', '條', '顆', '台', '盒'];
@@ -35,8 +36,24 @@ export default function InventoryForm() {
     enabled: isEdit,
   });
 
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        horizontalRule: false,
+      }),
+      Underline,
+    ],
+    content: form.note,
+    onUpdate: ({ editor }) => {
+      setForm(prev => ({ ...prev, note: editor.getHTML() }));
+    },
+  });
+
   useEffect(() => {
-    if (editData) {
+    if (editData && editor) {
       setForm({
         product_code: editData.product_code,
         product_name: editData.product_name,
@@ -49,11 +66,12 @@ export default function InventoryForm() {
         min_stock: editData.min_stock,
         note: editData.note || '',
       });
+      editor.commands.setContent(editData.note || '');
     }
-  }, [editData]);
+  }, [editData, editor]);
 
   const mutation = useMutation({
-    mutationFn: (data: InventoryFormData) => 
+    mutationFn: (data: InventoryFormData) =>
       isEdit ? inventoryApi.update(id!, data) : inventoryApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
@@ -65,6 +83,17 @@ export default function InventoryForm() {
     e.preventDefault();
     mutation.mutate(form);
   };
+
+  const ToolbarButton = ({ onClick, active, children, title }: { onClick: () => void; active?: boolean; children: React.ReactNode; title?: string }) => (
+    <button
+      type="button"
+      onMouseDown={(e) => { e.preventDefault(); onClick(); }}
+      className={`p-1.5 rounded hover:bg-gray-100 ${active ? 'bg-gray-200 text-blue-600' : 'text-gray-600'}`}
+      title={title}
+    >
+      {children}
+    </button>
+  );
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -176,20 +205,39 @@ export default function InventoryForm() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">備註</label>
-          <ReactQuill
-            theme="snow"
-            value={form.note}
-            onChange={(value) => setForm({ ...form, note: value })}
-            className="bg-white rounded-lg"
-            modules={{
-              toolbar: [
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['link', 'image'],
-                ['clean'],
-              ],
-            }}
-          />
+          {editor && (
+            <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+              <div className="flex items-center gap-0.5 border-b border-gray-200 p-1.5 bg-gray-50 flex-wrap">
+                <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="粗體">
+                  <Bold size={16} />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="斜體">
+                  <Italic size={16} />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="底線">
+                  <UnderlineIcon size={16} />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title="刪除線">
+                  <Strikethrough size={16} />
+                </ToolbarButton>
+                <span className="w-px h-5 bg-gray-300 mx-1" />
+                <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="項目符號">
+                  <List size={16} />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="編號">
+                  <ListOrdered size={16} />
+                </ToolbarButton>
+                <span className="w-px h-5 bg-gray-300 mx-1" />
+                <ToolbarButton onClick={() => {
+                  const url = window.prompt('輸入連結 URL');
+                  if (url) editor.chain().focus().setLink({ href: url }).run();
+                }} active={editor.isActive('link')} title="連結">
+                  <LinkIcon size={16} />
+                </ToolbarButton>
+              </div>
+              <EditorContent editor={editor} className="prose prose-sm max-w-none p-3 min-h-[120px]" />
+            </div>
+          )}
         </div>
         <div className="flex gap-3 pt-4">
           <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
