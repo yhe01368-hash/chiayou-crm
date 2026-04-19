@@ -270,7 +270,8 @@ export default function ShipmentPrint() {
             background: #fff !important;
             display: flex !important;
             justify-content: center !important;
-            align-items: flex-start !important;
+            align-items: center !important;
+            height: 100vh !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
@@ -282,8 +283,7 @@ export default function ShipmentPrint() {
           }
           .print-paper {
             width: 9.5in !important;
-            min-height: 5.5in !important;
-            max-height: 5.5in !important;
+            height: 5.5in !important;
             padding: 0.15in 0.2in !important;
             margin: 0 !important;
             box-shadow: none !important;
