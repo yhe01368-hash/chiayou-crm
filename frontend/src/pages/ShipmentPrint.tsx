@@ -108,7 +108,7 @@ export default function ShipmentPrint() {
 
   // ——— 版面（完全對照參考單） ———
   return (
-    <div className="min-h-screen bg-gray-100 print:bg-white flex flex-col items-center pt-4">
+    <div className="min-h-screen bg-gray-100 print:bg-white flex flex-col items-start pt-4">
 
       {/* 控制列（不列印） */}
       <div className="no-print flex gap-2 mb-4">
