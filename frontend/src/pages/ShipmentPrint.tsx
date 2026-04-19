@@ -32,7 +32,7 @@ export default function ShipmentPrint() {
       // jsPDF portrait swaps format params internally → use landscape + 90° rotation
       // landscape format:[612,396] gives MediaBox [0 0 612 396] = 8.5x5.5in
       // Then rotate canvas 90° CCW so image ends up portrait on the page
-      const PAPER_W_PX = Math.round(8.5 * 96); // 816px
+      const PAPER_W_PX = Math.round(9.5 * 96); // 912px
       const PAPER_H_PX = Math.round(5.5 * 96); // 528px
       const canvas = await html2canvas(paperRef.current, {
         scale: 1,
@@ -132,9 +132,9 @@ export default function ShipmentPrint() {
       <div
         ref={paperRef}
         style={{
-          width: '8.5in',
+          width: '9.5in',
           backgroundColor: '#fff',
-          padding: '0.10in 0.14in',
+          padding: '0.10in 0.20in',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC","Microsoft JhengHei","Heiti TC",sans-serif',
           fontSize: F,
@@ -322,8 +322,8 @@ export default function ShipmentPrint() {
             background: #fff !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
+            justify-content: flex-start !important;
+            align-items: flex-start !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
