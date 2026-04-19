@@ -54,10 +54,11 @@ export default function ShipmentPrint() {
   const totalQty = items.reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
 
   // 中一刀尺寸：9.5" × 5.5" = 241.3mm × 139.7mm 直印（Portrait）
-  const PAPER_W = '241.3mm';
-  const PAPER_H = '139.7mm';
-  const PAD_H = '6mm';
-  const PAD_V = '5mm';
+  // 考量印表機左右各有約5mm無法列印的範圍，設定228mm x 150mm
+  const PAPER_W = '228mm';
+  const PAPER_H = '150mm';
+  const PAD_H = '5mm';
+  const PAD_V = '4mm';
 
   return (
     <div
@@ -259,7 +260,7 @@ export default function ShipmentPrint() {
       {/* Print styles */}
       <style>{`
         @page {
-          size: 241.3mm 139.7mm portrait;
+          size: 228mm 150mm portrait;
           margin: 0;
         }
         html, body {
@@ -276,10 +277,10 @@ export default function ShipmentPrint() {
           display: none !important;
         }
         .print-paper {
-          width: 241.3mm !important;
-          min-height: 139.7mm !important;
-          max-height: 139.7mm !important;
-          padding: 5mm 6mm !important;
+          width: 228mm !important;
+          min-height: 150mm !important;
+          max-height: 150mm !important;
+          padding: 5mm 5mm !important;
           margin: 0 !important;
           box-shadow: none !important;
           overflow: hidden !important;
