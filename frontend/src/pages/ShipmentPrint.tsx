@@ -39,7 +39,6 @@ export default function ShipmentPrint() {
     );
   }
 
-  // Format date to ROC year
   const formatRocDate = (dateStr: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -47,15 +46,24 @@ export default function ShipmentPrint() {
     return `${rocYear} 年 ${format(d, 'MM 月 dd 日', { locale: zhTW })}`;
   };
 
-  const formatCurrency = (amount: number) => {
-    return '$' + Number(amount).toLocaleString();
-  };
+  const formatCurrency = (amount: number) =>
+    '$' + Number(amount).toLocaleString();
 
   const items = shipment.items || [];
-  const emptyRows = Math.max(0, 4 - items.length);
+  const totalAmount = items.reduce((sum: number, item: any) => sum + Number(item.subtotal || 0), 0);
+  const totalQty = items.reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
+
+  // 中一刀尺寸：215.9mm × 139.7mm（8.5" × 5.5"）
+  const PAPER_W = '215.9mm';
+  const PAPER_H = '139.7mm';
+  const PAD_H = '5mm';
+  const PAD_V = '4mm';
 
   return (
-    <div className="min-h-screen bg-gray-100" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '16px' }}>
+    <div
+      className="min-h-screen bg-gray-100"
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: '16px' }}
+    >
       {/* Non-print controls */}
       <div className="no-print" style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         <Link to="/shipments" className="btn btn-secondary flex items-center gap-2">
@@ -66,29 +74,30 @@ export default function ShipmentPrint() {
         </button>
       </div>
 
-      {/* Printable A5 paper */}
+      {/* ── Printable 中一刀 paper ── */}
       <div
         className="print-paper"
         style={{
-          width: '148mm',
-          minHeight: '210mm',
+          width: PAPER_W,
+          minHeight: PAPER_H,
           backgroundColor: '#fff',
-          padding: '8mm 9mm',
+          padding: `${PAD_V} ${PAD_H}`,
           boxSizing: 'border-box',
-          fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", "Heiti TC", sans-serif',
-          fontSize: '11px',
+          fontFamily: '"Noto Sans CJK TC","Microsoft JhengHei","Heiti TC",sans-serif',
+          fontSize: '9.5px',
           color: '#1a1a1a',
+          lineHeight: 1.45,
         }}
       >
         {/* ── 頁面標題 ── */}
         <div style={{
           textAlign: 'center',
-          fontSize: '17px',
+          fontSize: '15px',
           fontWeight: 'bold',
-          letterSpacing: '7px',
+          letterSpacing: '6px',
           border: '2px solid #1a1a1a',
-          padding: '3px 0',
-          marginBottom: '5px',
+          padding: '2px 0',
+          marginBottom: '3px',
         }}>
           出　貨　單
         </div>
@@ -98,188 +107,151 @@ export default function ShipmentPrint() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          borderBottom: '1.5px solid #1a1a1a',
-          paddingBottom: '3px',
-          marginBottom: '3px',
-          fontSize: '10px',
-          lineHeight: '1.5',
+          borderBottom: '1px solid #1a1a1a',
+          paddingBottom: '2px',
+          marginBottom: '2px',
+          fontSize: '9px',
+          color: '#444',
+          lineHeight: 1.5,
         }}>
           <div>
-            <div style={{ fontSize: '13px', fontWeight: 'bold' }}>嘉祐資訊企業有限公司</div>
-            <div style={{ color: '#444' }}>台中市豐原區中正路 737 巷 23 弄 2 號</div>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
+            <div>台中市豐原區中正路 737 巷 23 弄 2 號</div>
           </div>
-          <div style={{ color: '#444', textAlign: 'right', whiteSpace: 'nowrap' }}>
-            電話: 04-25279968　傳真: 04-25279997
+          <div style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+            電話：04-25279968　傳真：04-25279997
           </div>
         </div>
 
-        {/* ── 單號列 ── */}
+        {/* ── 單號 + 日期列 ── */}
         <div style={{
           display: 'flex',
-          justifyContent: 'flex-end',
-          marginBottom: '4px',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '3px',
         }}>
-          <span style={{
+          <div style={{ fontSize: '9.5px' }}>
+            <span style={{ fontWeight: 'bold' }}>日　期：</span>
+            {shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}
+          </div>
+          <div style={{
             background: '#1a1a1a',
             color: '#fff',
-            padding: '1px 6px',
-            fontSize: '11px',
+            padding: '1px 5px',
+            fontSize: '10px',
             fontWeight: 'bold',
             letterSpacing: '1px',
           }}>
             貨單號碼：{shipment.shipment_number}
-          </span>
+          </div>
         </div>
 
         {/* ── 客戶資料 ── */}
-        <div style={{ border: '1px solid #1a1a1a', padding: '4px 6px', marginBottom: '4px' }}>
-          <div style={{ display: 'flex', gap: '4px', lineHeight: '1.8', fontSize: '10.5px', flexWrap: 'wrap' }}>
-            <span style={{ fontWeight: 'bold', minWidth: '68px' }}>客戶名稱：</span>
-            <span style={{ borderBottom: '1px dotted #aaa', flex: 1, paddingRight: '8px' }}>
-              {shipment.customer?.name || '-'}
-            </span>
-            <span style={{ fontWeight: 'bold', minWidth: '68px' }}>客戶地址：</span>
-            <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>
-              {shipment.customer?.address || '-'}
-            </span>
+        <div style={{
+          border: '1px solid #1a1a1a',
+          padding: '3px 5px',
+          marginBottom: '3px',
+        }}>
+          <div style={{ display: 'flex', gap: '6px', fontSize: '9.5px', lineHeight: 1.8 }}>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
+            <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.name || '-'}</span>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
+            <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.address || '-'}</span>
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0', lineHeight: '1.8', fontSize: '10.5px', marginTop: '2px' }}>
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <span style={{ fontWeight: 'bold', minWidth: '45px' }}>電　話：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.phone || '-'}</span>
-              <span style={{ fontWeight: 'bold', minWidth: '40px' }}>傳　真：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>-</span>
-            </div>
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <span style={{ fontWeight: 'bold', minWidth: '40px' }}>手　機：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>-</span>
-              <span style={{ fontWeight: 'bold', minWidth: '40px' }}>統　編：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.tax_id || '-'}</span>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '4px', lineHeight: '1.8', fontSize: '10.5px', marginTop: '2px' }}>
-            <span style={{ fontWeight: 'bold', minWidth: '68px' }}>聯絡人：</span>
-            <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>-</span>
+          <div style={{ display: 'flex', gap: '6px', fontSize: '9.5px', lineHeight: 1.8 }}>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電　話：</span>
+            <span style={{ borderBottom: '1px dotted #aaa' }}>{shipment.customer?.phone || '-'}</span>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>手　機：</span>
+            <span style={{ borderBottom: '1px dotted #aaa' }}>{shipment.customer?.phone2 || '-'}</span>
+            <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統　編：</span>
+            <span style={{ borderBottom: '1px dotted #aaa' }}>{shipment.customer?.tax_id || '-'}</span>
           </div>
         </div>
 
-        {/* ── 收費標準 ── */}
-        <div style={{ border: '1px solid #1a1a1a', padding: '4px 6px', marginBottom: '4px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '3px', fontSize: '11px' }}>收費標準：</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', lineHeight: '1.7', fontSize: '10px' }}>
-            {[
-              { label: '診斷檢測費　───　免費', checked: true },
-              { label: '車馬費　───　300', checked: false },
-              { label: '硬體安裝(單項)　───　300', checked: false },
-              { label: '軟體設定、調整　───　300', checked: false },
-              { label: '系統重灌　───　800', checked: false },
-              { label: '網路架設(材料另計)　───　1000', checked: false },
-            ].map((f, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                <span style={{
-                  width: '11px',
-                  height: '11px',
-                  border: '1px solid #1a1a1a',
-                  display: 'inline-block',
-                  flexShrink: 0,
-                  background: f.checked ? '#1a1a1a' : '#fff',
-                  position: 'relative',
-                }}>
-                  {f.checked && <span style={{ color: '#fff', fontSize: '9px', position: 'absolute', top: '-2px', left: '1px' }}>✓</span>}
-                </span>
-                {f.label}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── 維修記錄表格 ── */}
-        <div style={{ marginBottom: '4px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10.5px' }}>
+        {/* ── 商品明細表格 ── */}
+        <div style={{ marginBottom: '3px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5px' }}>
             <thead>
               <tr>
-                <th style={tableThStyle(18)}>維修項目</th>
-                <th style={tableThStyle(7)}>數量</th>
-                <th style={tableThStyle(7)}>單位</th>
-                <th style={tableThStyle(18)}>單價</th>
-                <th style={tableThStyle(18)}>金額</th>
+                <th style={th}>項 目 名 稱</th>
+                <th style={{ ...th, width: '10%', textAlign: 'center' }}>數量</th>
+                <th style={{ ...th, width: '10%', textAlign: 'center' }}>單位</th>
+                <th style={{ ...th, width: '18%', textAlign: 'right' }}>單　價</th>
+                <th style={{ ...th, width: '18%', textAlign: 'right' }}>金　額</th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item: any) => (
-                <tr key={item.id}>
-                  <td style={tableTdStyle()}>{item.product_name}</td>
-                  <td style={{ ...tableTdStyle(), textAlign: 'center' }}>{item.quantity}</td>
-                  <td style={{ ...tableTdStyle(), textAlign: 'center' }}>組</td>
-                  <td style={{ ...tableTdStyle(), textAlign: 'right' }}>{formatCurrency(item.unit_price)}</td>
-                  <td style={{ ...tableTdStyle(), textAlign: 'right' }}>{formatCurrency(item.subtotal)}</td>
+              {items.length === 0 ? (
+                Array.from({ length: 3 }).map((_, i) => (
+                  <tr key={i}>
+                    <td style={td}></td>
+                    <td style={{ ...td, textAlign: 'center' }}></td>
+                    <td style={{ ...td, textAlign: 'center' }}></td>
+                    <td style={{ ...td, textAlign: 'right' }}></td>
+                    <td style={{ ...td, textAlign: 'right' }}></td>
+                  </tr>
+                ))
+              ) : (
+                items.map((item: any) => (
+                  <tr key={item.id}>
+                    <td style={td}>{item.product_name || item.product_id}</td>
+                    <td style={{ ...td, textAlign: 'center' }}>{item.quantity}</td>
+                    <td style={{ ...td, textAlign: 'center' }}>組</td>
+                    <td style={{ ...td, textAlign: 'right' }}>{formatCurrency(item.unit_price)}</td>
+                    <td style={{ ...td, textAlign: 'right' }}>{formatCurrency(item.subtotal)}</td>
+                  </tr>
+                ))
+              )}
+              {/* 空行填滿 */}
+              {items.length < 3 && Array.from({ length: Math.max(0, 3 - items.length) }).map((_, i) => (
+                <tr key={`e${i}`}>
+                  <td style={{ ...td, height: '16px' }}></td>
+                  <td style={{ ...td, height: '16px', textAlign: 'center' }}></td>
+                  <td style={{ ...td, height: '16px', textAlign: 'center' }}></td>
+                  <td style={{ ...td, height: '16px', textAlign: 'right' }}></td>
+                  <td style={{ ...td, height: '16px', textAlign: 'right' }}></td>
                 </tr>
               ))}
-              {Array.from({ length: emptyRows }).map((_, i) => (
-                <tr key={`empty-${i}`}>
-                  <td style={{ ...tableTdStyle(), height: '20px' }}></td>
-                  <td style={{ ...tableTdStyle(), height: '20px' }}></td>
-                  <td style={{ ...tableTdStyle(), height: '20px' }}></td>
-                  <td style={{ ...tableTdStyle(), height: '20px' }}></td>
-                  <td style={{ ...tableTdStyle(), height: '20px' }}></td>
-                </tr>
-              ))}
+              {/* 合計列 */}
+              <tr>
+                <td colSpan={2} style={{ ...td, fontWeight: 'bold', textAlign: 'right', paddingRight: '4px' }}>
+                  合計：共 {totalQty} 項
+                </td>
+                <td style={{ ...td, textAlign: 'center' }}></td>
+                <td style={{ ...td, textAlign: 'right' }}></td>
+                <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '10.5px' }}>
+                  {formatCurrency(totalAmount)}
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
 
-        {/* ── 總計 ── */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'baseline',
-          marginBottom: '4px',
-          borderTop: '1.5px solid #1a1a1a',
-          borderBottom: '1.5px solid #1a1a1a',
-          padding: '3px 0',
-        }}>
-          <span style={{ fontSize: '13px', fontWeight: 'bold', letterSpacing: '3px', marginRight: '8px' }}>總　計：</span>
-          <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{formatCurrency(shipment.total_amount)}</span>
-        </div>
-
         {/* ── 備註 ── */}
-        <div style={{ border: '1px solid #1a1a1a', padding: '4px 6px', marginBottom: '4px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '2px', fontSize: '11px' }}>備　註：</div>
-          <div style={{ lineHeight: '1.65', fontSize: '10px' }}>
-            玉山銀行（銀行代號 808）　分行別：豐原分行　帳號：0381440003611　戶名：嘉祐資訊企業有限公司
+        <div style={{ border: '1px solid #1a1a1a', padding: '2px 5px', marginBottom: '3px' }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '1px', fontSize: '9.5px' }}>備　註：</div>
+          <div style={{ fontSize: '9px', lineHeight: 1.5 }}>
+            玉山銀行（808）豐原分行　帳號：0381440003611　戶名：嘉祐資訊企業有限公司
           </div>
-        </div>
-
-        {/* ── 注意事項 ── */}
-        <div style={{ border: '1px solid #1a1a1a', padding: '4px 6px', marginBottom: '4px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '2px', fontSize: '11px' }}>注意事項：</div>
-          <ol style={{ paddingLeft: '1.5em', lineHeight: '1.65', fontSize: '10px' }}>
-            <li>請注意客戶送修電腦其內裝所有軟體，有關版權問題一律與本公司無關，特此聲明！</li>
-            <li>如有需要安裝新軟體，請客戶自備版權軟體，或由本公司代購。</li>
-            <li>客戶取回之產品，三日內同問題應立即告知，逾期無效；不同原因之問題視為計費維修。</li>
-            <li>更換／修理之零件保證期限為壹個月。</li>
-            <li>客戶送修之產品若為故障品，本公司不負賠償之責任。</li>
-          </ol>
+          {shipment.note && (
+            <div style={{ fontSize: '9px', marginTop: '1px', lineHeight: 1.5, color: '#444' }}
+              dangerouslySetInnerHTML={{ __html: shipment.note }} />
+          )}
         </div>
 
         {/* ── 簽收欄 ── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border: '1px solid #1a1a1a' }}>
-          <div style={{ padding: '5px 6px', borderRight: '1px solid #1a1a1a' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '2px' }}>工程師</div>
-            <div style={{ borderBottom: '1px solid #1a1a1a', height: '16px', marginTop: '3px' }}></div>
+          <div style={{ padding: '3px 5px', borderRight: '1px solid #1a1a1a' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '9.5px', letterSpacing: '2px' }}>工程師</div>
+            <div style={{ borderBottom: '1px solid #1a1a1a', height: '14px', marginTop: '2px' }}></div>
           </div>
-          <div style={{ padding: '5px 6px', borderRight: '1px solid #1a1a1a' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '2px' }}>客戶簽名</div>
-            <div style={{ borderBottom: '1px solid #1a1a1a', height: '16px', marginTop: '3px' }}></div>
+          <div style={{ padding: '3px 5px', borderRight: '1px solid #1a1a1a' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '9.5px', letterSpacing: '2px' }}>客戶簽名</div>
+            <div style={{ borderBottom: '1px solid #1a1a1a', height: '14px', marginTop: '2px' }}></div>
           </div>
-          <div style={{ padding: '5px 6px' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '11px', letterSpacing: '2px' }}>日　期</div>
-            <div style={{ borderBottom: '1px solid #1a1a1a', height: '16px', marginTop: '3px' }}></div>
-            <div style={{ marginTop: '2px', fontSize: '10px', color: '#555' }}>
-              {shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}
-            </div>
+          <div style={{ padding: '3px 5px' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '9.5px', letterSpacing: '2px' }}>日　期</div>
+            <div style={{ borderBottom: '1px solid #1a1a1a', height: '14px', marginTop: '2px' }}></div>
           </div>
         </div>
       </div>
@@ -288,7 +260,7 @@ export default function ShipmentPrint() {
       <style>{`
         @media print {
           @page {
-            size: 148mm 210mm;
+            size: 215.9mm 139.7mm;
             margin: 0;
           }
           body {
@@ -300,9 +272,9 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .print-paper {
-            width: 148mm !important;
-            min-height: 210mm !important;
-            padding: 8mm 9mm !important;
+            width: 215.9mm !important;
+            min-height: 139.7mm !important;
+            padding: 4mm 5mm !important;
             margin: 0 !important;
             box-shadow: none !important;
           }
@@ -312,24 +284,20 @@ export default function ShipmentPrint() {
   );
 }
 
-function tableThStyle(width: number) {
-  return {
-    background: '#1a1a1a',
-    color: '#fff',
-    padding: '3px 4px',
-    textAlign: 'center' as const,
-    fontSize: '10px',
-    letterSpacing: '1px',
-    border: '1px solid #1a1a1a',
-    width: `${width}%`,
-  };
-}
+const th: React.CSSProperties = {
+  background: '#1a1a1a',
+  color: '#fff',
+  padding: '2px 4px',
+  textAlign: 'left',
+  fontSize: '9px',
+  letterSpacing: '1px',
+  border: '1px solid #1a1a1a',
+  fontWeight: 'bold',
+};
 
-function tableTdStyle() {
-  return {
-    border: '1px solid #1a1a1a',
-    padding: '3px 4px',
-    verticalAlign: 'middle',
-    lineHeight: '1.5',
-  };
-}
+const td: React.CSSProperties = {
+  border: '1px solid #1a1a1a',
+  padding: '2px 4px',
+  verticalAlign: 'middle',
+  lineHeight: 1.4,
+};
