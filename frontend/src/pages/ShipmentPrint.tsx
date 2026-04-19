@@ -260,31 +260,36 @@ export default function ShipmentPrint() {
       {/* Print styles */}
       <style>{`
         @page {
-          size: 9.5in 5.5in portrait;
+          size: 9.5in 5.5in;
           margin: 0;
         }
-        html, body {
-          margin: 0 !important;
-          padding: 0 !important;
-          background: #fff !important;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        * {
-          box-sizing: border-box !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-        .print-paper {
-          width: 9.5in !important;
-          min-height: 5.5in !important;
-          max-height: 5.5in !important;
-          padding: 0.15in 0.2in !important;
-          margin: 0 !important;
-          box-shadow: none !important;
-          overflow: hidden !important;
-          border: none !important;
+        @media print {
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: flex-start !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          * {
+            box-sizing: border-box !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-paper {
+            width: 9.5in !important;
+            min-height: 5.5in !important;
+            max-height: 5.5in !important;
+            padding: 0.15in 0.2in !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            overflow: hidden !important;
+            border: none !important;
+          }
         }
       `}</style>
     </div>
