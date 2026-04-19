@@ -34,15 +34,21 @@ export default function ShipmentPrint() {
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
+        width: paperRef.current.scrollWidth,
+        height: paperRef.current.scrollHeight,
       });
-      // 8.5in x 5.5in at 72 points per inch
+      const pxWidth = canvas.width;
+      const pxHeight = canvas.height;
+      // Convert pixels (at 96dpi screen scale) to PDF points (72dpi)
+      const pdfW = (pxWidth / 96) * 72;
+      const pdfH = (pxHeight / 96) * 72;
       const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'in',
-        format: [8.5, 5.5],
+        orientation: pdfW > pdfH ? 'landscape' : 'portrait',
+        unit: 'pt',
+        format: [pdfW, pdfH],
       });
       const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', 0, 0, 8.5, 5.5);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save(`出貨單_${shipment?.shipment_number || id}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
