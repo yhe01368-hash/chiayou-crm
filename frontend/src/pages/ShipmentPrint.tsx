@@ -29,6 +29,9 @@ export default function ShipmentPrint() {
     if (!paperRef.current) return;
     setDownloading(true);
     try {
+      // jsPDF portrait swaps format params internally → use landscape + 90° rotation
+      // landscape format:[612,396] gives MediaBox [0 0 612 396] = 8.5x5.5in
+      // Then rotate canvas 90° CCW so image ends up portrait on the page
       const PAPER_W_PX = Math.round(8.5 * 96); // 816px
       const PAPER_H_PX = Math.round(5.5 * 96); // 528px
       const canvas = await html2canvas(paperRef.current, {
@@ -39,18 +42,26 @@ export default function ShipmentPrint() {
         width: PAPER_W_PX,
         height: PAPER_H_PX,
       });
-      // 8.5 x 5.5 inches portrait
-      const pdfW = 612;   // 8.5in * 72
-      const pdfH = 396;   // 5.5in * 72
+      // Rotate canvas 90° CCW: swap W/H
+      const canvasRotated = document.createElement('canvas');
+      canvasRotated.width = canvas.height;
+      canvasRotated.height = canvas.width;
+      const ctx = canvasRotated.getContext('2d')!;
+      ctx.translate(0, canvas.width);
+      ctx.rotate(-Math.PI / 2);
+      ctx.drawImage(canvas, 0, 0);
+      const imgData = canvasRotated.toDataURL('image/png');
+      // 8.5x5.5in landscape at 72dpi = 612x396pt
+      const pdfW = 612;
+      const pdfH = 396;
       const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation: 'landscape',
         unit: 'pt',
-        format: [396, 612],
+        format: [pdfW, pdfH],
       });
-      const imgData = canvas.toDataURL('image/png');
-      // addImage w/h are in PDF pt units; canvas is 816x528px at 96dpi
-      // 816px * 72/96 = 612pt, 528px * 72/96 = 396pt — matches pdfW x pdfH
-      pdf.addImage(imgData, 'PNG', 0, 0, 612, 396);
+      // After 90° CCW rotation: image W=528pt (5.5in), H=612pt (8.5in)
+      // Fits perfectly in 612x396pt landscape page
+      pdf.addImage(imgData, 'PNG', 0, 0, 528, 612);
       pdf.save(`出貨單_${shipment?.shipment_number || id}.pdf`);
     } catch (err) {
       console.error('PDF generation failed:', err);
