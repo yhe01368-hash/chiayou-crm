@@ -177,7 +177,7 @@ export default function ShipmentPrint() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2pt', fontSize: '7pt' }}>
               <div>電話：04-25279968 傳真：04-25279997</div>
-              <div style={{ background: '#1a1a1a', color: '#fff', padding: '2pt 4pt', fontSize: '7pt', fontWeight: 'bold' }}>
+              <div style={{ background: '#e0e0e0', color: '#1a1a1a', padding: '2pt 4pt', fontSize: '7pt', fontWeight: 'bold' }}>
                 貨單號碼：{shipment.shipment_number}
               </div>
             </div>
@@ -307,8 +307,8 @@ export default function ShipmentPrint() {
 }
 
 const th: React.CSSProperties = {
-  background: '#1a1a1a',
-  color: '#fff',
+  background: '#e5e5e5',
+  color: '#1a1a1a',
   padding: '2pt 3pt',
   textAlign: 'left',
   fontSize: '7pt',
