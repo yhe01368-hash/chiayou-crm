@@ -141,10 +141,11 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .shipment-paper {
-            width: 8in !important;
-            font-size: 7.5pt !important;
-            padding: 4pt !important;
+            width: 7.5in !important;
+            font-size: 7pt !important;
+            padding: 3pt !important;
             margin: 0 auto !important;
+            transform: scale(1) !important;
           }
           * {
             box-sizing: border-box !important;
@@ -171,12 +172,12 @@ export default function ShipmentPrint() {
         </div>
 
         <div ref={paperRef} className="shipment-paper" style={{
-          width: '8in',
+          width: '7.5in',
           backgroundColor: '#fff',
-          padding: '4pt',
+          padding: '3pt',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", sans-serif',
-          fontSize: '7.5pt',
+          fontSize: '7pt',
           color: '#1a1a1a',
           lineHeight: 1.2,
         }}>
