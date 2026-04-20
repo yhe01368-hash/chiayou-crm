@@ -141,7 +141,9 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .shipment-paper {
-            width: 8in !important;
+            width: 7.5in !important;
+            transform: scale(0.98) !important;
+            transform-origin: center top !important;
             font-size: 9pt !important;
             padding: 6pt !important;
             margin: 0 auto !important;
