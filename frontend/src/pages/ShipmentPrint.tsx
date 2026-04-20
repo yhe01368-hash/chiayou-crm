@@ -202,14 +202,12 @@ export default function ShipmentPrint() {
 
           {/* 客戶資料區 */}
           <div style={{ border, padding: '3pt', marginBottom: '4pt' }}>
-            {/* 第一列：客戶名稱 + 客戶地址 + 日期 平均分配 */}
+            {/* 第一列：客戶名稱 + 客戶地址 平均分配 */}
             <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.name || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.address || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>日 期：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}</span>
             </div>
             {/* 第二列：電話、傳真、手機、統編、聯絡人 平均分配 */}
             <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
@@ -311,7 +309,7 @@ export default function ShipmentPrint() {
             </div>
             <div style={{ padding: '3pt' }}>
               <div style={{ fontWeight: 'bold', fontSize: '7pt', letterSpacing: '1pt' }}>日 期</div>
-              <div style={{ borderBottom: '1px solid #1a1a1a', height: '12pt', marginTop: '1pt' }}></div>
+              <div style={{ borderBottom: '1px solid #1a1a1a', height: '12pt', marginTop: '1pt', fontSize: '6.5pt' }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : ''}</div>
             </div>
           </div>
         </div>
