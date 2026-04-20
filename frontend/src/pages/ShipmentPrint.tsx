@@ -24,7 +24,7 @@ export default function ShipmentPrint() {
         // 自動設定橫向列印
         const style = document.createElement('style');
         style.id = 'print-orientation';
-        style.innerHTML = '@page { size: 9.5in 5.5in landscape; margin: 0; }';
+        style.innerHTML = '@page { size: 9.5in 5.5in portrait; margin: 0; }';
         document.head.appendChild(style);
         window.print();
         setTimeout(() => {
