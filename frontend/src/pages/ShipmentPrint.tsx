@@ -104,14 +104,14 @@ export default function ShipmentPrint() {
     <>
       <style>{`
         @page {
-          size: 9.5in 5.5in landscape;
+          size: 9.5in 5.5in portrait;
           margin: 0;
         }
         
         @media screen {
           .shipment-paper {
             width: 100% !important;
-            max-width: 900px !important;
+            max-width: 850px !important;
             min-height: calc(100vh - 150px) !important;
             box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
             border-radius: 8px !important;
@@ -141,9 +141,9 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .shipment-paper {
-            width: 9in !important;
-            font-size: 8pt !important;
-            padding: 5pt !important;
+            width: 8in !important;
+            font-size: 7.5pt !important;
+            padding: 4pt !important;
             margin: 0 auto !important;
           }
           * {
@@ -171,12 +171,12 @@ export default function ShipmentPrint() {
         </div>
 
         <div ref={paperRef} className="shipment-paper" style={{
-          width: '9in',
+          width: '8in',
           backgroundColor: '#fff',
-          padding: '5pt',
+          padding: '4pt',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", sans-serif',
-          fontSize: '8pt',
+          fontSize: '7.5pt',
           color: '#1a1a1a',
           lineHeight: 1.2,
         }}>
