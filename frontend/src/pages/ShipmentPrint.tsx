@@ -21,21 +21,8 @@ export default function ShipmentPrint() {
   });
 
   useEffect(() => {
-    if (shipment) {
-      const timer = setTimeout(() => {
-        const style = document.createElement('style');
-        style.id = 'print-orientation';
-        style.innerHTML = '@page { size: 9.5in 5.5in portrait; margin: 0; }';
-        document.head.appendChild(style);
-        window.print();
-        setTimeout(() => {
-          const existing = document.getElementById('print-orientation');
-          if (existing) existing.remove();
-        }, 500);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [shipment]);
+    // 不要在頁面載入時自動列印，等待使用者選擇
+  }, []);
 
   const handleDownloadPDF = async () => {
     if (!paperRef.current) return;
@@ -69,6 +56,18 @@ export default function ShipmentPrint() {
     } finally {
       setDownloading(false);
     }
+  };
+
+  const handlePrint = () => {
+    const style = document.createElement('style');
+    style.id = 'print-orientation';
+    style.innerHTML = '@page { size: 9.5in 5.5in portrait; margin: 0; }';
+    document.head.appendChild(style);
+    window.print();
+    setTimeout(() => {
+      const existing = document.getElementById('print-orientation');
+      if (existing) existing.remove();
+    }, 500);
   };
 
   if (isLoading) {
@@ -184,7 +183,7 @@ export default function ShipmentPrint() {
                   onClick={() => {
                     setShowTax(true);
                     setShowDialog(false);
-                    setTimeout(() => window.print(), 100);
+                    setTimeout(() => handlePrint(), 100);
                   }}
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
@@ -194,7 +193,7 @@ export default function ShipmentPrint() {
                   onClick={() => {
                     setShowTax(false);
                     setShowDialog(false);
-                    setTimeout(() => window.print(), 100);
+                    setTimeout(() => handlePrint(), 100);
                   }}
                   className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
                 >
