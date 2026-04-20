@@ -54,7 +54,7 @@ export default function ShipmentPrint() {
  pdf.save(`出貨單_${shipment?.shipment_number || id}.pdf`);
  } catch (err) {
  console.error('PDF generation failed:', err);
- } finally:
+ } finally {
  setDownloading(false);
  }
  };
