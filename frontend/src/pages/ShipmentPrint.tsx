@@ -12,6 +12,8 @@ export default function ShipmentPrint() {
   const { id } = useParams();
   const paperRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+  const [showTax, setShowTax] = useState(true);
+  const [showDialog, setShowDialog] = useState(false);
 
   const { data: shipment, isLoading } = useQuery({
     queryKey: ['shipment', id],
@@ -163,14 +165,51 @@ export default function ShipmentPrint() {
           <Link to="/shipments" className="btn btn-secondary flex items-center gap-2">
             <ArrowLeft size={16} /> 返回列表
           </Link>
-          <button onClick={() => window.print()} className="btn btn-primary flex items-center gap-2">
+          <button onClick={() => setShowDialog(true)} className="btn btn-primary flex items-center gap-2">
             <Printer size={16} /> 列印
           </button>
-          <button onClick={handleDownloadPDF} disabled={downloading} className="btn btn-secondary flex items-center gap-2">
-            <Download size={16} />
-            {downloading ? '生成中...' : '下載 PDF'}
+          <button onClick={() => setShowDialog(true)} className="btn btn-secondary flex items-center gap-2">
+            <Download size={16} /> 下載 PDF
           </button>
         </div>
+
+        {/* 稅額選擇對話框 */}
+        {showDialog && (
+          <div className="no-print fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4">
+              <h3 className="text-lg font-bold mb-4">選擇列印選項</h3>
+              <p className="text-gray-600 mb-4">是否要列印稅額與總計？</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowTax(true);
+                    setShowDialog(false);
+                    setTimeout(() => window.print(), 100);
+                  }}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  是（含稅額）
+                </button>
+                <button
+                  onClick={() => {
+                    setShowTax(false);
+                    setShowDialog(false);
+                    setTimeout(() => window.print(), 100);
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+                >
+                  否（不含金稅）
+                </button>
+              </div>
+              <button
+                onClick={() => setShowDialog(false)}
+                className="mt-3 w-full text-center text-gray-500 hover:text-gray-700"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        )}
 
         <div ref={paperRef} className="shipment-paper" style={{
           width: '8in',
@@ -269,16 +308,26 @@ export default function ShipmentPrint() {
                   </tr>
                 ))}
                 {/* 稅額與總計 */}
-                <tr>
-                  <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt' }}>稅額：</td>
-                  <td style={td}></td>
-                  <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(taxAmount)}</td>
-                </tr>
-                <tr>
-                  <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt' }}>總計：</td>
-                  <td style={td}></td>
-                  <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(totalAmount + taxAmount)}</td>
-                </tr>
+                {showTax && (
+                  <>
+                    <tr>
+                      <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt' }}>稅額：</td>
+                      <td style={td}></td>
+                      <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(taxAmount)}</td>
+                    </tr>
+                    <tr>
+                      <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt' }}>總計：</td>
+                      <td style={td}></td>
+                      <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(totalAmount + taxAmount)}</td>
+                    </tr>
+                  </>
+                )}
+                {!showTax && (
+                  <tr>
+                    <td colSpan={4} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt' }}>合計：</td>
+                    <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(totalAmount)}</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
