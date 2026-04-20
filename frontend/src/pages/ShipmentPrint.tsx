@@ -141,7 +141,7 @@ export default function ShipmentPrint() {
             display: none !important;
           }
           .shipment-paper {
-            width: 9in !important;
+            width: 8in !important;
             font-size: 9pt !important;
             padding: 6pt !important;
             margin: 0 auto !important;
@@ -171,7 +171,7 @@ export default function ShipmentPrint() {
         </div>
 
         <div ref={paperRef} className="shipment-paper" style={{
-          width: '9in',
+          width: '8in',
           backgroundColor: '#fff',
           padding: '6pt',
           boxSizing: 'border-box',
