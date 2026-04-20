@@ -142,9 +142,9 @@ export default function ShipmentPrint() {
           }
           .shipment-paper {
             width: 7.5in !important;
-            transform: scale(0.98) !important;
+            transform: scale(1) !important;
             transform-origin: center top !important;
-            font-size: 9pt !important;
+            font-size: 9.5pt !important;
             padding: 6pt !important;
             margin: 0 auto !important;
           }
@@ -178,14 +178,14 @@ export default function ShipmentPrint() {
           padding: '6pt',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", sans-serif',
-          fontSize: '9pt',
+          fontSize: '9.5pt',
           color: '#1a1a1a',
           lineHeight: 1.3,
         }}>
           {/* 公司抬頭列 */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3pt' }}>
             <div>
-              <div style={{ fontSize: '11pt', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
+              <div style={{ fontSize: '11.5pt', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
               <div style={{ fontSize: '8pt', color: '#444', lineHeight: 1.2 }}>台中市豐原區中正路 737 巷 23 弄 2 號</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2pt', fontSize: '8pt' }}>
@@ -197,7 +197,7 @@ export default function ShipmentPrint() {
           </div>
 
           {/* 頁面大標題 */}
-          <div style={{ textAlign: 'center', fontSize: '14pt', fontWeight: 'bold', letterSpacing: '4pt', border: '1.5px solid #1a1a1a', padding: '3pt 0', marginBottom: '3pt' }}>
+          <div style={{ textAlign: 'center', fontSize: '14.7pt', fontWeight: 'bold', letterSpacing: '4pt', border: '1.5px solid #1a1a1a', padding: '3pt 0', marginBottom: '3pt' }}>
             出 貨 單
           </div>
 
@@ -227,7 +227,7 @@ export default function ShipmentPrint() {
 
           {/* 商品明細 */}
           <div style={{ marginBottom: '3pt' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9.5pt' }}>
               <thead>
                 <tr>
                   <th style={{ ...th, width: '45%' }}>項目名稱</th>
@@ -275,9 +275,9 @@ export default function ShipmentPrint() {
                   <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(taxAmount)}</td>
                 </tr>
                 <tr>
-                  <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt', fontSize: '10pt' }}>總計：</td>
+                  <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt', fontSize: '10.5pt' }}>總計：</td>
                   <td style={td}></td>
-                  <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '10pt' }}>{formatCurrency(totalAmount + taxAmount)}</td>
+                  <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '10.5pt' }}>{formatCurrency(totalAmount + taxAmount)}</td>
                 </tr>
               </tbody>
             </table>
@@ -319,7 +319,7 @@ const th: React.CSSProperties = {
   color: '#1a1a1a',
   padding: '2pt 3pt',
   textAlign: 'left',
-  fontSize: '9pt',
+  fontSize: '9.5pt',
   letterSpacing: '0.5px',
   border: '1px solid #1a1a1a',
   fontWeight: 'bold',
