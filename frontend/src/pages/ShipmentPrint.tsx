@@ -142,10 +142,9 @@ export default function ShipmentPrint() {
           }
           .shipment-paper {
             width: 7.5in !important;
-            font-size: 7pt !important;
-            padding: 3pt !important;
+            font-size: 8pt !important;
+            padding: 4pt !important;
             margin: 0 auto !important;
-            transform: scale(1) !important;
           }
           * {
             box-sizing: border-box !important;
@@ -177,7 +176,7 @@ export default function ShipmentPrint() {
           padding: '3pt',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", sans-serif',
-          fontSize: '7pt',
+          fontSize: '8pt',
           color: '#1a1a1a',
           lineHeight: 1.2,
         }}>
