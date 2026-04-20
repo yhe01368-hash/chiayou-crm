@@ -20,7 +20,18 @@ export default function ShipmentPrint() {
 
   useEffect(() => {
     if (shipment) {
-      const timer = setTimeout(() => window.print(), 300);
+      const timer = setTimeout(() => {
+        // 自動設定橫向列印
+        const style = document.createElement('style');
+        style.id = 'print-orientation';
+        style.innerHTML = '@page { size: 9.5in 5.5in landscape; margin: 0; }';
+        document.head.appendChild(style);
+        window.print();
+        setTimeout(() => {
+          const existing = document.getElementById('print-orientation');
+          if (existing) existing.remove();
+        }, 500);
+      }, 300);
       return () => clearTimeout(timer);
     }
   }, [shipment]);
