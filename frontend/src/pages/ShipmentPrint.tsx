@@ -209,7 +209,7 @@ export default function ShipmentPrint() {
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.address || '-'}</span>
             </div>
-            {/* 第二列：電話、傳真、手機、統編、聯絡人、日期 平均分配 */}
+            {/* 第二列：電話、傳真、手機、統編、聯絡人 平均分配 */}
             <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.phone || '-'}</span>
@@ -221,8 +221,6 @@ export default function ShipmentPrint() {
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.tax_id || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.contact || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>日 期：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}</span>
             </div>
           </div>
 
@@ -311,7 +309,7 @@ export default function ShipmentPrint() {
             </div>
             <div style={{ padding: '3pt' }}>
               <div style={{ fontWeight: 'bold', fontSize: '7pt', letterSpacing: '1pt' }}>日 期</div>
-              <div style={{ borderBottom: '1px solid #1a1a1a', height: '12pt', marginTop: '1pt' }}></div>
+              <div style={{ borderBottom: '1px solid #1a1a1a', height: '12pt', marginTop: '1pt', fontSize: '6.5pt' }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : ''}</div>
             </div>
           </div>
         </div>
