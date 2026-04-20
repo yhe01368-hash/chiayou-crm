@@ -202,25 +202,27 @@ export default function ShipmentPrint() {
 
           {/* 客戶資料區 */}
           <div style={{ border, padding: '3pt', marginBottom: '4pt' }}>
-            <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* 第一列：客戶名稱 + 客戶地址 + 日期 */}
+            <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', flexWrap: 'wrap', marginBottom: '2pt' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
               <span style={{ borderBottom: '1px dotted #aaa', minWidth: '80pt', paddingRight: '2pt' }}>{shipment.customer?.name || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.address || '-'}</span>
-            </div>
-            <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', minWidth: '70pt' }}>{shipment.customer?.phone || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>傳 真：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', minWidth: '50pt' }}>{shipment.customer?.fax || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>手 機：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', minWidth: '80pt' }}>{shipment.customer?.phone2 || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統 編：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', minWidth: '60pt' }}>{shipment.customer?.tax_id || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', minWidth: '50pt' }}>{shipment.customer?.contact || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>日 期：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', minWidth: '80pt' }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : '-'}</span>
+            </div>
+            {/* 第二列：電話、傳真、手機、統編、聯絡人 平均分配 */}
+            <div style={{ display: 'flex', gap: '3pt', fontSize: '7pt', lineHeight: 1.5, alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.phone || '-'}</span>
+              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>傳 真：</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.fax || '-'}</span>
+              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>手 機：</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.phone2 || '-'}</span>
+              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統 編：</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.tax_id || '-'}</span>
+              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.contact || '-'}</span>
             </div>
           </div>
 
