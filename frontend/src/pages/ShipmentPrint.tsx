@@ -275,9 +275,9 @@ export default function ShipmentPrint() {
                   <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(taxAmount)}</td>
                 </tr>
                 <tr>
-                  <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt', fontSize: '10.5pt' }}>總計：</td>
+                  <td colSpan={3} style={{ ...td, textAlign: 'right', fontWeight: 'bold', paddingRight: '4pt' }}>總計：</td>
                   <td style={td}></td>
-                  <td style={{ ...td, textAlign: 'right', fontWeight: 'bold', fontSize: '10.5pt' }}>{formatCurrency(totalAmount + taxAmount)}</td>
+                  <td style={{ ...td, textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(totalAmount + taxAmount)}</td>
                 </tr>
               </tbody>
             </table>
