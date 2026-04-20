@@ -174,8 +174,8 @@ export default function ShipmentPrint() {
 
         {/* 稅額選擇對話框 */}
         {showDialog && (
-          <div className="no-print fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4">
+          <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4" style={{ position: 'relative', zIndex: 10000 }}>
               <h3 className="text-lg font-bold mb-4">選擇列印選項</h3>
               <p className="text-gray-600 mb-4">是否要列印稅額與總計？</p>
               <div className="flex gap-3">
