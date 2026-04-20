@@ -96,8 +96,9 @@ export default function ShipmentPrint() {
  
  <style>{`
  @page {
- size: 9.5in 5.5in;
- margin: 0;
+  size: 9.5in 5.5in landscape;
+  margin: 0.1in;
+}
  }
  
  /* 預覽時讓紙張放大充滿視窗 */
