@@ -206,22 +206,22 @@ export default function ShipmentPrint() {
             {/* 第一列：客戶名稱 + 客戶地址 */}
             <div style={{ display: 'flex', gap: '2pt', fontSize: '8pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between', marginBottom: '2pt' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.name || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.name || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 2 }}>{shipment.customer?.address || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 2, fontWeight: 'bold' }}>{shipment.customer?.address || '-'}</span>
             </div>
             {/* 第二列：電話、傳真、手機、統編、聯絡人 */}
             <div style={{ display: 'flex', gap: '2pt', fontSize: '8pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.phone || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.phone || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>傳 真：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.fax || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.fax || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>手 機：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.phone2 || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.phone2 || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統 編：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.tax_id || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.tax_id || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1 }}>{shipment.customer?.contact || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.contact || '-'}</span>
             </div>
           </div>
 
