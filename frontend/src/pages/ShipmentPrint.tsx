@@ -96,9 +96,8 @@ export default function ShipmentPrint() {
  
  <style>{`
  @page {
-  size: 9.5in 5.5in landscape;
-  margin: 0.1in;
-}
+ size: 9.5in 5.5in landscape;
+ margin: 0;
  }
  
  /* 預覽時讓紙張放大充滿視窗 */
@@ -123,20 +122,7 @@ export default function ShipmentPrint() {
  }
  }
  
- /* 列印時的字體大小 */
- @media print {
- .shipment-paper {
- width: 9.3in !important;
- font-size: 9pt !important;
- padding: 8px !important;
- margin: 0 !important;
- }
- .shipment-paper * {
- font-size: inherit !important;
- }
- }
- 
- /* 列印時隱藏控制列 */
+ /* 列印時 */
  @media print {
  html, body {
  margin: 0 !important;
@@ -144,10 +130,25 @@ export default function ShipmentPrint() {
  width: 100% !important;
  height: 100% !important;
  background: #fff !important;
+ overflow: hidden !important;
  }
  .no-print {
  display: none !important;
  }
+ .shipment-paper {
+ width: 9.3in !important;
+ max-width: 9.3in !important;
+ font-size: 9pt !important;
+ padding: 6pt !important;
+ margin: 0 auto !important;
+ }
+ * {
+ box-sizing: border-box !important;
+ }
+ -webkit-print-color-adjust: exact;
+ print-color-adjust: exact;
+ }
+ `}</style>
  * {
  box-sizing: border-box !important;
  }
@@ -354,3 +355,4 @@ const td: React.CSSProperties = {
  verticalAlign: 'middle',
  lineHeight: 1.25,
 };
+
