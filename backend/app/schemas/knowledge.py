@@ -16,10 +16,10 @@ class KnowledgeBaseUpdate(BaseModel):
     solution: Optional[str] = None
 
 class KnowledgeBaseResponse(BaseModel):
-    id: str
+    id: int | str
     title: str
     category: str
     problem: str
     solution: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str
