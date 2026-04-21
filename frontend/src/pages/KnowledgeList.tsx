@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import { knowledgeApi } from '../services/api';
-import { Plus, Search, X, BookOpen, Trash2, Edit, ArrowLeft } from 'lucide-react';
+import { Plus, Search, X, BookOpen, Trash2, Edit, ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 
 const categories = ['硬體問題', '軟體問題', '網路問題', 'Windows設定', '週邊設備', '其他'];
 
@@ -20,7 +22,7 @@ export default function KnowledgeList() {
   const filteredList = knowledgeList.filter((item: any) => {
     if (!search) return true;
     const s = search.toLowerCase();
-    return item.title.toLowerCase().includes(s) || item.problem.toLowerCase().includes(s);
+    return item.title.toLowerCase().includes(s) || item.problem?.toLowerCase().includes(s);
   });
 
   const deleteMutation = useMutation({
@@ -117,12 +119,14 @@ export default function KnowledgeList() {
                   <div className="mb-2">
                     <p className="text-sm text-gray-500 mb-1">
                       <span className="font-medium text-gray-700">問題：</span>
-                      {item.problem.length > 100 ? item.problem.slice(0, 100) + '...' : item.problem}
                     </p>
-                    <p className="text-sm text-gray-700">
+                    <div className="text-sm text-gray-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: item.problem || '' }} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">
                       <span className="font-medium text-gray-700">解決方案：</span>
-                      {item.solution.length > 100 ? item.solution.slice(0, 100) + '...' : item.solution}
                     </p>
+                    <div className="text-sm text-gray-700 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: item.solution || '' }} />
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -150,20 +154,53 @@ export default function KnowledgeList() {
   );
 }
 
-// 維修知識庫表單元件
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
+// 維修知識庫表單
 function KnowledgeForm({ id, onBack }: { id: string | null; onBack: () => void }) {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isEdit = Boolean(id);
 
   const [form, setForm] = useState({
     title: '',
     category: '其他',
-    problem: '',
-    solution: '',
+  });
+
+  // 非受控模式的 TipTap 編輯器
+  const problemEditor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        horizontalRule: false,
+      }),
+    ],
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[120px] focus:outline-none',
+      },
+    },
+    onUpdate: () => {
+      // 不做任何 state 更新！
+    },
+  });
+
+  const solutionEditor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: false,
+        codeBlock: false,
+        blockquote: false,
+        horizontalRule: false,
+      }),
+    ],
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[120px] focus:outline-none',
+      },
+    },
+    onUpdate: () => {
+      // 不做任何 state 更新！
+    },
   });
 
   const { data: editData } = useQuery({
@@ -177,11 +214,15 @@ function KnowledgeForm({ id, onBack }: { id: string | null; onBack: () => void }
       setForm({
         title: editData.title || '',
         category: editData.category || '其他',
-        problem: editData.problem || '',
-        solution: editData.solution || '',
       });
+      if (problemEditor && editData.problem) {
+        problemEditor.commands.setContent(editData.problem);
+      }
+      if (solutionEditor && editData.solution) {
+        solutionEditor.commands.setContent(editData.solution);
+      }
     }
-  }, [editData]);
+  }, [editData, problemEditor, solutionEditor]);
 
   const mutation = useMutation({
     mutationFn: (data: any) =>
@@ -195,10 +236,67 @@ function KnowledgeForm({ id, onBack }: { id: string | null; onBack: () => void }
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return alert('請輸入標題');
-    if (!form.problem.trim()) return alert('請輸入問題描述');
-    if (!form.solution.trim()) return alert('請輸入解決方案');
-    mutation.mutate(form);
+    const problemText = problemEditor?.getHTML() || '';
+    const solutionText = solutionEditor?.getHTML() || '';
+    if (!problemText || problemText === '<p></p>') return alert('請輸入問題描述');
+    if (!solutionText || solutionText === '<p></p>') return alert('請輸入解決方案');
+    mutation.mutate({
+      title: form.title,
+      category: form.category,
+      problem: problemText,
+      solution: solutionText,
+    });
   };
+
+  const ToolbarButton = ({ onClick, active, children, title }: { onClick: () => void; active?: boolean; children: React.ReactNode; title?: string }) => (
+    <button
+      type="button"
+      onMouseDown={(e) => { e.preventDefault(); onClick(); }}
+      className={`p-1.5 rounded hover:bg-gray-100 ${active ? 'bg-gray-200 text-blue-600' : 'text-gray-600'}`}
+      title={title}
+    >
+      {children}
+    </button>
+  );
+
+  const RichTextField = ({ editor, label }: { editor: ReturnType<typeof useEditor>; label: string }) => (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      {editor && (
+        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-6">
+          <div className="flex items-center gap-0.5 border-b border-gray-200 p-1.5 bg-gray-50 flex-wrap">
+            <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="粗體">
+              <Bold size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title="斜體">
+              <Italic size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title="底線">
+              <UnderlineIcon size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title="刪除線">
+              <Strikethrough size={16} />
+            </ToolbarButton>
+            <span className="w-px h-5 bg-gray-300 mx-1" />
+            <ToolbarButton onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title="項目符號">
+              <List size={16} />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title="編號">
+              <ListOrdered size={16} />
+            </ToolbarButton>
+            <span className="w-px h-5 bg-gray-300 mx-1" />
+            <ToolbarButton onClick={() => {
+              const url = window.prompt('輸入連結 URL');
+              if (url) editor.chain().focus().setLink({ href: url }).run();
+            }} active={editor.isActive('link')} title="連結">
+              <LinkIcon size={16} />
+            </ToolbarButton>
+          </div>
+          <EditorContent editor={editor} />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-4 max-w-2xl">
@@ -217,7 +315,7 @@ function KnowledgeForm({ id, onBack }: { id: string | null; onBack: () => void }
           <input
             type="text"
             className="input"
-            placeholder="例：印表機無法連線"
+            placeholder="例：印表機無法列印"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
@@ -234,25 +332,8 @@ function KnowledgeForm({ id, onBack }: { id: string | null; onBack: () => void }
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">問題描述 *</label>
-          <textarea
-            className="input min-h-[100px]"
-            placeholder="詳細描述遇到的問題..."
-            value={form.problem}
-            onChange={(e) => setForm({ ...form, problem: e.target.value })}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">解決方案 *</label>
-          <textarea
-            className="input min-h-[100px]"
-            placeholder="詳細描述如何解決..."
-            value={form.solution}
-            onChange={(e) => setForm({ ...form, solution: e.target.value })}
-          />
-        </div>
+        <RichTextField editor={problemEditor} label="問題描述 *" />
+        <RichTextField editor={solutionEditor} label="解決方案 *" />
 
         <div className="flex gap-3 pt-4">
           <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
