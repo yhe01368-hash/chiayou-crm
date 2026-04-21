@@ -23,7 +23,8 @@ export default function ShipmentForm() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<ShipmentItemInput[]>([]);
-  const [note, setNote] = useState('');
+  // 追蹤是否已初始化
+  const editorInitializedRef = useRef(false);
 
   const { data: customers = [] } = useQuery({
     queryKey: ['customers'],
@@ -50,9 +51,13 @@ export default function ShipmentForm() {
         horizontalRule: false,
       }),
     ],
-    content: note,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[100px] focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
-      setNote(editor.getHTML());
+      // 不做任何 state 更新！
     },
   });
 
@@ -73,14 +78,16 @@ export default function ShipmentForm() {
   }, []);
 
   useEffect(() => {
-    if (editData && editor) {
+    if (editData && !editorInitializedRef.current) {
+      editorInitializedRef.current = true;
       setCustomerId(editData.customer_id);
       setItems(editData.items.map((item: any) => ({
         product_id: item.product_id,
         quantity: item.quantity,
       })));
-      setNote(editData.note || '');
-      editor.commands.setContent(editData.note || '');
+      if (editor && editData.note) {
+        editor.commands.setContent(editData.note);
+      }
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
     }
@@ -100,7 +107,8 @@ export default function ShipmentForm() {
     e.preventDefault();
     if (!customerId) return alert('請選擇客戶');
     if (items.length === 0) return alert('請新增商品');
-    mutation.mutate({ customer_id: customerId, items, note });
+    const noteText = editor?.getHTML() || '';
+    mutation.mutate({ customer_id: customerId, items, note: noteText });
   };
 
   const addItem = () => {
