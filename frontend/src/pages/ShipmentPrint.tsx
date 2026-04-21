@@ -343,13 +343,13 @@ export default function ShipmentPrint() {
 
           {/* 簽收欄 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border }}>
-            <div style={{ padding: '3pt', display: 'flex', alignItems: 'flex-start', borderRight: '1px solid #1a1a1a', minHeight: '50pt' }}>
+            <div style={{ padding: '3pt', display: 'flex', alignItems: 'flex-start', borderRight: '1px solid #1a1a1a', minHeight: '25pt' }}>
               <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>工程師</div>
             </div>
-            <div style={{ padding: '3pt', display: 'flex', alignItems: 'flex-start', borderRight: '1px solid #1a1a1a', minHeight: '50pt' }}>
+            <div style={{ padding: '3pt', display: 'flex', alignItems: 'flex-start', borderRight: '1px solid #1a1a1a', minHeight: '25pt' }}>
               <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>客戶簽名</div>
             </div>
-            <div style={{ padding: '3pt', display: 'flex', alignItems: 'flex-start', flex: 1, minHeight: '50pt' }}>
+            <div style={{ padding: '3pt', display: 'flex', alignItems: 'flex-start', flex: 1, minHeight: '25pt' }}>
               <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>日 期：</div>
               <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : ''}</div>
             </div>
