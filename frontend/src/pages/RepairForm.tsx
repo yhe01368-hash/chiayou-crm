@@ -165,7 +165,7 @@ export default function RepairForm() {
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {editor && (
-        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10">
+        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10" style={{ minHeight: '150px' }}>
           <div className="flex items-center gap-0.5 border-b border-gray-200 p-1.5 bg-gray-50 flex-wrap">
             <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="粗體">
               <Bold size={16} />
