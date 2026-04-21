@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -30,6 +30,10 @@ export default function CustomerForm() {
     note: '',
   });
 
+  // 追蹤是否已初始化
+  const editorInitializedRef = useRef(false);
+
+  // TipTap 作為非受控組件
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -39,15 +43,20 @@ export default function CustomerForm() {
         horizontalRule: false,
       }),
     ],
-    content: form.note,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[100px] focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
-      setForm(prev => ({ ...prev, note: editor.getHTML() }));
+      // 不做任何 state 更新！
     },
   });
 
   // Sync initial content when editing
   useEffect(() => {
-    if (existingCustomer && editor) {
+    if (existingCustomer && !editorInitializedRef.current) {
+      editorInitializedRef.current = true;
       setForm({
         name: existingCustomer.name || '',
         phone: existingCustomer.phone || '',
@@ -57,7 +66,9 @@ export default function CustomerForm() {
         email: existingCustomer.email || '',
         note: existingCustomer.note || '',
       });
-      editor.commands.setContent(existingCustomer.note || '');
+      if (editor && existingCustomer.note) {
+        editor.commands.setContent(existingCustomer.note);
+      }
     }
   }, [existingCustomer, editor]);
 
@@ -72,7 +83,9 @@ export default function CustomerForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(form);
+    const noteText = editor?.getHTML() || form.note || '';
+    const formData = { ...form, note: noteText };
+    mutation.mutate(formData);
   };
 
   const ToolbarButton = ({ onClick, active, children, title }: { onClick: () => void; active?: boolean; children: React.ReactNode; title?: string }) => (
