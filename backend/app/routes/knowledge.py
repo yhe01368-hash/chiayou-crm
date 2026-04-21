@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
 from uuid import UUID
-from .schemas import KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
+from ..schemas import KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
 from ..database import get_client
 
 router = APIRouter(prefix="/knowledge", tags=["knowledge"])
