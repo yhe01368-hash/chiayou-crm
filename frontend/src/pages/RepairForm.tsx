@@ -34,7 +34,7 @@ export default function RepairForm() {
     cost: undefined,
   });
 
-  // 獨立編輯器狀態，避免每次輸入都 re-render
+  // 獨立編輯器內容（用 useState 初始化）
   const [problemContent, setProblemContent] = useState('');
   const [repairContent, setRepairContent] = useState('');
 
@@ -99,12 +99,9 @@ export default function RepairForm() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 追蹤是否已經初始化過（用 ref 避免 effect 重複執行）
-  const hasInitializedRef = useRef(false);
-
+  // 初始化編輯器內容（只在 editData 首次載入時執行一次）
   useEffect(() => {
-    if (editData && hasInitializedRef.current === false && problemEditor && repairDetailEditor) {
-      hasInitializedRef.current = true;
+    if (editData && !problemContent && !repairContent) {
       setForm({
         customer_id: editData.customer_id,
         device_type: editData.device_type,
@@ -116,19 +113,12 @@ export default function RepairForm() {
         repair_detail: editData.repair_detail || '',
         cost: editData.cost,
       });
-      if (editData.problem) {
-        setProblemContent(editData.problem);
-        if (problemEditor) problemEditor.commands.setContent(editData.problem);
-      }
-      if (editData.repair_detail) {
-        setRepairContent(editData.repair_detail);
-        if (repairDetailEditor) repairDetailEditor.commands.setContent(editData.repair_detail);
-      }
-      // 設定搜尋框顯示值
+      setProblemContent(editData.problem || '');
+      setRepairContent(editData.repair_detail || '');
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
     }
-  }, [editData, problemEditor, repairDetailEditor]);
+  }, [editData]);
 
   const mutation = useMutation({
     mutationFn: (data: RepairFormData) =>
@@ -141,7 +131,7 @@ export default function RepairForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 同步編輯器內容到表單
+    // 使用編輯器的最新內容
     const formData = {
       ...form,
       problem: problemContent || form.problem,
@@ -165,7 +155,7 @@ export default function RepairForm() {
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {editor && (
-        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10" style={{ minHeight: '150px' }}>
+        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10">
           <div className="flex items-center gap-0.5 border-b border-gray-200 p-1.5 bg-gray-50 flex-wrap">
             <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="粗體">
               <Bold size={16} />
