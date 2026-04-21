@@ -4,7 +4,7 @@ from uuid import UUID
 from ..schemas import KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
 from app.core.supabase_client import get_client
 
-router = APIRouter(prefix="/knowledge", tags=["knowledge"])
+router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
 
 @router.get("", response_model=List[KnowledgeBaseResponse])
 def list_knowledge(search: str = None, category: str = None):
