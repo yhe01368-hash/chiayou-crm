@@ -343,13 +343,11 @@ export default function ShipmentPrint() {
 
           {/* 簽收欄 */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', border }}>
-            <div style={{ padding: '3pt', borderRight: '1px solid #1a1a1a' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '8pt', letterSpacing: '1pt' }}>工程師</div>
-              <div style={{ borderBottom: '1px solid #1a1a1a', height: '14pt', marginTop: '1pt' }}></div>
+            <div style={{ padding: '3pt', display: 'flex', alignItems: 'center', borderRight: '1px solid #1a1a1a' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>工程師</div>
             </div>
-            <div style={{ padding: '3pt', borderRight: '1px solid #1a1a1a' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '8pt', letterSpacing: '1pt' }}>客戶簽名</div>
-              <div style={{ borderBottom: '1px solid #1a1a1a', height: '14pt', marginTop: '1pt' }}></div>
+            <div style={{ padding: '3pt', display: 'flex', alignItems: 'center', borderRight: '1px solid #1a1a1a' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>客戶簽名</div>
             </div>
             <div style={{ padding: '3pt', display: 'flex', alignItems: 'center', flex: 1 }}>
               <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>日 期：</div>
