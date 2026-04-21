@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from typing import List, Optional
-from uuid import UUID
+from typing import List, Optional, Union
 from ..schemas import KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
 from app.core.supabase_client import get_client
 
@@ -18,7 +17,7 @@ def list_knowledge(search: str = None, category: str = None):
     return result or []
 
 @router.get("/{knowledge_id}", response_model=KnowledgeBaseResponse)
-def get_knowledge(knowledge_id: UUID):
+def get_knowledge(knowledge_id: Union[int, str]):
     sb = get_client()
     result = sb.select("knowledge", filters={"id": str(knowledge_id)}, single=True)
     
@@ -35,7 +34,7 @@ def create_knowledge(knowledge: KnowledgeBaseCreate):
     return result
 
 @router.put("/{knowledge_id}", response_model=KnowledgeBaseResponse)
-def update_knowledge(knowledge_id: UUID, knowledge: KnowledgeBaseUpdate):
+def update_knowledge(knowledge_id: Union[int, str], knowledge: KnowledgeBaseUpdate):
     sb = get_client()
     payload = {k: v for k, v in knowledge.model_dump(exclude_unset=True).items() if v is not None}
     
@@ -50,7 +49,7 @@ def update_knowledge(knowledge_id: UUID, knowledge: KnowledgeBaseUpdate):
     return result
 
 @router.delete("/{knowledge_id}")
-def delete_knowledge(knowledge_id: UUID):
+def delete_knowledge(knowledge_id: Union[int, str]):
     sb = get_client()
     sb.delete("knowledge", filters={"id": str(knowledge_id)})
     return {"message": "刪除成功"}
