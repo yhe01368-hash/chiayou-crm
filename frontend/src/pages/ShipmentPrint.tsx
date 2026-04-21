@@ -353,7 +353,7 @@ export default function ShipmentPrint() {
             </div>
             <div style={{ padding: '3pt', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1, borderBottom: '1px solid #1a1a1a' }}>
               <div style={{ fontWeight: 'bold', fontSize: '9pt', letterSpacing: '1pt' }}>日 期</div>
-              <div style={{ fontSize: '9pt', fontWeight: 'bold', height: '14pt' }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : ''}</div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '9pt', fontWeight: 'bold' }}>{shipment.shipment_date ? formatRocDate(shipment.shipment_date) : ''}</div>
             </div>
           </div>
         </div>
