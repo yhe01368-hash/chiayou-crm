@@ -96,25 +96,21 @@ export default function RepairForm() {
   }, []);
 
   useEffect(() => {
-    if (editData) {
-      setForm({
-        customer_id: editData.customer_id,
-        device_type: editData.device_type,
-        device_brand: editData.device_brand || '',
-        device_model: editData.device_model || '',
-        serial_number: editData.serial_number || '',
-        problem: editData.problem,
-        status: editData.status,
-        repair_detail: editData.repair_detail || '',
-        cost: editData.cost,
-      });
-      if (problemEditor) problemEditor.commands.setContent(editData.problem || '');
-      if (repairDetailEditor) repairDetailEditor.commands.setContent(editData.repair_detail || '');
-      // 編輯模式時也要設定搜尋框顯示值
+    if (editData && problemEditor && repairDetailEditor) {
+      // 只有編輯模式載入時執行一次，不要在 customers 變化時重設
+      const hasInitialized = problemEditor.getHTML() !== '';
+      if (!hasInitialized && editData.problem) {
+        problemEditor.commands.setContent(editData.problem || '');
+      }
+      const hasInitialized2 = repairDetailEditor.getHTML() !== '';
+      if (!hasInitialized2 && editData.repair_detail) {
+        repairDetailEditor.commands.setContent(editData.repair_detail || '');
+      }
+      // 設定搜尋框顯示值（只需要一次）
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
     }
-  }, [editData, customers, problemEditor, repairDetailEditor]);
+  }, [editData, problemEditor, repairDetailEditor]);
 
   const mutation = useMutation({
     mutationFn: (data: RepairFormData) =>
