@@ -1,20 +1,12 @@
-# Re-export all schemas
-from .customers import (
+# Re-export all schemas from schemas.py and knowledge.py
+from .schemas import (
     CustomerCreate, CustomerUpdate, CustomerResponse,
-    CustomerListResponse
-)
-from .repairs import (
-    RepairCreate, RepairUpdate, RepairResponse,
-    RepairListResponse
-)
-from .inventory import (
-    InventoryCreate, InventoryUpdate, InventoryResponse,
-    InventoryListResponse
-)
-from .shipments import (
-    ShipmentCreate, ShipmentUpdate, ShipmentResponse,
-    ShipmentListResponse, ShipmentItemResponse
+    RepairCreate, RepairUpdate, RepairResponse, RepairStatusUpdate,
+    InventoryCreate, InventoryUpdate, InventoryResponse, StockAdjust,
+    ShipmentCreate, ShipmentUpdate, ShipmentResponse, ShipmentItemResponse,
+    RepairStatusEnum, ShipmentStatusEnum,
+    DashboardResponse,
 )
 from .knowledge import (
-    KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
+    KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse,
 )
