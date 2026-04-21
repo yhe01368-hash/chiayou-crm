@@ -34,9 +34,8 @@ export default function RepairForm() {
     cost: undefined,
   });
 
-  // 獨立編輯器內容（用 useState 初始化）
-  const [problemContent, setProblemContent] = useState('');
-  const [repairContent, setRepairContent] = useState('');
+  // 編輯器是否已初始化過
+  const editorInitializedRef = useRef(false);
 
   const [customerSearch, setCustomerSearch] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -53,6 +52,7 @@ export default function RepairForm() {
     enabled: isEdit,
   });
 
+  // TipTap 作為非受控組件 - 只在初始化時設定一次內容
   const problemEditor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -62,9 +62,13 @@ export default function RepairForm() {
         horizontalRule: false,
       }),
     ],
-    content: problemContent,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[120px] focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
-      setProblemContent(editor.getHTML());
+      // 不做任何 state 更新！讓編輯器自己管理內容
     },
   });
 
@@ -77,9 +81,13 @@ export default function RepairForm() {
         horizontalRule: false,
       }),
     ],
-    content: repairContent,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[120px] focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
-      setRepairContent(editor.getHTML());
+      // 不做任何 state 更新！讓編輯器自己管理內容
     },
   });
 
@@ -99,9 +107,10 @@ export default function RepairForm() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 初始化編輯器內容（只在 editData 首次載入時執行一次）
+  // 初始化表單資料（只在首次載入時執行一次）
   useEffect(() => {
-    if (editData && !problemContent && !repairContent) {
+    if (editData && !editorInitializedRef.current) {
+      editorInitializedRef.current = true;
       setForm({
         customer_id: editData.customer_id,
         device_type: editData.device_type,
@@ -113,12 +122,17 @@ export default function RepairForm() {
         repair_detail: editData.repair_detail || '',
         cost: editData.cost,
       });
-      setProblemContent(editData.problem || '');
-      setRepairContent(editData.repair_detail || '');
+      // 初始化編輯器內容（只做一次）
+      if (problemEditor && editData.problem) {
+        problemEditor.commands.setContent(editData.problem);
+      }
+      if (repairDetailEditor && editData.repair_detail) {
+        repairDetailEditor.commands.setContent(editData.repair_detail);
+      }
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
     }
-  }, [editData]);
+  }, [editData, customers, problemEditor, repairDetailEditor]);
 
   const mutation = useMutation({
     mutationFn: (data: RepairFormData) =>
@@ -131,11 +145,13 @@ export default function RepairForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 使用編輯器的最新內容
+    // 直接從編輯器讀取內容，不依賴 state
+    const problemText = problemEditor?.getHTML() || form.problem || '';
+    const repairDetailText = repairDetailEditor?.getHTML() || form.repair_detail || '';
     const formData = {
       ...form,
-      problem: problemContent || form.problem,
-      repair_detail: repairContent || form.repair_detail,
+      problem: problemText,
+      repair_detail: repairDetailText,
     };
     mutation.mutate(formData);
   };
@@ -155,7 +171,7 @@ export default function RepairForm() {
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
       {editor && (
-        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10 [&_.ProseMirror:focus]:outline-none">
+        <div className="border border-gray-300 rounded-lg overflow-hidden bg-white mb-10">
           <div className="flex items-center gap-0.5 border-b border-gray-200 p-1.5 bg-gray-50 flex-wrap">
             <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title="粗體">
               <Bold size={16} />
@@ -184,7 +200,7 @@ export default function RepairForm() {
               <LinkIcon size={16} />
             </ToolbarButton>
           </div>
-          <EditorContent editor={editor} className="prose prose-sm max-w-none p-3 min-h-[120px]" />
+          <EditorContent editor={editor} />
         </div>
       )}
     </div>
