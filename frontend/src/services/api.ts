@@ -75,4 +75,18 @@ export const dashboardApi = {
   get: () => api.get('/dashboard'),
 };
 
+// ===== 維修知識庫 API =====
+export const knowledgeApi = {
+  getAll: (params?: { search?: string; category?: string }) =>
+    api.get('/knowledge', { params }),
+  getById: (id: string) =>
+    api.get(`/knowledge/${id}`),
+  create: (data: any) =>
+    api.post('/knowledge', data),
+  update: (id: string, data: any) =>
+    api.put(`/knowledge/${id}`, data),
+  delete: (id: string) =>
+    api.delete(`/knowledge/${id}`),
+};
+
 export default api;

@@ -14,6 +14,7 @@ import ShipmentList from './pages/ShipmentList';
 import ShipmentForm from './pages/ShipmentForm';
 import ShipmentDetail from './pages/ShipmentDetail';
 import ShipmentPrint from './pages/ShipmentPrint';
+import KnowledgeList from './pages/KnowledgeList';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +57,9 @@ export default function App() {
             <Route path="/shipments/:id" element={<ShipmentDetail />} />
             <Route path="/shipments/:id/edit" element={<ShipmentForm />} />
             <Route path="/shipments/:id/print" element={<ShipmentPrint />} />
+
+            {/* Knowledge routes */}
+            <Route path="/knowledge" element={<KnowledgeList />} />
           </Routes>
         </Layout>
       </BrowserRouter>

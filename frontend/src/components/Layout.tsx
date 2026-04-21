@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
- LayoutDashboard, Users, Wrench, Package, Truck, 
+ LayoutDashboard, Users, Wrench, Package, Truck, BookOpen,
  Menu, X
 } from 'lucide-react';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ const navItems = [
  { path: '/repairs', label: '維修管理', icon: Wrench },
  { path: '/inventory', label: '庫存管理', icon: Package },
  { path: '/shipments', label: '出貨單', icon: Truck },
+ { path: '/knowledge', label: '維修知識庫', icon: BookOpen },
 ];
 
 export default function Layout({ children }: LayoutProps) {
