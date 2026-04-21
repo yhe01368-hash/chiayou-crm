@@ -95,18 +95,30 @@ export default function RepairForm() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 追蹤是否已經初始化過（用 ref 避免 effect 重複執行）
+  const hasInitializedRef = useRef(false);
+
   useEffect(() => {
-    if (editData && problemEditor && repairDetailEditor) {
-      // 只有編輯模式載入時執行一次，不要在 customers 變化時重設
-      const hasInitialized = problemEditor.getHTML() !== '';
-      if (!hasInitialized && editData.problem) {
-        problemEditor.commands.setContent(editData.problem || '');
+    if (editData && hasInitializedRef.current === false && problemEditor && repairDetailEditor) {
+      hasInitializedRef.current = true;
+      setForm({
+        customer_id: editData.customer_id,
+        device_type: editData.device_type,
+        device_brand: editData.device_brand || '',
+        device_model: editData.device_model || '',
+        serial_number: editData.serial_number || '',
+        problem: editData.problem || '',
+        status: editData.status,
+        repair_detail: editData.repair_detail || '',
+        cost: editData.cost,
+      });
+      if (editData.problem) {
+        problemEditor.commands.setContent(editData.problem);
       }
-      const hasInitialized2 = repairDetailEditor.getHTML() !== '';
-      if (!hasInitialized2 && editData.repair_detail) {
-        repairDetailEditor.commands.setContent(editData.repair_detail || '');
+      if (editData.repair_detail) {
+        repairDetailEditor.commands.setContent(editData.repair_detail);
       }
-      // 設定搜尋框顯示值（只需要一次）
+      // 設定搜尋框顯示值
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
     }
