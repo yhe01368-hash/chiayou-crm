@@ -86,7 +86,7 @@ export default function RepairList() {
                     </div>
                   </div>
                   <div className="text-sm text-gray-600 ml-13">
-                    <span className="font-medium">問題：</span>{repair.problem}
+                    <span className="font-medium">問題：</span>{repair.problem?.replace(/<[^>]+>/g, '')}
                   </div>
                   {repair.cost && (
                     <div className="text-sm text-gray-600 mt-1">
