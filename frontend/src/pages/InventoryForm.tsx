@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -30,12 +30,16 @@ export default function InventoryForm() {
     note: '',
   });
 
+  // 追蹤是否已初始化
+  const editorInitializedRef = useRef(false);
+
   const { data: editData } = useQuery({
     queryKey: ['inventory', id],
     queryFn: () => inventoryApi.getById(id!).then(res => res.data),
     enabled: isEdit,
   });
 
+  // TipTap 作為非受控組件
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -45,14 +49,19 @@ export default function InventoryForm() {
         horizontalRule: false,
       }),
     ],
-    content: form.note,
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm max-w-none p-3 min-h-[100px] focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
-      setForm(prev => ({ ...prev, note: editor.getHTML() }));
+      // 不做任何 state 更新！
     },
   });
 
   useEffect(() => {
-    if (editData && editor) {
+    if (editData && !editorInitializedRef.current) {
+      editorInitializedRef.current = true;
       setForm({
         product_code: editData.product_code,
         product_name: editData.product_name,
@@ -65,7 +74,9 @@ export default function InventoryForm() {
         min_stock: editData.min_stock,
         note: editData.note || '',
       });
-      editor.commands.setContent(editData.note || '');
+      if (editor && editData.note) {
+        editor.commands.setContent(editData.note);
+      }
     }
   }, [editData, editor]);
 
@@ -80,7 +91,9 @@ export default function InventoryForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(form);
+    const noteText = editor?.getHTML() || form.note || '';
+    const formData = { ...form, note: noteText };
+    mutation.mutate(formData);
   };
 
   const ToolbarButton = ({ onClick, active, children, title }: { onClick: () => void; active?: boolean; children: React.ReactNode; title?: string }) => (
