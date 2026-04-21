@@ -34,6 +34,10 @@ export default function RepairForm() {
     cost: undefined,
   });
 
+  // 獨立編輯器狀態，避免每次輸入都 re-render
+  const [problemContent, setProblemContent] = useState('');
+  const [repairContent, setRepairContent] = useState('');
+
   const [customerSearch, setCustomerSearch] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -58,9 +62,9 @@ export default function RepairForm() {
         horizontalRule: false,
       }),
     ],
-    content: form.problem,
+    content: problemContent,
     onUpdate: ({ editor }) => {
-      setForm(prev => ({ ...prev, problem: editor.getHTML() }));
+      setProblemContent(editor.getHTML());
     },
   });
 
@@ -73,9 +77,9 @@ export default function RepairForm() {
         horizontalRule: false,
       }),
     ],
-    content: form.repair_detail,
+    content: repairContent,
     onUpdate: ({ editor }) => {
-      setForm(prev => ({ ...prev, repair_detail: editor.getHTML() }));
+      setRepairContent(editor.getHTML());
     },
   });
 
@@ -113,10 +117,12 @@ export default function RepairForm() {
         cost: editData.cost,
       });
       if (editData.problem) {
-        problemEditor.commands.setContent(editData.problem);
+        setProblemContent(editData.problem);
+        if (problemEditor) problemEditor.commands.setContent(editData.problem);
       }
       if (editData.repair_detail) {
-        repairDetailEditor.commands.setContent(editData.repair_detail);
+        setRepairContent(editData.repair_detail);
+        if (repairDetailEditor) repairDetailEditor.commands.setContent(editData.repair_detail);
       }
       // 設定搜尋框顯示值
       const cust = customers.find((c: any) => c.id === editData.customer_id);
@@ -135,7 +141,13 @@ export default function RepairForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutation.mutate(form);
+    // 同步編輯器內容到表單
+    const formData = {
+      ...form,
+      problem: problemContent || form.problem,
+      repair_detail: repairContent || form.repair_detail,
+    };
+    mutation.mutate(formData);
   };
 
   const ToolbarButton = ({ onClick, active, children, title }: { onClick: () => void; active?: boolean; children: React.ReactNode; title?: string }) => (
