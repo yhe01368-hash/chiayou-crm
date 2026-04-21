@@ -101,6 +101,10 @@ def create_repair(repair: RepairCreate):
     # 處理 Decimal -> float (Supabase JSON 不接受 Decimal)
     if payload.get("cost") is not None:
         payload["cost"] = float(payload["cost"])
+    # UUID -> str (否則 JSON 序列化失敗)
+    for k, v in list(payload.items()):
+        if v is not None and not isinstance(v, (str, int, float, bool)):
+            payload[k] = str(v)
 
     try:
         row = sb.insert("repairs", payload)
@@ -121,6 +125,11 @@ def update_repair(repair_id: UUID, repair: RepairUpdate):
 
     if "cost" in payload and payload["cost"] is not None:
         payload["cost"] = float(payload["cost"])
+
+    # UUID -> str (否則 JSON 序列化失敗)
+    for k, v in list(payload.items()):
+        if v is not None and not isinstance(v, (str, int, float, bool)):
+            payload[k] = str(v)
 
     try:
         row = sb.update(
