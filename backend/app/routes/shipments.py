@@ -200,22 +200,56 @@ def create_shipment(shipment: ShipmentCreate):
 def update_shipment(shipment_id: UUID, shipment: ShipmentUpdate):
     sb = get_client()
     payload = shipment.model_dump(exclude_unset=True)
-    if not payload:
-        return get_shipment(shipment_id)
+    
+    # 拿出 items（不更新到 shipments 主表）
+    items_data = payload.pop("items", None)
+    
+    # 更新主表欄位
+    if payload:
+        try:
+            sb.update("shipments", payload, filters={"id": str(shipment_id)})
+        except httpx.HTTPStatusError as e:
+            raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
+        except Exception as e:
+            raise HTTPException(status_code=502, detail=str(e))
 
-    try:
-        row = sb.update(
-            "shipments",
-            payload,
-            filters={"id": str(shipment_id)},
-        )
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+    # 如果有 items 要更新
+    if items_data is not None:
+        # 刪除原本的 items（退庫存）
+        old_items = sb.select("shipment_items", select="*", filters={"shipment_id": str(shipment_id)})
+        for old_item in old_items:
+            product = sb.select("inventory", select="quantity", filters={"id": old_item["product_id"]}, single=True)
+            if product:
+                sb.update("inventory", {"quantity": product["quantity"] + old_item["quantity"]}, filters={"id": old_item["product_id"]})
+        sb.delete("shipment_items", filters={"shipment_id": str(shipment_id)})
 
-    if not row:
-        raise HTTPException(status_code=404, detail="出貨單不存在")
+        # 新增新 items（扣庫存）
+        total = Decimal("0")
+        for item in items_data:
+            product = sb.select("inventory", select="*", filters={"id": str(item["product_id"])}, single=True)
+            if not product:
+                raise HTTPException(status_code=404, detail=f"商品 ID {item['product_id']} 不存在")
+            if product["quantity"] < item["quantity"]:
+                raise HTTPException(status_code=400, detail=f"商品「{product['product_name']}」庫存不足")
+            
+            new_qty = product["quantity"] - item["quantity"]
+            sb.update("inventory", {"quantity": new_qty}, filters={"id": str(item["product_id"])})
+            
+            subtotal = Decimal(str(item["quantity"])) * Decimal(str(product["selling_price"]))
+            total += subtotal
+            
+            sb.insert("shipment_items", {
+                "shipment_id": str(shipment_id),
+                "product_id": str(item["product_id"]),
+                "product_name": product["product_name"],
+                "quantity": item["quantity"],
+                "unit_price": float(product["selling_price"]),
+                "subtotal": float(subtotal),
+            })
+        
+        # 更新總金額
+        sb.update("shipments", {"total_amount": float(total)}, filters={"id": str(shipment_id)})
+
     return _load_shipment(sb, str(shipment_id))
 
 

@@ -162,6 +162,7 @@ class ShipmentUpdate(BaseModel):
     shipment_date: Optional[date] = None
     status: Optional[ShipmentStatusEnum] = None
     note: Optional[str] = None
+    items: Optional[List[ShipmentItemCreate]] = None
 
 class ShipmentResponse(ShipmentBase):
     id: UUID
