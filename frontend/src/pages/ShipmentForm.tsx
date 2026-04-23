@@ -108,7 +108,7 @@ export default function ShipmentForm() {
     if (!customerId) return alert('請選擇客戶');
     if (items.length === 0) return alert('請新增商品');
     const noteText = editor?.getHTML() || '';
-    mutation.mutate({ customer_id: customerId, items, note: noteText });
+    mutation.mutate({ customer_id: customerId, items, note: noteText, status: 'completed' });
   };
 
   const addItem = () => {
