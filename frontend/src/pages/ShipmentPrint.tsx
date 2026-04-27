@@ -146,7 +146,7 @@ export default function ShipmentPrint() {
             transform: scale(1) !important;
             transform-origin: center top !important;
             font-size: 9.5pt !important;
-            padding: 6pt !important;
+            padding: 4pt !important;
             margin: 0 auto !important;
           }
           * {
@@ -213,7 +213,7 @@ export default function ShipmentPrint() {
         <div ref={paperRef} className="shipment-paper" style={{
           width: '8in',
           backgroundColor: '#fff',
-          padding: '6pt',
+          padding: '4pt',
           boxSizing: 'border-box',
           fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", sans-serif',
           fontSize: '9.5pt',
