@@ -332,8 +332,8 @@ export default function ShipmentPrint() {
           </div>
 
           {/* 注意事項 */}
-          <div style={{ border, padding: '3pt', marginBottom: '3pt', fontSize: '7.5pt', lineHeight: 1.3 }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '1pt', fontSize: '8pt' }}>注意事項：</div>
+          <div style={{ border, padding: '3pt', marginBottom: '3pt', fontSize: '9.75pt', lineHeight: 1.3 }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '1pt', fontSize: '10.4pt' }}>注意事項：</div>
             <div>1. 請注意客戶送修電腦其內裝所有軟體，有關版權問題一律與本公司無關，特此聲明！</div>
             <div>2. 如有需要安裝新軟體，請客戶自備版權軟體，或由本公司代購。</div>
             <div>3. 客戶取回之產品，三日內同問題應立即告知，逾期無效；不同原因之問題視為計費維修。</div>
