@@ -242,14 +242,14 @@ export default function ShipmentPrint() {
           {/* 客戶資料區 - 兩列 */}
           <div style={{ border, padding: '3pt', marginBottom: '3pt' }}>
             {/* 第一列：客戶名稱 + 客戶地址 */}
-            <div style={{ display: 'flex', gap: '2pt', fontSize: '9pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between', marginBottom: '2pt' }}>
+            <div style={{ display: 'flex', gap: '2pt', fontSize: '10.8pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between', marginBottom: '2pt' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.name || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 2, fontWeight: 'bold' }}>{shipment.customer?.address || '-'}</span>
             </div>
             {/* 第二列：電話、傳真、手機、統編、聯絡人 */}
-            <div style={{ display: 'flex', gap: '2pt', fontSize: '9pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', gap: '2pt', fontSize: '10.8pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.phone || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>傳 真：</span>
