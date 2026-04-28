@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嘉祐資訊 CRM 管理系統 - 簡報</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+    background: #0f0f1a;
+    color: #e0e0e0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Page wrapper ── */
+  .page-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #0f0f1a 100%);
+  }
+
+  /* ── Slides ── */
+  .slide {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 48px 64px 64px;
+    overflow-y: auto;
+    flex-direction: column;
+  }
+
+  .slide.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide.active { animation: fadeIn 0.35s ease; }
+
+  /* ── Navigation ── */
+  .nav-bar {
+    height: 56px;
+    background: rgba(22,22,42,0.97);
+    border-top: 1px solid rgba(99,102,241,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-shrink: 0;
+    z-index: 200;
+  }
+
+  .nav-btn {
+    background: rgba(99,102,241,0.15);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: #a5b4fc;
+    padding: 8px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .nav-btn:hover { background: rgba(99,102,241,0.35); color: #fff; }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+  .nav-btn:disabled:hover { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+
+  .page-indicator {
+    color: #6b7280;
+    font-size: 13px;
+    min-width: 80px;
+    text-align: center;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Typography ── */
+  h1 { font-size: 2.2em; font-weight: 700; color: #f0f0ff; margin-bottom: 10px; }
+  h2 { font-size: 1.6em; font-weight: 700; color: #f0f0ff; margin-bottom: 20px; }
+  h3 { font-size: 1.1em; font-weight: 600; color: #a5b4fc; margin-bottom: 10px; }
+  p  { font-size: 1em; line-height: 1.75; color: #c0c0d8; }
+
+  /* ── Title slide ── */
+  .title-slide {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .title-slide h1 { font-size: 2.6em; margin-bottom: 14px; }
+  .title-slide .subtitle { font-size: 1.2em; color: #a5b4fc; margin-bottom: 28px; }
+  .title-slide .meta { font-size: 0.9em; color: #6b7280; margin-top: 20px; }
+
+  .emoji-icon { font-size: 3.5em; margin-bottom: 16px; }
+
+  /* ── Badges / tags ── */
+  .badge, .tag {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.82em;
+    margin: 3px;
+  }
+  .badge {
+    background: rgba(99,102,241,0.18);
+    border: 1px solid rgba(99,102,241,0.35);
+    color: #a5b4fc;
+  }
+  .badge.green  { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+  .badge.amber  { background: rgba(245,158,11,0.15);  border-color: rgba(245,158,11,0.3);  color: #fcd34d; }
+  .badge.cyan   { background: rgba(6,182,212,0.15);   border-color: rgba(6,182,212,0.3);   color: #67e8f9; }
+
+  .tag.v  { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.25); color: #a5b4fc; }
+  .tag.g  { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3);  color: #6ee7b7; }
+  .tag.a  { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.3);  color: #fcd34d; }
+  .tag.c  { background: rgba(6,182,212,0.15); border-color: rgba(6,182,212,0.3);   color: #67e8f9; }
+
+  /* ── Feature grid ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 6px;
+  }
+  .feature-item {
+    background: rgba(99,102,241,0.07);
+    border: 1px solid rgba(99,102,241,0.14);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .feature-item h4 { color: #a5b4fc; font-size: 0.95em; margin-bottom: 6px; }
+  .feature-item p  { font-size: 0.88em; color: #9090a8; }
+
+  /* ── Architecture ── */
+  .arch-box {
+    background: rgba(6,182,212,0.07);
+    border: 1px solid rgba(6,182,212,0.18);
+    border-radius: 10px;
+    padding: 18px 24px;
+    margin: 10px 0;
+  }
+  .arch-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 8px 0;
+  }
+  .arch-label {
+    background: rgba(99,102,241,0.22);
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #c4b5fd;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.88em;
+    min-width: 110px;
+    text-align: center;
+  }
+  .arch-label.f { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.35); color: #93c5fd; }
+  .arch-label.b { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.35); color: #6ee7b7; }
+  .arch-label.d { background: rgba(245,158,11,0.18);  border-color: rgba(245,158,11,0.35);  color: #fcd34d; }
+  .arch-label.cl { background: rgba(6,182,212,0.18); border-color: rgba(6,182,212,0.35); color: #67e8f9; }
+  .arch-arrow { color: #374151; font-size: 1.1em; padding: 0 8px; white-space: nowrap; }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #0d0d1a;
+    border: 1px solid rgba(99,102,241,0.13);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8em;
+    color: #9ca3af;
+    overflow-x: auto;
+    line-height: 1.65;
+    margin: 6px 0;
+    white-space: pre;
+  }
+  .code-block .kw  { color: #c084fc; }
+  .code-block .str { color: #6ee7b7; }
+  .code-block .cm  { color: #4b5563; font-style: italic; }
+  .code-block .fn  { color: #60a5fa; }
+  .code-block .num { color: #fcd34d; }
+
+  /* ── DB table ── */
+  .db-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82em;
+    margin: 6px 0;
+  }
+  .db-table th {
+    background: rgba(99,102,241,0.18);
+    color: #c4b5fd;
+    padding: 8px 12px;
+    text-align: left;
+    border: 1px solid rgba(99,102,241,0.2);
+  }
+  .db-table td {
+    padding: 6px 12px;
+    color: #b0b0c8;
+    border: 1px solid rgba(99,102,241,0.1);
+  }
+  .db-table tr:hover td { background: rgba(99,102,241,0.04); }
+
+  /* ── Lists ── */
+  ul.c-list {
+    list-style: none;
+    padding: 0;
+  }
+  ul.c-list li {
+    padding: 6px 0 6px 22px;
+    position: relative;
+    color: #c0c0d8;
+    font-size: 0.9em;
+    line-height: 1.6;
+  }
+  ul.c-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #a5b4fc;
+  }
+
+  ol.f-list {
+    list-style: none;
+    padding: 0;
+    counter-reset: step;
+  }
+  ol.f-list li {
+    counter-increment: step;
+    padding: 10px 14px 10px 50px;
+    position: relative;
+    color: #c0c0d8;
+    font-size: 0.9em;
+    border-left: 2px solid rgba(99,102,241,0.28);
+    margin-left: 14px;
+    line-height: 1.6;
+  }
+  ol.f-list li::before {
+    content: counter(step);
+    position: absolute;
+    left: -15px;
+    top: 8px;
+    background: rgba(99,102,241,0.28);
+    color: #a5b4fc;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78em;
+    font-weight: 700;
+  }
+  ol.f-list li:first-child { border-left-color: rgba(99,102,241,0.5); }
+
+  /* ── Layout helpers ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    flex: 1;
+  }
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    flex: 1;
+  }
+
+  .card {
+    background: rgba(99,102,241,0.06);
+    border: 1px solid rgba(99,102,241,0.12);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card h4 { color: #a5b4fc; font-size: 0.95em; }
+  .card p  { font-size: 0.85em; color: #9090a8; flex: 1; }
+
+  .env-var {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(99,102,241,0.05);
+    border: 1px solid rgba(99,102,241,0.11);
+    border-radius: 6px;
+    margin: 5px 0;
+    font-size: 0.83em;
+  }
+  .env-var .key { color: #fcd34d; font-family: 'Courier New', monospace; min-width: 160px; }
+  .env-var .val { color: #6ee7b7; font-family: 'Courier New', monospace; }
+
+  .git-cmd {
+    background: rgba(16,185,129,0.07);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 5px;
+    padding: 7px 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.82em;
+    color: #6ee7b7;
+    margin: 4px 0;
+  }
+
+  .success-metric {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: rgba(16,185,129,0.07);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px;
+  }
+  .success-metric .num  { font-size: 1.9em; font-weight: 700; color: #6ee7b7; }
+  .success-metric .desc { color: #9090a8; font-size: 0.88em; }
+
+  .tech-stack { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+
+  .highlight   { color: #a5b4fc; font-weight: 600; }
+  .highlight-g { color: #6ee7b7; font-weight: 600; }
+  .highlight-a { color: #fcd34d; font-weight: 600; }
+
+  /* ── Footer ── */
+  .slide-footer {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(99,102,241,0.09);
+    font-size: 0.75em;
+    color: #374151;
+    text-align: center;
+  }
+
+  /* ── Scrollbar styling ── */
+  .slide::-webkit-scrollbar { width: 5px; }
+  .slide::-webkit-scrollbar-track { background: transparent; }
+  .slide::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 3px; }
+
+  /* ── Intro text ── */
+  .intro-text {
+    font-size: 1em;
+    color: #c0c0d8;
+    margin-bottom: 18px;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     ALL SLIDES — single page, JS toggles .active
+     ══════════════════════════════════════ -->
+
+<!-- SLIDE 1: 封面 -->
+<div class="slide title-slide active" id="slide-1">
+  <div class="emoji-icon">🖥️</div>
+  <h1>嘉祐資訊 CRM 管理系統</h1>
+  <div class="subtitle">chiayou-crm — 從架構設計到部署上線</div>
+  <div class="tech-stack">
+    <span class="badge">React + Vite</span>
+    <span class="badge green">FastAPI</span>
+    <span class="badge amber">Supabase</span>
+    <span class="badge cyan">Vercel + Render</span>
+  </div>
+  <div class="meta">嘉祐資訊企業有限公司｜2026</div>
+  <div class="slide-footer">chiayou-crm</div>
+</div>
+
+<!-- SLIDE 2: 系統功能概覽 -->
+<div class="slide" id="slide-2">
+  <h2>系統功能概覽</h2>
+  <p class="intro-text">專為電腦硬體銷售與維修店家設計的整合管理系統，用一個系統管理所有客戶、維修、庫存與出貨。</p>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <h4>👥 客戶管理</h4>
+      <p>完整客戶資料建檔、統一編號紀錄、關鍵字搜尋、快速檢視客戶所有歷史維修與出貨記錄。</p>
+    </div>
+    <div class="feature-item">
+      <h4>🔧 維修管理</h4>
+      <p>維修單狀態追蹤（待處理→處理中→已完成）、Rich Text 問題描述與維修過程、費用計算。</p>
+    </div>
+    <div class="feature-item">
+      <h4>📦 庫存管理</h4>
+      <p>商品上下架、進貨成本與售價管理、低庫存警示、類別篩選、入庫與出庫數量調整。</p>
+    </div>
+    <div class="feature-item">
+      <h4>📄 出貨單管理</h4>
+      <p>選擇客戶與商品開立出貨單、支援多項目、自動計算總金額、PDF 列印輸出（中一刀紙張）。</p>
+    </div>
+  </div>
+  <div class="feature-grid" style="margin-top:14px">
+    <div class="feature-item" style="grid-column:1/-1; background:rgba(245,158,11,0.05); border-color:rgba(245,158,11,0.2)">
+      <h4>📊 儀表板 Dashboard</h4>
+      <p>一目了然：今日待處理維修數、庫存警示商品、本月營收概覽、最近出貨記錄，數據驅動經營決策。</p>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 3: 系統架構圖 -->
+<div class="slide" id="slide-3">
+  <h2>系統架構圖</h2>
+  <p class="intro-text">整個系統分為三層：前端使用者介面、後端 API 服務、資料庫儲存。每一層都有明確的職責與部署方式。</p>
+  <div class="arch-box">
+    <div style="text-align:center; margin-bottom:6px; color:#6b7280; font-size:0.82em">使用者瀏覽器 / 手機</div>
+    <div class="arch-row">
+      <div class="arch-label f">React 前端</div>
+      <span class="arch-arrow">─── HTTPS ───</span>
+      <div class="arch-label b">FastAPI 後端</div>
+      <span class="arch-arrow">── HTTPS REST ──</span>
+      <div class="arch-label d">Supabase DB</div>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.78em; color:#6b7280; flex-wrap:wrap; gap:4px">
+      <span>Vercel｜chiayou-crm.vercel.app</span>
+      <span>Render｜chiayou-crm.onrender.com</span>
+      <span>PostgreSQL｜ucscqaveijjzndidnvcq.supabase.co</span>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top:12px">
+    <div>
+      <h3>前端（Client）</h3>
+      <ul class="c-list">
+        <li>React 18 + TypeScript 型別安全</li>
+        <li>Vite 5 高速建構工具</li>
+        <li>Tailwind CSS 樣式系統</li>
+        <li>React Router SPA 路由</li>
+        <li>Axios HTTP 客戶端</li>
+        <li>@tiptap Rich Text 編輯器</li>
+        <li>響應式設計（手機/平板/電腦）</li>
+      </ul>
+    </div>
+    <div>
+      <h3>後端（Server）</h3>
+      <ul class="c-list">
+        <li>Python FastAPI 高效能 API 框架</li>
+        <li>httpx 走 HTTPS 呼叫 Supabase REST API</li>
+        <li>Pydantic 資料驗證</li>
+        <li>Render 雲端主機部署</li>
+        <li>CORS 跨域資源共享設定</li>
+        <li>環境變數管理敏感資訊</li>
+        <li>UUID 主鍵、JSON 序列化處理</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 4: 資料庫設計 -->
+<div class="slide" id="slide-4">
+  <h2>資料庫設計（Supabase PostgreSQL）</h2>
+  <p class="intro-text">採用 Supabase 雲端 PostgreSQL，建立五張核心資料表，彼此以 UUID 主鍵關聯，形成完整的客戶-維修-庫存-出貨資料流。</p>
+  <div class="two-col">
+    <div>
+      <table class="db-table">
+        <tr><th colspan="2">customers（客戶）</th></tr>
+        <tr><td>id</td><td>UUID 主鍵</td></tr>
+        <tr><td>name / phone / phone2</td><td>姓名電話</td></tr>
+        <tr><td>tax_id</td><td>統一編號</td></tr>
+        <tr><td>address / email</td><td>地址 Email</td></tr>
+        <tr><td>note</td><td>備註（Rich Text）</td></tr>
+      </table>
+      <table class="db-table" style="margin-top:10px">
+        <tr><th colspan="2">repairs（維修單）</th></tr>
+        <tr><td>id / customer_id</td><td>UUID 主鍵 + 外鍵</td></tr>
+        <tr><td>device_type / brand / model</td><td>裝置資訊</td></tr>
+        <tr><td>problem / repair_detail</td><td>問題與過程</td></tr>
+        <tr><td>status</td><td>pending/processing/completed</td></tr>
+        <tr><td>cost</td><td>維修費用</td></tr>
+      </table>
+    </div>
+    <div>
+      <table class="db-table">
+        <tr><th colspan="2">inventory（庫存）</th></tr>
+        <tr><td>id / product_code</td><td>UUID + 商品編號</td></tr>
+        <tr><td>product_name / category</td><td>名稱與類別</td></tr>
+        <tr><td>quantity / unit</td><td>數量與單位</td></tr>
+        <tr><td>cost_price / selling_price</td><td>成本與售價</td></tr>
+        <tr><td>min_stock</td><td>低庫存警示線</td></tr>
+      </table>
+      <table class="db-table" style="margin-top:10px">
+        <tr><th colspan="2">shipments + shipment_items</th></tr>
+        <tr><td>id / customer_id</td><td>UUID 主鍵 + 外鍵</td></tr>
+        <tr><td>shipment_date / total_amount</td><td>日期與總金額</td></tr>
+        <tr><td>status</td><td>draft / completed / cancelled</td></tr>
+        <tr><td>product_id / quantity</td><td>商品外鍵 + 數量</td></tr>
+        <tr><td>unit_price / subtotal</td><td>單價與小計</td></tr>
+      </table>
+    </div>
+  </div>
+  <div style="margin-top:14px; padding:12px 16px; background:rgba(99,102,241,0.05); border:1px solid rgba(99,102,241,0.13); border-radius:8px; font-size:0.88em; color:#9090a8">
+    <span class="highlight">Supabase 特點：</span>即時 REST API + Realtime、Row Level Security（資料列級安全）、已內建身份驗證、備份與災難復原，全托管無需管理伺服器。
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 5: 後端 API 設計 -->
+<div class="slide" id="slide-5">
+  <h2>後端 API 設計</h2>
+  <p class="intro-text">後端以 FastAPI 建構 RESTful API，每個資源都有完整的 CRUD 端點，統一 JSON 格式交換資料。</p>
+  <div class="two-col">
+    <div>
+      <h3>API 路由結構</h3>
+      <div class="code-block"><span class="cm"># FastAPI 路由結構</span>
+<span class="fn">backend/app/routes/</span>
+├── customers.py   <span class="cm"># GET/POST/PUT/DELETE /api/customers</span>
+├── repairs.py     <span class="cm"># GET/POST/PUT/PATCH /api/repairs</span>
+├── inventory.py   <span class="cm"># CRUD + PATCH /stock</span>
+├── shipments.py   <span class="cm"># CRUD 出貨單</span>
+└── dashboard.py   <span class="cm"># GET /api/dashboard 聚合查詢</span>
+
+<span class="fn">backend/app/core/</span>
+└── supabase_client.py  <span class="cm"># HTTP REST API client</span></div>
+
+      <h3 style="margin-top:14px">為什麼不走 port 5432？</h3>
+      <div class="code-block"><span class="cm"># PostgreSQL 標準 port = 5432（被防火牆阻擋）</span>
+<span class="cm"># 改走 HTTPS REST API port = 443（一定開放）</span>
+<span class="kw">httpx</span>.<span class="fn">Client</span>(
+  base_url=<span class="str">"https://ucscqave...</span>
+           <span class="str">.supabase.co/rest/v1"</span>
+)</div>
+    </div>
+    <div>
+      <h3>後端主程式（main.py）</h3>
+      <div class="code-block"><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> fastapi.middleware.cors <span class="kw">import</span> CORSMiddleware
+
+app = <span class="fn">FastAPI</span>(title=<span class="str">"chiayou-crm API"</span>)
+
+app.add_middleware(<span class="fn">CORSMiddleware</span>,
+  allow_origins=[<span class="str">"*"</span>],
+  allow_credentials=<span class="kw">True</span>,
+  allow_methods=[<span class="str">"*"</span>],
+  allow_headers=[<span class="str">"*"</span>])
+
+<span class="cm"># 掛載各別路由</span>
+app.include_router(customers.router,  prefix=<span class="str">"/api"</span>)
+app.include_router(repairs.router,   prefix=<span class="str">"/api"</span>)
+app.include_router(inventory.router, prefix=<span class="str">"/api"</span>)
+app.include_router(shipments.router, prefix=<span class="str">"/api"</span>)
+app.include_router(dashboard.router,  prefix=<span class="str">"/api"</span>)</div>
+
+      <h3 style="margin-top:14px">新增客戶端點範例</h3>
+      <div class="code-block"><span class="kw">@router.post</span>(<span class="str">"/customers"</span>)
+<span class="kw">def</span> <span class="fn">create_customer</span>(data: CustomerCreate):
+    row = data.model_dump()
+    row[<span class="str">"created_at"</span>] = <span class="str">"now()"</span>
+    <span class="kw">return</span> supabase.<span class="fn">insert</span>(<span class="str">"customers"</span>, row)</div>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 6: 前端架構 -->
+<div class="slide" id="slide-6">
+  <h2>前端架構（React + Vite + TypeScript）</h2>
+  <p class="intro-text">前端採用現代 React 開發棧，TypeScript 確保型別安全，Tailwind CSS 快速建構響應式介面，React Router 處理 SPA 路由導航。</p>
+  <div class="two-col">
+    <div>
+      <h3>目錄結構</h3>
+      <div class="code-block"><span class="fn">frontend/src/</span>
+├── pages/              <span class="cm"># 13 個頁面元件</span>
+<span class="cm">│   ├── Dashboard.tsx</span>
+<span class="cm">│   ├── CustomerList / Form / Detail</span>
+<span class="cm">│   ├── RepairList / Form / Detail</span>
+<span class="cm">│   ├── InventoryList / Form</span>
+<span class="cm">│   ├── ShipmentList / Form / Detail</span>
+<span class="cm">│   └── ShipmentPrint.tsx  ← PDF 列印</span>
+├── services/api.ts     <span class="cm"># Axios API 封裝</span>
+├── types/index.ts      <span class="cm"># TypeScript 介面定義</span>
+└── App.tsx             <span class="cm"># 路由設定</span></div>
+
+      <h3 style="margin-top:14px">環境變數</h3>
+      <div class="env-var">
+        <span class="key">VITE_API_URL</span>
+        <span class="val">https://chiayou-crm.onrender.com/api</span>
+      </div>
+    </div>
+    <div>
+      <h3>API 服務層（api.ts）</h3>
+      <div class="code-block"><span class="kw">import</span> axios <span class="kw">from</span> <span class="str">'axios'</span>
+<span class="kw">const</span> API_BASE = <span class="kw">import</span>.<span class="fn">meta.env.VITE_API_URL</span>
+
+<span class="kw">export const</span> customerApi = {
+  getAll:   (search) =&gt; api.<span class="fn">get</span>(<span class="str">'/customers'</span>, {params:{search}}),
+  getById:  (id)     =&gt; api.<span class="fn">get</span>(<span class="str">`/customers/${id}`</span>),
+  create:   (data)   =&gt; api.<span class="fn">post</span>(<span class="str">'/customers'</span>, data),
+  update:   (id,data)=&gt; api.<span class="fn">put</span>(<span class="str">`/customers/${id}`</span>, data),
+  delete:   (id)     =&gt; api.<span class="fn">delete</span>(<span class="str">`/customers/${id}`</span>),
+}</div>
+
+      <h3 style="margin-top:14px">React Query 資料獲取</h3>
+      <div class="code-block"><span class="kw">const</span> { data, isLoading } = <span class="fn">useQuery</span>({
+  queryKey: [<span class="str">'customers'</span>, search],
+  queryFn:  () =&gt; customerApi.<span class="fn">getAll</span>(search),
+})
+
+<span class="kw">const</span> mutation = <span class="fn">useMutation</span>({
+  mutationFn:  (data) =&gt; customerApi.<span class="fn">create</span>(data),
+  onSuccess:  () =&gt; {
+    queryClient.<span class="fn">invalidateQueries</span>({queryKey:[<span class="str">'customers'</span>]})
+  },
+})</div>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 7: 搜尋式下拉選單 -->
+<div class="slide" id="slide-7">
+  <h2>關鍵功能：搜尋式下拉選單</h2>
+  <p class="intro-text">98 筆客戶資料如果用傳統 select 下拉選單，難以使用。系統改用關鍵字搜尋式下拉，輸入即時過濾，大幅提升資料選取效率。</p>
+  <div class="two-col">
+    <div>
+      <h3>運作流程</h3>
+      <ol class="f-list">
+        <li>點擊客戶輸入框，展開下拉候選清單</li>
+        <li>輸入關鍵字，程式即時以 <span class="highlight">includes()</span> 對姓名/電話過濾</li>
+        <li>點擊候選項目，寫入 hidden input（customer_id）</li>
+        <li>點擊外部，自動關閉下拉（<span class="highlight">useRef + mousedown</span> 事件偵測）</li>
+        <li>編輯模式時，以 customer_id 反查客戶名稱自動填入</li>
+      </ol>
+      <h3 style="margin-top:16px">技術要點</h3>
+      <ul class="c-list">
+        <li>useRef 偵測點擊外面：ref.current.contains(e.target)</li>
+        <li>filteredCustomers = 姓名或電話 contains 搜尋文字</li>
+        <li>hidden input 實際傳送 id，input 只顯示名稱</li>
+      </ul>
+    </div>
+    <div>
+      <h3>關鍵程式碼</h3>
+      <div class="code-block"><span class="cm">// 點外面關閉</span>
+<span class="kw">const</span> dropdownRef = <span class="fn">useRef</span>(<span class="kw">null</span>)
+
+<span class="fn">useEffect</span>(() =&gt; {
+  <span class="kw">const</span> handleClick = (e) =&gt; {
+    <span class="kw">if</span> (!dropdownRef.current?.<span class="fn">contains</span>(e.target))
+      setShowDropdown(<span class="kw">false</span>)
+  }
+  document.<span class="fn">addEventListener</span>(<span class="str">'mousedown'</span>, handleClick)
+  <span class="kw">return</span> () =&gt; document.<span class="fn">removeEventListener</span>(<span class="str">'mousedown'</span>, handleClick)
+}, [])
+
+<span class="cm">// 搜尋過濾</span>
+<span class="kw">const</span> filtered = customers.<span class="fn">filter</span>((c) =&gt;
+  c.name.<span class="fn">includes</span>(customerSearch) ||
+  c.phone.<span class="fn">includes</span>(customerSearch)
+)</div>
+      <h3 style="margin-top:14px">套用範圍</h3>
+      <div class="tech-stack">
+        <span class="tag v">維修單 — 選擇客戶</span>
+        <span class="tag v">出貨單 — 選擇客戶</span>
+        <span class="tag v">出貨單 — 選擇商品</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 8: Rich Text 編輯器 -->
+<div class="slide" id="slide-8">
+  <h2>關鍵功能：Rich Text 編輯器</h2>
+  <p class="intro-text">維修問題描述、維修過程、客戶備註都需要格式化文字。系統使用 <span class="highlight">@tiptap/react</span> 取代 react-quill，完整支援 React 19。</p>
+  <div class="two-col">
+    <div>
+      <h3>為什麼放棄 react-quill？</h3>
+      <ul class="c-list">
+        <li>react-quill 只支援到 React 18</li>
+        <li>React 19 移除了 <code style="color:#f87171; font-size:0.85em">findDOMNode</code> API</li>
+        <li>升級 React 19 → react-quill 直接空白頁</li>
+        <li>@tiptap 是模組化架構，按需要選擇擴充</li>
+        <li>輸出 HTML，與 Tailwind prose 完美整合</li>
+      </ul>
+      <h3 style="margin-top:14px">編輯器工具列</h3>
+      <div class="tech-stack">
+        <span class="tag v">粗體 B</span>
+        <span class="tag v">斜體 I</span>
+        <span class="tag v">底線 U</span>
+        <span class="tag v">刪除線</span>
+        <span class="tag v">項目符號</span>
+        <span class="tag v">編號列表</span>
+        <span class="tag v">超連結</span>
+      </div>
+    </div>
+    <div>
+      <h3>核心程式碼</h3>
+      <div class="code-block"><span class="kw">const</span> editor = <span class="fn">useEditor</span>({
+  extensions: [<span class="fn">StarterKit.configure</span>({
+    heading:   <span class="kw">false</span>,
+    codeBlock: <span class="kw">false</span>,
+  })],
+  content: initialValue,
+  onUpdate: ({ editor }) =&gt; {
+    setForm(prev =&gt; ({ ...prev,
+      note: editor.<span class="fn">getHTML</span>() }))
+  },
+})
+
+<span class="cm">// 工具列按鈕 helper</span>
+<span class="kw">const</span> ToolbarButton = ({ onClick, active, children }) =&gt; (
+  &lt;button type=<span class="str">"button"</span>
+    onMouseDown={(e) =&gt; { e.<span class="fn">preventDefault</span>(); <span class="fn">onClick</span>() }}
+    className={`p-1.5 rounded
+      ${active ? <span class="str">'bg-gray-200 text-blue-600'</span>
+               : <span class="str">'text-gray-600 hover:bg-gray-100'</span>}`}&gt;
+    {children}
+  &lt;/button&gt;
+)</div>
+      <h3 style="margin-top:14px">套用位置</h3>
+      <p style="font-size:0.88em; color:#9090a8">客戶備註、維修問題描述、維修過程、庫存備註、出貨單備註</p>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 9: PDF 出貨單列印 -->
+<div class="slide" id="slide-9">
+  <h2>關鍵功能：出貨單 PDF 列印</h2>
+  <p class="intro-text">出貨單要在點陣印表機（Epson LQ 系列）上穩定輸出，採用 <span class="highlight">html2canvas + jsPDF</span> 截圖轉 PDF，完全繞過瀏覽器列印引擎的不穩定性。</p>
+  <div class="two-col">
+    <div>
+      <h3>版面規格（中一刀紙張）</h3>
+      <div class="code-block"><span class="cm">紙張尺寸：9.5" × 5.5"（寬 × 高）</span>
+<span class="cm">方向：直印（Portrait）</span>
+<span class="cm">印表機設定：Width=950, Height=550（1/100"）</span>
+
+<span class="cm">jsPDF 關鍵（繞過 bug）：</span>
+<span class="fn">jsPDF</span>(<span class="str">'landscape'</span>, <span class="str">'pt'</span>, format:[<span class="num">684</span>, <span class="num">396</span>])
+<span class="cm">→ MediaBox [0 0 684 396] = 9.5×5.5 inch ✓</span>
+<span class="cm">html2canvas 截圖後，逆時針旋轉 90° 再放進 PDF</span></div>
+      <h3 style="margin-top:14px">技術挑戰</h3>
+      <ul class="c-list">
+        <li><span class="highlight-a">jsPDF bug：</span>portrait + format:[w,h] 會交換寬高，用 landscape + 旋轉解決</li>
+        <li><span class="highlight-a">瀏覽器不一致：</span>@page CSS 各瀏覽器解讀不同，直接生成 PDF 繞過</li>
+        <li><span class="highlight-a">CSS 寬度：</span>必須與 @page size 完全一致，否則內容被壓縮</li>
+      </ul>
+    </div>
+    <div>
+      <h3>PDF 生成流程</h3>
+      <ol class="f-list">
+        <li>出貨單詳情頁，點「列印出貨單」→ 新分頁開啟 /shipments/{id}/print</li>
+        <li>呈現完整版面（公司抬頭、客戶資料、商品明細、注意事項、簽收欄）</li>
+        <li>點「下載 PDF」→ html2canvas 以 9.5×5.5in 尺寸截圖</li>
+        <li>Canvas 逆時針旋轉 90°，以 landscape jsPDF 嵌入圖片</li>
+        <li>觸發下載，檔名：出貨單_{單號}.pdf</li>
+      </ol>
+      <h3 style="margin-top:14px">出貨單內容對照</h3>
+      <ul class="c-list">
+        <li>公司抬頭列（名稱、地址、電話/傳真、貨單號碼）</li>
+        <li>大標題「出　貨　單」（邊框、letter-spacing）</li>
+        <li>收費標準（診斷費/車馬費/系統重灌等）</li>
+        <li>注意事項（版權聲明、保固說明、三日通知期限）</li>
+        <li>簽收欄（工程師 / 客戶簽名 / 日期）</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 10: GitHub 程式碼管理 -->
+<div class="slide" id="slide-10">
+  <h2>GitHub 程式碼倉庫管理</h2>
+  <p class="intro-text">所有程式碼集中托管在 GitHub，實現版本控制、協作與自動化部署三大功能。</p>
+  <div class="two-col">
+    <div>
+      <h3>Repository 資訊</h3>
+      <div class="code-block"><span class="kw">https</span>://github.com/yhe01368-hash/chiayou-crm
+
+<span class="cm">├── frontend/          # React 前端</span>
+<span class="cm">├── backend/           # FastAPI 後端</span>
+<span class="cm">├── SPEC.md            # 系統規格書</span>
+<span class="cm">├── DEPLOYMENT.md      # 部署文件</span>
+<span class="cm">└── Dockerfile         # 容器化（備用）</span></div>
+
+      <h3 style="margin-top:14px">前端提交流程</h3>
+      <div class="git-cmd">cd ~/chiayou-crm</div>
+      <div class="git-cmd">git add -A && git commit -m "feat: 新增 XXX"</div>
+      <div class="git-cmd">git push origin main</div>
+      <div style="margin-top:8px; padding:9px 14px; background:rgba(16,185,129,0.07); border:1px solid rgba(16,185,129,0.2); border-radius:6px; font-size:0.82em; color:#6ee7b7">
+        ✓ Vercel 自動偵測 push → 自動觸發部署
+      </div>
+
+      <h3 style="margin-top:12px">後端提交流流程</h3>
+      <div class="git-cmd">cd ~/chiayou-crm/backend</div>
+      <div class="git-cmd">git add -A && git commit -m "fix: 修復 XXX"</div>
+      <div class="git-cmd">git push origin main</div>
+      <div style="margin-top:8px; padding:9px 14px; background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2); border-radius:6px; font-size:0.82em; color:#fcd34d">
+        ✓ Render 自動偵測 push → 自動重新部署
+      </div>
+    </div>
+    <div>
+      <h3>Commit 記錄（最近）</h3>
+      <div class="code-block" style="font-size:0.75em"><span class="kw">ba71dea</span> fix: left-align paper in screen view
+<span class="kw">fa72930</span> fix: expand paper width 8.5→9.5in 中一刀
+<span class="kw">f0047b4</span> fix: update @page size to 9.5×5.5in
+<span class="kw">628c796</span> fix: jsPDF landscape+rotate 8.5×5.5
+<span class="kw">c3d2acd</span> feat: align ShipmentPrint layout
+<span class="kw">10ad660</span> feat: add download PDF button
+<span class="kw">d7cfbd0</span> fix: CustomerForm edit/new mode distinguish
+<span class="kw">a40fd5e</span> feat: repair form customer search dropdown
+<span class="kw">eb4f20c</span> fix: dashboard three bugs (eq prefix, in(), Decimal)
+<span class="kw">c841bf6</span> feat: shipment form customer search dropdown</div>
+
+      <h3 style="margin-top:14px">版本控制的好處</h3>
+      <ul class="c-list">
+        <li><span class="highlight-g">隨時復原：</span>任何失誤都能一鍵回復到上一個正常版本</li>
+        <li><span class="highlight-g">變更追蹤：</span>每個功能/bugfix 都有對應 commit，責任歸屬明確</li>
+        <li><span class="highlight-g">自動化部署：</span>push 即部署，省去手動上傳的繁瑣與人為錯誤</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 11: 自動化部署流程 -->
+<div class="slide" id="slide-11">
+  <h2>自動化部署流程</h2>
+  <p class="intro-text">前端 Vercel + 後端 Render，兩個平台都與 GitHub 整合，push 到 main 分支自動觸發部署，完全不需要手動操作伺服器。</p>
+  <div class="three-col">
+    <div class="card">
+      <h4>Vercel 前端部署</h4>
+      <span class="tag v" style="margin-bottom:8px">frontend → Vercel</span>
+      <p>React/Vite/Tailwind 靜態應用，Vercel 全球 CDN 分發，加載速度最快。</p>
+      <div style="margin-top:auto; padding-top:10px">
+        <div class="env-var" style="flex-direction:column; gap:3px">
+          <span style="color:#6b7280; font-size:0.78em">環境變數</span>
+          <span class="key" style="min-width:auto; font-size:0.78em">VITE_API_URL</span>
+          <span class="val" style="font-size:0.75em">chiayou-crm.onrender.com/api</span>
+        </div>
+      </div>
+      <div style="font-size:0.82em; color:#6ee7b7; margin-top:8px">✓ chiayou-crm.vercel.app</div>
+    </div>
+    <div class="card">
+      <h4>Render 後端部署</h4>
+      <span class="tag a" style="margin-bottom:8px">backend → Render</span>
+      <p>FastAPI Python 應用，支援環境變數，自動偵測 requirements.txt。</p>
+      <div style="margin-top:auto; padding-top:10px">
+        <div class="env-var" style="flex-direction:column; gap:3px">
+          <span style="color:#6b7280; font-size:0.78em">環境變數</span>
+          <span class="key" style="min-width:auto; font-size:0.78em">SUPABASE_URL</span>
+          <span class="key" style="min-width:auto; font-size:0.78em; margin-top:3px">SUPABASE_KEY</span>
+        </div>
+      </div>
+      <div style="font-size:0.82em; color:#fcd34d; margin-top:8px">✓ chiayou-crm.onrender.com</div>
+    </div>
+    <div class="card">
+      <h4>Supabase 資料庫</h4>
+      <span class="tag c" style="margin-bottom:8px">database → Supabase</span>
+      <p>雲端托管 PostgreSQL，REST API 端點，全托管無需管理伺服器。</p>
+      <div style="margin-top:auto; padding-top:10px">
+        <div style="font-size:0.82em; color:#67e8f9; margin-top:8px">✓ REST API: ucscqave...supabase.co</div>
+        <div style="font-size:0.82em; color:#67e8f9; margin-top:4px">✓ 即時備份 ✓ 災難復原</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:18px">完整部署流程圖</h3>
+  <div class="arch-box">
+    <div class="arch-row">
+      <div class="arch-label" style="min-width:90px; font-size:0.8em">開發者</div>
+      <span class="arch-arrow">→ git push</span>
+      <div class="arch-label" style="min-width:120px; font-size:0.8em">GitHub main</div>
+      <span class="arch-arrow">→ Webhook</span>
+      <div class="arch-label f" style="min-width:90px; font-size:0.8em">Vercel</div>
+      <span class="arch-arrow" style="font-size:0.9em">或</span>
+      <div class="arch-label b" style="min-width:90px; font-size:0.8em">Render</div>
+    </div>
+    <div style="text-align:center; margin-top:10px; font-size:0.82em; color:#6b7280; line-height:1.7">
+      每次 push 到 GitHub main → 自動觸發 build + deploy → 幾分鐘內上線<br>
+      全程無需登入伺服器或手動上傳檔案
+    </div>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 12: 除錯經驗 -->
+<div class="slide" id="slide-12">
+  <h2>開發過程中的關鍵除錯經驗</h2>
+  <p class="intro-text">從 SQLAlchemy ORM 改走 REST API、克服雲端主機網路限制、PDF 列印相容性問題——每一個障礙都是學習的機會。</p>
+  <div class="feature-grid">
+    <div class="feature-item" style="border-left:3px solid #f87171">
+      <h4>🚫 雲端主機無法直連資料庫</h4>
+      <p><span class="highlight-a">問題：</span>Render 無法直接連線 Supabase PostgreSQL port 5432，被防火牆封鎖。<br>
+      <span class="highlight-g">解決：</span>不走 port 5432，改走 HTTPS 443 的 REST API（PostgREST），完全繞過網路限制。放棄 SQLAlchemy ORM，改用 httpx 直接發 HTTP 請求。</p>
+    </div>
+    <div class="feature-item" style="border-left:3px solid #f87171">
+      <h4>🐛 Dashboard 三個 Bug 同時爆炸</h4>
+      <p><span class="highlight-a">問題：</span>eq. 雙重前綴、in() 逗號被 URL 編碼、Decimal 序列化失敗，三個問題同時存在。<br>
+      <span class="highlight-g">解決：</span>逐一隔離：filter 加 operator prefix pass-through、in() 拆成兩個串聯查詢、移除 response_model 直接回 dict。</p>
+    </div>
+    <div class="feature-item" style="border-left:3px solid #f87171">
+      <h4>📄 jsPDF 紙張尺寸 Bug</h4>
+      <p><span class="highlight-a">問題：</span>直覺上 format:[612,396] portrait 應該是 8.5×5.5，實際輸出是 5.5×8.5（寬高交換）。<br>
+      <span class="highlight-g">解決：</span>用 landscape 模式建立文件，截圖逆時針旋轉 90° 放進去，視覺上變成正確的 9.5×5.5 中一刀。</p>
+    </div>
+    <div class="feature-item" style="border-left:3px solid #f87171">
+      <h4>⚛️ React 19 + react-quill 不相容</h4>
+      <p><span class="highlight-a">問題：</span>react-quill 使用已被 React 19 移除的 findDOMNode，會造成頁面空白。<br>
+      <span class="highlight-g">解決：</span>全面改用 @tiptap/react，模組化擴充設計，更穩定且未來易於升級。</p>
+    </div>
+  </div>
+  <div style="margin-top:14px; padding:12px 16px; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:8px">
+    <span class="highlight-g">核心心法：</span>
+    <span style="color:#9090a8; font-size:0.88em">雲端環境和本地環境差異很大，很多「在本地正常」的程式在雲端會因為網路、檔案系統、依賴版本不同而失敗。逐一隔離問題、一次只改一個變數——這是雲端除錯的基本原則。</span>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 13: 成果與指標 -->
+<div class="slide" id="slide-13">
+  <h2>專案成果與技術指標</h2>
+  <p class="intro-text">經過多次迭代與除錯，系統已完全上線運行，所有功能驗證正常。</p>
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:12px 0">
+    <div class="success-metric" style="flex-direction:column; text-align:center; gap:8px">
+      <div class="num">4</div>
+      <div class="desc"><strong>資料模組</strong><br>客戶/維修/庫存/出貨單</div>
+    </div>
+    <div class="success-metric" style="flex-direction:column; text-align:center; gap:8px">
+      <div class="num">13</div>
+      <div class="desc"><strong>前端頁面</strong><br>含列表、表單、詳情、列印</div>
+    </div>
+    <div class="success-metric" style="flex-direction:column; text-align:center; gap:8px">
+      <div class="num">5</div>
+      <div class="desc"><strong>API 端點群</strong><br>customers/repairs/inventory/shipments/dashboard</div>
+    </div>
+    <div class="success-metric" style="flex-direction:column; text-align:center; gap:8px">
+      <div class="num">98+</div>
+      <div class="desc"><strong>已匯入客戶</strong><br>從 PDF 批次匯入</div>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top:12px">
+    <div>
+      <h3>技術棧完整清單</h3>
+      <div class="tech-stack">
+        <span class="tag v">React 18</span>
+        <span class="tag v">TypeScript</span>
+        <span class="tag v">Vite 5</span>
+        <span class="tag v">Tailwind CSS</span>
+        <span class="tag v">React Router</span>
+        <span class="tag v">React Query</span>
+        <span class="tag v">@tiptap/react</span>
+        <span class="tag v">Axios</span>
+        <span class="tag a">Python 3</span>
+        <span class="tag a">FastAPI</span>
+        <span class="tag a">httpx</span>
+        <span class="tag a">Pydantic</span>
+        <span class="tag c">PostgreSQL</span>
+        <span class="tag c">Supabase</span>
+        <span class="tag c">Vercel</span>
+        <span class="tag c">Render</span>
+        <span class="tag c">GitHub</span>
+      </div>
+    </div>
+    <div>
+      <h3>自動化程度</h3>
+      <ul class="c-list">
+        <li><span class="highlight-g">✓</span> GitHub push → Vercel 自動部署前端</li>
+        <li><span class="highlight-g">✓</span> GitHub push → Render 自動部署後端</li>
+        <li><span class="highlight-g">✓</span> Supabase 全托管資料庫（無需管理）</li>
+        <li><span class="highlight-g">✓</span> PDF 生成在瀏覽器端完成（零伺服器負擔）</li>
+        <li><span class="highlight-g">✓</span> 響應式設計一次搞定手機/平板/電腦</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top:14px; padding:12px 16px; background:rgba(99,102,241,0.05); border:1px solid rgba(99,102,241,0.13); border-radius:8px; text-align:center; font-size:0.88em">
+    <span style="color:#c0c0d8">
+      前端：<span class="highlight">chiayou-crm.vercel.app</span>
+      ｜後端：<span class="highlight">chiayou-crm.onrender.com</span>
+      ｜資料庫：<span class="highlight">Supabase PostgreSQL</span>
+    </span>
+  </div>
+  <div class="slide-footer">chiayou-crm｜嘉祐資訊 CRM 管理系統</div>
+</div>
+
+<!-- SLIDE 14: 總結 -->
+<div class="slide title-slide" id="slide-14">
+  <div class="emoji-icon">🚀</div>
+  <h1>一個完整系統<br>從無到有的誕生過程</h1>
+  <div class="subtitle" style="max-width:680px; margin:0 auto 22px; font-size:1.1em; line-height:1.7">
+    從需求訪談 → 系統設計 → 資料庫規劃 → API 建構 → 前端開發 → GitHub 管理 → 自動化部署 → 功能迭代 → 除錯優化，完整走過一遍。
+  </div>
+  <div class="tech-stack" style="justify-content:center">
+    <span class="badge green">需求驅動</span>
+    <span class="badge amber">敏捷開發</span>
+    <span class="badge cyan">雲端部署</span>
+    <span class="badge">持續迭代</span>
+  </div>
+  <div class="meta" style="margin-top:28px; font-size:0.88em; line-height:1.8">
+    嘉祐資訊 CRM｜chiayou-crm.vercel.app｜2026<br>
+    系統已上線運行，感謝使用
+  </div>
+  <div class="slide-footer">chiayou-crm</div>
+</div>
+
+<!-- ══════════════════════════════════════
+     NAVIGATION BAR
+     ══════════════════════════════════════ -->
+<div class="nav-bar">
+  <button class="nav-btn" id="prevBtn" onclick="prevSlide()">◀ 上一頁</button>
+  <span class="page-indicator" id="pageIndicator">1 / 14</span>
+  <button class="nav-btn" id="nextBtn" onclick="nextSlide()">下一頁 ▶</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════ -->
+<script>
+  const TOTAL = 14;
+
+  function showSlide(n) {
+    if (n < 1) n = 1;
+    if (n > TOTAL) n = TOTAL;
+
+    // Hide all slides
+    for (let i = 1; i <= TOTAL; i++) {
+      document.getElementById('slide-' + i).classList.remove('active');
+    }
+
+    // Show target slide
+    document.getElementById('slide-' + n).classList.add('active');
+
+    // Update indicator
+    document.getElementById('pageIndicator').textContent = n + ' / ' + TOTAL;
+
+    // Update button states
+    document.getElementById('prevBtn').disabled = (n === 1);
+    document.getElementById('nextBtn').disabled = (n === TOTAL);
+
+    // Scroll slide to top
+    document.getElementById('slide-' + n).scrollTop = 0;
+  }
+
+  function nextSlide() { showSlide(parseInt(currentSlide()) + 1); }
+  function prevSlide() { showSlide(parseInt(currentSlide()) - 1); }
+
+  function currentSlide() {
+    for (let i = 1; i <= TOTAL; i++) {
+      if (document.getElementById('slide-' + i).classList.contains('active')) return i;
+    }
+    return 1;
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key === 'Home') { e.preventDefault(); showSlide(1); }
+    if (e.key === 'End') { e.preventDefault(); showSlide(TOTAL); }
+  });
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchend', function(e) {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? nextSlide() : prevSlide();
+    }
+  }, { passive: true });
+
+  // Init button state
+  document.getElementById('prevBtn').disabled = true;
+</script>
+
+</body>
+</html>

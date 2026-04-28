@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { shipmentApi } from '../services/api';
 import type { Shipment } from '../types';
-import { Plus, Edit2, Trash2, Truck, Eye } from 'lucide-react';
+import { Plus, Edit2, Trash2, Truck, Eye, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 
@@ -15,6 +15,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 
 export default function ShipmentList() {
   const [statusFilter, setStatusFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 
   const { data: shipments = [], isLoading } = useQuery({
@@ -27,6 +28,18 @@ export default function ShipmentList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shipments'] }),
   });
 
+  // Client-side search filter
+  const filteredShipments = shipments.filter((shipment: Shipment) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      shipment.shipment_number?.toLowerCase().includes(q) ||
+      shipment.customer?.name?.toLowerCase().includes(q) ||
+      shipment.customer?.phone?.includes(q) ||
+      String(shipment.total_amount ?? '').includes(q)
+    );
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -34,6 +47,18 @@ export default function ShipmentList() {
         <Link to="/shipments/new" className="btn btn-primary flex items-center gap-2">
           <Plus size={20} /> 新增出貨單
         </Link>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <input
+          type="text"
+          placeholder="搜尋出貨單（單號、客戶名稱、電話、金額）..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        />
       </div>
 
       {/* Status filter */}
@@ -58,11 +83,13 @@ export default function ShipmentList() {
         <div className="animate-pulse space-y-4">
           {[1,2,3].map(i => <div key={i} className="h-24 bg-gray-200 rounded-xl" />)}
         </div>
-      ) : shipments.length === 0 ? (
-        <div className="card p-12 text-center text-gray-500">尚無出貨記錄</div>
+      ) : filteredShipments.length === 0 ? (
+        <div className="card p-12 text-center text-gray-500">
+          {searchQuery ? '無符合「' + searchQuery + '」的出貨記錄' : '尚無出貨記錄'}
+        </div>
       ) : (
         <div className="grid gap-4">
-          {shipments.map((shipment: Shipment) => (
+          {filteredShipments.map((shipment: Shipment) => (
             <div key={shipment.id} className="card p-4">
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <div className="flex items-center gap-3">
