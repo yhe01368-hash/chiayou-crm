@@ -259,7 +259,7 @@ export default function ShipmentPrint() {
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統 編：</span>
               <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.tax_id || '-'}</span>
               <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.contact || '-'}</span>
+              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.contact_person || '-'}</span>
             </div>
           </div>
 
