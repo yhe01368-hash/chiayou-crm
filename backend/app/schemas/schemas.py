@@ -25,6 +25,8 @@ class CustomerBase(BaseModel):
     tax_id: Optional[str] = None
     address: Optional[str] = None
     email: Optional[str] = None
+    contact_person: Optional[str] = None
+    fax: Optional[str] = None
     note: Optional[str] = None
 
 class CustomerCreate(CustomerBase):
@@ -37,6 +39,8 @@ class CustomerUpdate(BaseModel):
     tax_id: Optional[str] = None
     address: Optional[str] = None
     email: Optional[str] = None
+    contact_person: Optional[str] = None
+    fax: Optional[str] = None
     note: Optional[str] = None
 
 class CustomerResponse(CustomerBase):

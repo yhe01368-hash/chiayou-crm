@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS customers (
     tax_id VARCHAR(20),
     address TEXT,
     email VARCHAR(100),
+    contact_person VARCHAR(100),
+    fax VARCHAR(20),
     note TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()

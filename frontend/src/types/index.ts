@@ -96,6 +96,8 @@ export interface CustomerFormData {
   tax_id?: string;
   address?: string;
   email?: string;
+  contact_person?: string;
+  fax?: string;
   note?: string;
 }
 

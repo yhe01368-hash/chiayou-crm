@@ -27,6 +27,8 @@ export default function CustomerForm() {
     tax_id: '',
     address: '',
     email: '',
+    contact_person: '',
+    fax: '',
     note: '',
   });
 
@@ -64,6 +66,8 @@ export default function CustomerForm() {
         tax_id: existingCustomer.tax_id || '',
         address: existingCustomer.address || '',
         email: existingCustomer.email || '',
+        contact_person: existingCustomer.contact_person || '',
+        fax: existingCustomer.fax || '',
         note: existingCustomer.note || '',
       });
       if (editor && existingCustomer.note) {
@@ -165,6 +169,24 @@ export default function CustomerForm() {
             className="input"
             value={form.email}
             onChange={(e) => setForm({...form, email: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">聯絡人</label>
+          <input
+            type="text"
+            className="input"
+            value={form.contact_person || ''}
+            onChange={(e) => setForm({...form, contact_person: e.target.value})}
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">傳真</label>
+          <input
+            type="text"
+            className="input"
+            value={form.fax || ''}
+            onChange={(e) => setForm({...form, fax: e.target.value})}
           />
         </div>
         <div>
