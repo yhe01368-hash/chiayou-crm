@@ -168,7 +168,7 @@ export default function ShipmentPrint() {
             <Printer size={16} /> 列印
           </button>
           <button onClick={() => setShowDialog(true)} className="btn btn-secondary flex items-center gap-2">
-            <Download size={16} /> 下載 PDF
+            <Download size={16} /> 稅額選擇
           </button>
         </div>
 
