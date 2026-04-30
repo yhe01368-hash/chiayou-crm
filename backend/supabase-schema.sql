@@ -144,9 +144,9 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- 管理者帳戶（帳號：admin，密碼：admin123）
--- 密碼需先用 bcrypt 雜湊，底下先預留，確認後再 INSERT
+-- 管理者帳戶（帳號：admin，密碼：admin123，PBKDF2 hash）
 INSERT INTO users (username, password_hash, full_name, role) VALUES
-('admin', '$2b$12$hKq/XiLuv0azvwAaygmdCuqQDRbPmIVK4/nNoSSqw7S/jtxHaXtCa', '系統管理員', 'admin')
+('admin', 'AmaPCjrXQMLH/amxFVLAXbjnewyLs6MgU4oLLbtyNGA=$gRjCXowKQstI/E/lg44U4Up9abyucEDuVS9EhVeaWW8=', '系統管理員', 'admin')
 ON CONFLICT (username) DO NOTHING;
 
 DROP TRIGGER IF EXISTS users_updated_at ON users;

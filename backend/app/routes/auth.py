@@ -6,10 +6,10 @@ from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jose import jwt, JWTError
-import bcrypt
 
 from app.core.config import settings
 from app.core.supabase_client import get_client
+from app.core.security import verify_password
 
 router = APIRouter(prefix="/api/auth", tags=["認證"])
 
@@ -79,12 +79,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = db.select("users", select="id,username,password_hash,full_name,role,is_active", filters={"username": form_data.username}, single=True)
     if not user:
         raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
-    # bcrypt 密碼驗證
-    try:
-        ok = bcrypt.checkpw(form_data.password.encode(), user["password_hash"].encode())
-    except Exception:
-        raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
-    if not ok:
+    # 密碼驗證
+    if not verify_password(form_data.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
     if not user.get("is_active", True):
         raise HTTPException(status_code=403, detail="帳號已停用，請聯絡管理員")

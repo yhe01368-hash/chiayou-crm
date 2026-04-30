@@ -1,13 +1,13 @@
 """
 使用者管理 API（管理員專用）
 """
-import bcrypt
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import Optional
 
 from app.routes.auth import get_current_user
 from app.core.supabase_client import get_client
+from app.core.security import hash_password, verify_password
 
 router = APIRouter(prefix="/api/users", tags=["使用者管理"])
 
@@ -65,8 +65,8 @@ def create_user(data: UserCreate, _admin: dict = Depends(require_admin)):
     existing = db.select("users", select="id", filters={"username": data.username}, single=True)
     if existing:
         raise HTTPException(status_code=409, detail="帳號已存在")
-    # 密碼 bcrypt 雜湊
-    pw_hash = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
+    # 密碼 PBKDF2 雜湊
+    pw_hash = hash_password(data.password)
     new_user = db.insert("users", {
         "username": data.username,
         "password_hash": pw_hash,
@@ -127,6 +127,5 @@ def reset_password(user_id: str, new_password: str, _admin: dict = Depends(requi
     existing = db.select("users", select="id", filters={"id": user_id}, single=True)
     if not existing:
         raise HTTPException(status_code=404, detail="找不到該使用者")
-    pw_hash = bcrypt.hashpw(new_password.encode(), bcrypt.gensalt()).decode()
-    db.update("users", {"password_hash": pw_hash}, filters={"id": user_id})
+    db.update("users", {"password_hash": hash_password(new_password)}, filters={"id": user_id})
     return {"message": "密碼已更新"}
