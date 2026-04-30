@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Wrench, Package, Truck, BookOpen,
   Menu, X, LogOut
@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { authApi } from '../services/api';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 interface NavItem {
@@ -167,7 +167,7 @@ export default function Layout({ children }: LayoutProps) {
 
           {/* Page content */}
           <main className="flex-1 p-4 lg:p-6 overflow-auto">
-            {children}
+            <Outlet />
           </main>
         </div>
       </div>

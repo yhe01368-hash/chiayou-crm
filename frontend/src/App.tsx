@@ -37,16 +37,10 @@ export default function App() {
           <Route path="/login" element={<Login />} />
 
           {/* 受保護的頁面 */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+          <Route element={<ProtectedRoute />}>
+            <Route element={<Layout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
 
             {/* 客戶管理 */}
             <Route path="customers" element={<CustomerList />} />
@@ -77,6 +71,7 @@ export default function App() {
 
             {/* 使用者管理（管理員） */}
             <Route path="users" element={<UserList />} />
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

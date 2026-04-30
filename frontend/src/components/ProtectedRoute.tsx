@@ -1,12 +1,8 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { authApi } from '../services/api';
 import { useState, useEffect } from 'react';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-}
-
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute() {
   const [checking, setChecking] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
 
@@ -40,5 +36,6 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     return <Navigate to="/login" replace />;
   }
 
-  return <>{children}</>;
+  // Outlet 渲染巢狀路由的內容（Dashboard 等頁面）
+  return <Outlet />;
 }
