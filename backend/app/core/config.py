@@ -12,9 +12,9 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", os.getenv("SUPABASE_SERVICE_KEY", ""))
     
     # JWT
-    JWT_SECRET: str = os.getenv("JWT_SECRET", secrets.token_urlsafe(32))
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "chiayou-crm-dev-secret-change-in-production")
     JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "480"))  # 8小時
+    JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))  # 24小時
     
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [

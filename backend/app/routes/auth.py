@@ -75,8 +75,14 @@ def get_current_user_optional(token: str = Depends(oauth2_scheme)) -> dict | Non
 @router.post("/login", response_model=TokenResponse)
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """帳號密碼登入，成功回傳 JWT access_token。"""
-    db = get_client()
-    user = db.select("users", select="id,username,password_hash,full_name,role,is_active", filters={"username": form_data.username}, single=True)
+    try:
+        db = get_client()
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"資料庫連線失敗: {str(e)}")
+    try:
+        user = db.select("users", select="id,username,password_hash,full_name,role,is_active", filters={"username": form_data.username}, single=True)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"查詢失敗: {str(e)}")
     if not user:
         raise HTTPException(status_code=401, detail="帳號或密碼錯誤")
     # 密碼驗證
