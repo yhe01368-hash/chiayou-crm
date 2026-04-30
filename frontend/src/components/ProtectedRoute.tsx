@@ -1,6 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { authApi } from '../services/api';
 import { useState, useEffect } from 'react';
+import Layout from './Layout';
 
 export default function ProtectedRoute() {
   const [checking, setChecking] = useState(true);
@@ -36,6 +37,10 @@ export default function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  // Outlet 渲染巢狀路由的內容（Dashboard 等頁面）
-  return <Outlet />;
+  // 驗證通過：render Layout（包含 Sidebar + Topbar）並在裡面 render Outlet 顯示子頁面
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
 }
