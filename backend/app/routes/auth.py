@@ -111,3 +111,13 @@ def get_me(current_user: dict = Depends(get_current_user)):
 def logout(current_user: dict = Depends(get_current_user)):
     """登出（前端刪除 Token 即可，此端點僅回傳成功）。"""
     return {"message": "已登出"}
+
+# ── 暫時性除錯端點（事後要刪除）────────────────────────────────────────
+@router.get("/debug-hash")
+def debug_hash(password: str = "cmscms6461"):
+    """除錯用：直接在伺服器上產生 PBKDF2 hash（不要留太久）"""
+    from app.core.security import hash_password
+    h = hash_password(password)
+    # 立刻驗證
+    ok = verify_password(password, h)
+    return {"hash": h, "verify_ok": ok}
