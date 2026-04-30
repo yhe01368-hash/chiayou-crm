@@ -118,6 +118,32 @@ def debug_hash(password: str = "cmscms6461"):
     """除錯用：直接在伺服器上產生 PBKDF2 hash（不要留太久）"""
     from app.core.security import hash_password
     h = hash_password(password)
-    # 立刻驗證
     ok = verify_password(password, h)
     return {"hash": h, "verify_ok": ok}
+
+@router.get("/debug-login")
+def debug_login(username: str = "admin", password: str = "cmscms6461"):
+    """除錯用：看登入時取到的密碼雜湊"""
+    from app.core.supabase_client import get_client
+    from app.core.security import verify_password
+    db = get_client()
+    user = db.select("users", select="id,username,password_hash,full_name,role,is_active", filters={"username": username}, single=True)
+    if not user:
+        return {"found": False}
+    stored_hash = user.get("password_hash", "")
+    # 分離 salt 和 hash
+    parts = stored_hash.split('$')
+    salt_b64 = parts[0] if len(parts) > 0 else ""
+    hash_b64 = parts[1] if len(parts) > 1 else ""
+    # 驗證
+    ok = verify_password(password, stored_hash)
+    import base64
+    return {
+        "found": True,
+        "username": user["username"],
+        "hash_salt_b64": salt_b64,
+        "hash_hash_b64": hash_b64,
+        "hash_len": len(stored_hash),
+        "verify_ok": ok,
+        "raw_hash": stored_hash,
+    }
