@@ -1,15 +1,16 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
 import httpx
 
 from app.core.supabase_client import get_client
 from app.schemas.schemas import DashboardResponse
+from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/dashboard", tags=["儀表板"])
 
 
 @router.get("")
-def get_dashboard():
+def get_dashboard(_current_user: dict = Depends(get_current_user)):
     sb = get_client()
 
     try:

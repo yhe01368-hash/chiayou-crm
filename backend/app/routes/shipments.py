@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from uuid import UUID
 from datetime import date, datetime
@@ -9,6 +9,7 @@ from app.core.supabase_client import get_client
 from app.schemas.schemas import (
     ShipmentCreate, ShipmentUpdate, ShipmentResponse, ShipmentItemResponse, ShipmentStatusEnum
 )
+from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/shipments", tags=["出貨單管理"])
 
@@ -53,6 +54,7 @@ def get_shipments(
     customer_id: Optional[UUID] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    _current_user: dict = Depends(get_current_user),
 ):
     sb = get_client()
     filters = {}
@@ -83,7 +85,7 @@ def get_shipments(
 
 
 @router.get("/{shipment_id}", response_model=ShipmentResponse)
-def get_shipment(shipment_id: UUID):
+def get_shipment(shipment_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         row = _load_shipment(sb, str(shipment_id))
@@ -98,7 +100,7 @@ def get_shipment(shipment_id: UUID):
 
 
 @router.post("", response_model=ShipmentResponse, status_code=201)
-def create_shipment(shipment: ShipmentCreate):
+def create_shipment(shipment: ShipmentCreate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
 
     # 驗證客戶存在
@@ -197,7 +199,7 @@ def create_shipment(shipment: ShipmentCreate):
 
 
 @router.put("/{shipment_id}", response_model=ShipmentResponse)
-def update_shipment(shipment_id: UUID, shipment: ShipmentUpdate):
+def update_shipment(shipment_id: UUID, shipment: ShipmentUpdate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = shipment.model_dump(exclude_unset=True)
     
@@ -254,7 +256,7 @@ def update_shipment(shipment_id: UUID, shipment: ShipmentUpdate):
 
 
 @router.delete("/{shipment_id}", status_code=204)
-def delete_shipment(shipment_id: UUID):
+def delete_shipment(shipment_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
 
     # 先取得出貨單

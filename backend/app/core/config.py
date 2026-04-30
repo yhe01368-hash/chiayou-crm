@@ -1,4 +1,5 @@
 import os
+import secrets
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -9,6 +10,11 @@ class Settings(BaseSettings):
     # Supabase REST API (PostgREST)
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", os.getenv("SUPABASE_SERVICE_KEY", ""))
+    
+    # JWT
+    JWT_SECRET: str = os.getenv("JWT_SECRET", secrets.token_urlsafe(32))
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "480"))  # 8小時
     
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [

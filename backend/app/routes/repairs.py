@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
@@ -8,6 +8,7 @@ from app.core.supabase_client import get_client
 from app.schemas.schemas import (
     RepairCreate, RepairUpdate, RepairResponse, RepairStatusUpdate, RepairStatusEnum
 )
+from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/repairs", tags=["維修管理"])
 
@@ -31,6 +32,7 @@ def get_repairs(
     customer_id: Optional[UUID] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    _current_user: dict = Depends(get_current_user),
 ):
     sb = get_client()
     filters = {}
@@ -56,7 +58,7 @@ def get_repairs(
 
 
 @router.get("/{repair_id}", response_model=RepairResponse)
-def get_repair(repair_id: UUID):
+def get_repair(repair_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         row = sb.select(
@@ -76,7 +78,7 @@ def get_repair(repair_id: UUID):
 
 
 @router.post("", response_model=RepairResponse, status_code=201)
-def create_repair(repair: RepairCreate):
+def create_repair(repair: RepairCreate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
 
     # Verify customer exists
@@ -117,7 +119,7 @@ def create_repair(repair: RepairCreate):
 
 
 @router.put("/{repair_id}", response_model=RepairResponse)
-def update_repair(repair_id: UUID, repair: RepairUpdate):
+def update_repair(repair_id: UUID, repair: RepairUpdate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = repair.model_dump(exclude_unset=True)
     if not payload:
@@ -148,7 +150,7 @@ def update_repair(repair_id: UUID, repair: RepairUpdate):
 
 
 @router.patch("/{repair_id}/status", response_model=RepairResponse)
-def update_repair_status(repair_id: UUID, status_update: RepairStatusUpdate):
+def update_repair_status(repair_id: UUID, status_update: RepairStatusUpdate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = {"status": status_update.status.value}
     if status_update.status == RepairStatusEnum.completed:
@@ -171,7 +173,7 @@ def update_repair_status(repair_id: UUID, status_update: RepairStatusUpdate):
 
 
 @router.delete("/{repair_id}", status_code=204)
-def delete_repair(repair_id: UUID):
+def delete_repair(repair_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         sb.delete("repairs", filters={"id": str(repair_id)})

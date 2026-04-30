@@ -129,5 +129,31 @@ CREATE INDEX IF NOT EXISTS idx_inventory_category ON inventory(category);
 CREATE INDEX IF NOT EXISTS idx_shipments_customer_id ON shipments(customer_id);
 CREATE INDEX IF NOT EXISTS idx_shipments_status ON shipments(status);
 
+-- ===============================================
+-- 6. 使用者資料表
+-- ===============================================
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user',  -- 'admin' 或 'user'
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 管理者帳戶（帳號：admin，密碼：admin123）
+-- 密碼需先用 bcrypt 雜湊，底下先預留，確認後再 INSERT
+INSERT INTO users (username, password_hash, full_name, role) VALUES
+('admin', '$2b$12$hKq/XiLuv0azvwAaygmdCuqQDRbPmIVK4/nNoSSqw7S/jtxHaXtCa', '系統管理員', 'admin')
+ON CONFLICT (username) DO NOTHING;
+
+DROP TRIGGER IF EXISTS users_updated_at ON users;
+CREATE TRIGGER users_updated_at BEFORE UPDATE ON users
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
 -- 完成
 SELECT 'CRM 資料庫設定完成！' AS status;

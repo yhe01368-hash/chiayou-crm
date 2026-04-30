@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from uuid import UUID
 import httpx
 
 from app.core.supabase_client import get_client
 from app.schemas.schemas import CustomerCreate, CustomerUpdate, CustomerResponse
+from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/customers", tags=["客戶管理"])
 
@@ -14,6 +15,7 @@ def get_customers(
     search: Optional[str] = Query(None, description="搜尋姓名或電話"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    _current_user: dict = Depends(get_current_user),
 ):
     sb = get_client()
     filters = {}
@@ -54,7 +56,7 @@ def get_customers(
 
 
 @router.get("/{customer_id}")
-def get_customer(customer_id: UUID):
+def get_customer(customer_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         row = sb.select(
@@ -74,7 +76,7 @@ def get_customer(customer_id: UUID):
 
 
 @router.post("", response_model=CustomerResponse, status_code=201)
-def create_customer(customer: CustomerCreate):
+def create_customer(customer: CustomerCreate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = customer.model_dump()
 
@@ -89,7 +91,7 @@ def create_customer(customer: CustomerCreate):
 
 
 @router.put("/{customer_id}", response_model=CustomerResponse)
-def update_customer(customer_id: UUID, customer: CustomerUpdate):
+def update_customer(customer_id: UUID, customer: CustomerUpdate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = customer.model_dump(exclude_unset=True)
     if not payload:
@@ -113,7 +115,7 @@ def update_customer(customer_id: UUID, customer: CustomerUpdate):
 
 
 @router.delete("/{customer_id}", status_code=204)
-def delete_customer(customer_id: UUID):
+def delete_customer(customer_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         sb.delete("customers", filters={"id": str(customer_id)})
