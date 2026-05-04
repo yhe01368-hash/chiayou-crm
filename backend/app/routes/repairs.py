@@ -47,6 +47,11 @@ def _load_repair(row: dict, sb) -> dict:
     return row
 
 
+# 簡單測試路由
+@router.get("/test", tags=["測試"])
+def test_route():
+    return {"msg": "test ok"}
+
 @router.get("", response_model=List[RepairResponse])
 def get_repairs(
     status: Optional[RepairStatusEnum] = Query(None),
