@@ -10,9 +10,11 @@ export default function RevenueDetail() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const getEndDate = (y: number, m: number) => {
-    // new Date(y, m, 0) = m 月的第 0 天 = m-1 月的最後一天
-    // m 傳入時是 1-12，所以直接用 m 就是當月最後一天
-    return new Date(y, m, 0).toISOString().split('T')[0];
+    // new Date(y, m, 0).getDate() = m 月的天數（m=3月時等於 31）
+    // 再用 local Date 建構，避免 toISOString UTC 時區偏移
+    const lastDay = new Date(y, m, 0).getDate();
+    const mm = String(m).padStart(2, '0');
+    return `${y}-${mm}-${String(lastDay).padStart(2, '0')}`;
   };
 
   const { data, isLoading } = useQuery({
