@@ -63,15 +63,20 @@ class CustomerResponse(CustomerBase):
 class RepairBase(BaseModel):
     customer_id: UUID
     device_type: str
-    device_brand: Optional[str] = None
-    device_model: Optional[str] = None
-    serial_number: Optional[str] = None
+    device_brand: Optional[StrInt] = None
+    device_model: Optional[StrInt] = None
+    serial_number: Optional[StrInt] = None
     problem: str
     status: RepairStatusEnum = RepairStatusEnum.pending
-    repair_detail: Optional[str] = None
+    repair_detail: Optional[StrInt] = None
     cost: Optional[Decimal] = None
     completed_at: Optional[datetime] = None
     parts_used: Optional[List[dict]] = None  # [{product_id, quantity}]
+
+    @field_validator("device_brand", "device_model", "serial_number", "repair_detail", mode="before")
+    @classmethod
+    def str_int_to_str(cls, v):
+        return str(v) if isinstance(v, int) else v
 
 class RepairCreate(RepairBase):
     pass
