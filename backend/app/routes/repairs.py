@@ -52,6 +52,31 @@ def _load_repair(row: dict, sb) -> dict:
 def test_route():
     return {"msg": "test ok"}
 
+@router.get("/raw", tags=["測試"])
+def get_repairs_raw(
+    status: Optional[RepairStatusEnum] = Query(None),
+    customer_id: Optional[UUID] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
+    _current_user: dict = Depends(get_current_user),
+):
+    """無 response_model 的版本，直接回傳原始資料"""
+    sb = get_client()
+    filters = {}
+    if status:
+        filters["status"] = status.value
+    if customer_id:
+        filters["customer_id"] = str(customer_id)
+
+    rows = sb.select(
+        "repairs",
+        select="*",
+        filters=filters if filters else None,
+        order="created_at.desc",
+        limit=limit,
+    )
+    return {"rows": rows, "type": str(type(rows))}
+
 @router.get("", response_model=List[RepairResponse])
 def get_repairs(
     status: Optional[RepairStatusEnum] = Query(None),
@@ -76,26 +101,23 @@ def get_repairs(
             limit=limit,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"[select] {type(e).__name__}: {str(e)}")
+        import traceback
+        raise HTTPException(status_code=500, detail=f"[select] {type(e).__name__}: {str(e)}\n{traceback.format_exc()}")
 
-    # DEBUG
-    import sys
-    print(f"[DEBUG get_repairs] rows type={type(rows)}, len={len(rows) if rows else 0}", flush=True)
-    for i, r in enumerate(rows or []):
-        print(f"[DEBUG row{i}] keys={list(r.keys())}", flush=True)
-        pu = r.get("parts_used")
-        print(f"[DEBUG row{i}] parts_used type={type(pu)}, repr={repr(pu)[:100]}", flush=True)
+    if not rows:
+        return []
 
-    # 在 Pydantic 驗證前先解析 JSONB 字串
     try:
         rows = [_parse_jsonb(r) for r in rows]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"[_parse_jsonb] {type(e).__name__}: {str(e)}")
+        import traceback
+        raise HTTPException(status_code=500, detail=f"[_parse_jsonb] {type(e).__name__}: {str(e)}\n{traceback.format_exc()}")
 
     try:
         return [_load_repair(r, sb) for r in rows]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"[_load_repair] {type(e).__name__}: {str(e)}")
+        import traceback
+        raise HTTPException(status_code=500, detail=f"[_load_repair] {type(e).__name__}: {str(e)}\n{traceback.format_exc()}")
 
 
 @router.get("/{repair_id}", response_model=RepairResponse)
