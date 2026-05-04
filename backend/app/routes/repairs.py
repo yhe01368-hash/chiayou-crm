@@ -3,6 +3,7 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import date, datetime
 import httpx
+import json
 
 from app.core.supabase_client import get_client
 from app.schemas.schemas import (
@@ -11,6 +12,20 @@ from app.schemas.schemas import (
 from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/repairs", tags=["維修管理"])
+
+
+def _parse_jsonb(obj):
+    """遞迴將 JSONB 字串欄位反序列化"""
+    if isinstance(obj, dict):
+        return {k: _parse_jsonb(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [_parse_jsonb(item) for item in obj]
+    elif isinstance(obj, str):
+        try:
+            return json.loads(obj)
+        except (json.JSONDecodeError, TypeError):
+            return obj
+    return obj
 
 
 def _load_repair(row: dict, sb) -> dict:
@@ -23,10 +38,8 @@ def _load_repair(row: dict, sb) -> dict:
             single=True,
         )
         row["customer"] = customer
-    # Supabase JSONB 回傳的是 JSON 字串，需要反序列化
-    if row.get("parts_used") and isinstance(row["parts_used"], str):
-        import json
-        row["parts_used"] = json.loads(row["parts_used"])
+    # 解析所有 JSONB 字串欄位
+    row = _parse_jsonb(row)
     return row
 
 
