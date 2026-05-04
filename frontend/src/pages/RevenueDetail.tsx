@@ -11,8 +11,8 @@ export default function RevenueDetail() {
 
   const getEndDate = (y: number, m: number) => {
     // new Date(y, m, 0) = m 月的第 0 天 = m-1 月的最後一天
-    // 要傳 m+1 才能得到 m 月最後一天
-    return new Date(y, m + 1, 0).toISOString().split('T')[0];
+    // m 傳入時是 1-12，所以直接用 m 就是當月最後一天
+    return new Date(y, m, 0).toISOString().split('T')[0];
   };
 
   const { data, isLoading } = useQuery({
