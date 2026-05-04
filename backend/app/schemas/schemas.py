@@ -1,9 +1,12 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, field_validator
+from typing import Optional, List, Union
 from datetime import datetime, date
 from uuid import UUID
 from decimal import Decimal
 from enum import Enum
+
+# ===== Utility Types =====
+StrInt = Union[str, int]  # 接受字串或整數（如統編 tax_id）
 
 # ===== Enums =====
 class RepairStatusEnum(str, Enum):
@@ -22,12 +25,17 @@ class CustomerBase(BaseModel):
     name: str
     phone: str
     phone2: Optional[str] = None
-    tax_id: Optional[str] = None
+    tax_id: Optional[StrInt] = None
     address: Optional[str] = None
     email: Optional[str] = None
     contact_person: Optional[str] = None
     fax: Optional[str] = None
     note: Optional[str] = None
+
+    @field_validator("tax_id", mode="before")
+    @classmethod
+    def tax_id_int_to_str(cls, v):
+        return str(v) if isinstance(v, int) else v
 
 class CustomerCreate(CustomerBase):
     pass
