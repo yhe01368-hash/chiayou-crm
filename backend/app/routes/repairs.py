@@ -82,9 +82,27 @@ def get_repairs(
         raise HTTPException(status_code=500, detail=f"[_parse_jsonb] {type(e).__name__}: {str(e)}")
 
     try:
-        return [_load_repair(r, sb) for r in rows]
+        result = [_load_repair(r, sb) for r in rows]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"[_load_repair] {type(e).__name__}: {str(e)}")
+        import traceback
+        tb = traceback.format_exc()
+        # 回傳第一筆失敗的維修單 ID
+        bad_id = rows[0].get("id", "?") if rows else "?"
+        raise HTTPException(status_code=500, detail=f"[_load_repair] {type(e).__name__}: {str(e)[:200]} | bad_id={bad_id}\n{tb[-500:]}")
+
+    # Pydantic validation
+    try:
+        return [RepairResponse.model_validate(r) for r in result]
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        # 找出哪一筆記錄失敗
+        for i, r in enumerate(result):
+            try:
+                RepairResponse.model_validate(r)
+            except Exception as ve:
+                raise HTTPException(status_code=500, detail=f"[validate #{i}] {type(ve).__name__}: {str(ve)[:300]} | id={r.get('id','?')} | customer_id={r.get('customer_id','?')}\n{tb[-300:]}")
+        raise HTTPException(status_code=500, detail=f"[validate] {type(e).__name__}: {str(e)[:200]}")
 
 
 @router.get("/{repair_id}", response_model=RepairResponse)
