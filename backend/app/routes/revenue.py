@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime
 import httpx
 
@@ -9,18 +9,54 @@ router = APIRouter(prefix="/api/dashboard/revenue", tags=["營收明細"])
 
 
 @router.get("/details")
-def get_revenue_details(_current_user: dict = Depends(get_current_user)):
+def get_revenue_details(
+    start_date: str = Query(default=None, description="起始日期 YYYY-MM-DD"),
+    end_date: str = Query(default=None, description="結束日期 YYYY-MM-DD"),
+    _current_user: dict = Depends(get_current_user),
+):
     sb = get_client()
 
     try:
-        # 取得本月一號開始的所有已完成出貨單
-        first_day = datetime.now().replace(day=1).date().isoformat()
-        rows = sb.select(
-            "shipments",
-            select="*",
-            filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
-            order="shipment_date.desc",
-        )
+        # 組過濾條件
+        filters = {"status": "completed"}
+
+        if start_date:
+            filters["shipment_date"] = f"gte.{start_date}"
+        if end_date:
+            filters["shipment_date"] = f"gte.{start_date or '1900-01-01'}" if "shipment_date" not in filters else filters["shipment_date"]
+            # 兩個都有就用 and... 但 Supabase REST 不支援 range，我們分開處理
+
+        # 如果有 start 和 end
+        if start_date and end_date:
+            rows = sb.select(
+                "shipments",
+                select="*",
+                filters={"status": "completed", "shipment_date": f"gte.{start_date}", "shipment_date": f"lte.{end_date}"},
+                order="shipment_date.desc",
+            )
+        elif start_date:
+            rows = sb.select(
+                "shipments",
+                select="*",
+                filters={"status": "completed", "shipment_date": f"gte.{start_date}"},
+                order="shipment_date.desc",
+            )
+        elif end_date:
+            rows = sb.select(
+                "shipments",
+                select="*",
+                filters={"status": "completed", "shipment_date": f"lte.{end_date}"},
+                order="shipment_date.desc",
+            )
+        else:
+            # 預設本月
+            first_day = datetime.now().replace(day=1).date().isoformat()
+            rows = sb.select(
+                "shipments",
+                select="*",
+                filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
+                order="shipment_date.desc",
+            )
 
         result = []
         for row in (rows or []):
@@ -38,7 +74,6 @@ def get_revenue_details(_current_user: dict = Depends(get_current_user)):
                 "total_amount": row.get("total_amount", 0),
             })
 
-        # 計算總計
         total = sum(r["total_amount"] or 0 for r in result)
 
     except httpx.HTTPStatusError as e:
