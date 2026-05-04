@@ -111,6 +111,7 @@ export interface RepairFormData {
   status: RepairStatus;
   repair_detail?: string;
   cost?: number;
+  parts_used?: { product_id: string; quantity: number }[];
 }
 
 export interface InventoryFormData {

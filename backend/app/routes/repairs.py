@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
+from datetime import date, datetime
 import httpx
 
 from app.core.supabase_client import get_client
@@ -128,9 +128,10 @@ def update_repair(repair_id: UUID, repair: RepairUpdate, _current_user: dict = D
     if "cost" in payload and payload["cost"] is not None:
         payload["cost"] = float(payload["cost"])
 
+    # parts_used 可能是 list → 保持原樣（已是 dict list）
     # UUID -> str (否則 JSON 序列化失敗)
     for k, v in list(payload.items()):
-        if v is not None and not isinstance(v, (str, int, float, bool)):
+        if v is not None and not isinstance(v, (str, int, float, bool, list)):
             payload[k] = str(v)
 
     try:
@@ -152,9 +153,61 @@ def update_repair(repair_id: UUID, repair: RepairUpdate, _current_user: dict = D
 @router.patch("/{repair_id}/status", response_model=RepairResponse)
 def update_repair_status(repair_id: UUID, status_update: RepairStatusUpdate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
+
+    # 拿取舊狀態
+    old_repair = sb.select(
+        "repairs",
+        select="*",
+        filters={"id": str(repair_id)},
+        single=True,
+    )
+    if not old_repair:
+        raise HTTPException(status_code=404, detail="維修單不存在")
+
     payload = {"status": status_update.status.value}
     if status_update.status == RepairStatusEnum.completed:
         payload["completed_at"] = datetime.utcnow().isoformat()
+
+        # ── 有使用零件 → 自動建立出貨單草稿 ──────────────────────
+        if old_repair.get("parts_used") and len(old_repair["parts_used"]) > 0:
+            shipment_number = f"SH{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            shipment_payload = {
+                "shipment_number": shipment_number,
+                "customer_id": old_repair["customer_id"],
+                "shipment_date": date.today().isoformat(),
+                "status": "draft",
+                "note": f"維修單 {repair_id} 完成後自動建立",
+            }
+            created_shipment = sb.insert("shipments", shipment_payload)
+            shipment_id = created_shipment["id"]
+            total = 0.0
+
+            for part in old_repair["parts_used"]:
+                pid = part.get("product_id")
+                qty = part.get("quantity", 1)
+                if not pid:
+                    continue
+                product = sb.select(
+                    "inventory",
+                    select="*",
+                    filters={"id": pid},
+                    single=True,
+                )
+                if not product:
+                    continue
+                subtotal = qty * float(product["selling_price"])
+                total += subtotal
+                sb.insert("shipment_items", {
+                    "shipment_id": shipment_id,
+                    "product_id": pid,
+                    "product_name": product["product_name"],
+                    "quantity": qty,
+                    "unit_price": float(product["selling_price"]),
+                    "subtotal": subtotal,
+                })
+
+            # 更新出貨單總金額
+            sb.update("shipments", {"total_amount": total}, filters={"id": shipment_id})
 
     try:
         row = sb.update(

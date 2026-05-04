@@ -63,6 +63,7 @@ class RepairBase(BaseModel):
     repair_detail: Optional[str] = None
     cost: Optional[Decimal] = None
     completed_at: Optional[datetime] = None
+    parts_used: Optional[List[dict]] = None  # [{product_id, quantity}]
 
 class RepairCreate(RepairBase):
     pass
@@ -78,6 +79,7 @@ class RepairUpdate(BaseModel):
     repair_detail: Optional[str] = None
     cost: Optional[Decimal] = None
     completed_at: Optional[datetime] = None
+    parts_used: Optional[List[dict]] = None
 
 class RepairResponse(RepairBase):
     id: UUID
