@@ -162,6 +162,51 @@ def update_repair(repair_id: UUID, repair: RepairUpdate, _current_user: dict = D
         if v is not None and not isinstance(v, (str, int, float, bool, list)):
             payload[k] = str(v)
 
+    # ── 狀態改為 completed + 有使用零件 → 自動建立出貨單草稿 ──────
+    new_status = payload.get("status")
+    if new_status == "completed":
+        old_repair = sb.select(
+            "repairs",
+            select="*",
+            filters={"id": str(repair_id)},
+            single=True,
+        )
+        if old_repair and old_repair.get("status") != "completed":
+            parts = old_repair.get("parts_used", [])
+            if parts and len(parts) > 0:
+                cust = sb.select("customers", select="name", filters={"id": str(old_repair["customer_id"])}, single=True)
+                cust_name = cust.get("name", "未知客戶") if cust else "未知客戶"
+                shipment_number = f"SH{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                shipment_payload = {
+                    "shipment_number": shipment_number,
+                    "customer_id": old_repair["customer_id"],
+                    "shipment_date": date.today().isoformat(),
+                    "status": "draft",
+                    "note": f"維修單（{cust_name}）完成後自動建立",
+                }
+                created_shipment = sb.insert("shipments", shipment_payload)
+                shipment_id = created_shipment["id"]
+                total = 0.0
+                for part in parts:
+                    pid = part.get("product_id")
+                    qty = part.get("quantity", 1)
+                    if not pid:
+                        continue
+                    product = sb.select("inventory", select="*", filters={"id": pid}, single=True)
+                    if not product:
+                        continue
+                    subtotal = qty * float(product["selling_price"])
+                    total += subtotal
+                    sb.insert("shipment_items", {
+                        "shipment_id": shipment_id,
+                        "product_id": pid,
+                        "product_name": product["product_name"],
+                        "quantity": qty,
+                        "unit_price": float(product["selling_price"]),
+                        "subtotal": subtotal,
+                    })
+                sb.update("shipments", {"total_amount": total}, filters={"id": shipment_id})
+
     try:
         row = sb.update(
             "repairs",
