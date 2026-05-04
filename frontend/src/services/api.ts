@@ -118,6 +118,7 @@ export const shipmentApi = {
 // ── 儀表板 API ──────────────────────────────────────────────────────────────
 export const dashboardApi = {
   get: () => api.get('/dashboard'),
+  getRevenueDetails: () => api.get('/dashboard/revenue/details'),
 };
 
 // ── 維修知識庫 API ─────────────────────────────────────────────────────────
