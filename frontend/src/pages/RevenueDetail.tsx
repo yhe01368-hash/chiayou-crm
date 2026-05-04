@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, DollarSign, Search } from 'lucide-react';
+import { ArrowLeft, DollarSign } from 'lucide-react';
 import api from '../services/api';
 
 export default function RevenueDetail() {
@@ -9,11 +9,15 @@ export default function RevenueDetail() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
+  const getEndDate = (y: number, m: number) => {
+    return new Date(y, m, 0).toISOString().split('T')[0];
+  };
+
   const { data, isLoading } = useQuery({
     queryKey: ['revenue-details', year, month],
     queryFn: () => {
       const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-      const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+      const endDate = getEndDate(year, month);
       return api.get('/dashboard/revenue/details', {
         params: { start_date: startDate, end_date: endDate },
       }).then(res => res.data);
@@ -59,7 +63,10 @@ export default function RevenueDetail() {
           </select>
         </div>
         <button
-          onClick={() => setYear(now.getFullYear())}
+          onClick={() => {
+            setYear(now.getFullYear());
+            setMonth(now.getMonth() + 1);
+          }}
           className="text-sm text-gray-500 hover:text-gray-700 underline"
         >
           重置為本月
