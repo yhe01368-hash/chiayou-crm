@@ -47,36 +47,30 @@ class SupabaseClient:
         GET /{table}?select=...&eq.field=value&order=...&limit=...
         filters: { "field": value }  →  field=eq.{value}
         """
-        params = {"select": select}
+        # 用 list of tuples 支援同一欄位多個 filter（如 gte + lte）
+        params_list: list[tuple[str, str]] = [("select", select)]
         if filters:
             for field, value in filters.items():
                 if isinstance(value, list):
-                    # 同一欄位多個條件：["gte.xxx", "lte.yyy"] → and(gte.field.eq.xxx,lte.field.eq.yyy)
-                    if all(isinstance(v, str) and "." in v for v in value):
-                        op1, val1 = value[0].split(".", 1)
-                        if len(value) == 2:
-                            op2, val2 = value[1].split(".", 1)
-                            params[field] = f"and({op1}.{field}.eq.{val1},{op2}.{field}.eq.{val2})"
+                    for v in value:
+                        if isinstance(v, str) and "." in v:
+                            op, val = v.split(".", 1)
+                            params_list.append((field, f"{op}.{val}"))
                         else:
-                            # 3+ conditions
-                            conditions = ",".join(f"{op}.{field}.eq.{v.split('.',1)[1]}" for op, v in (x.split(".",1) for x in value))
-                            params[field] = f"and({conditions})"
-                    else:
-                        params[field] = f"in.({','.join(str(v) for v in value)})"
+                            params_list.append((field, f"eq.{v}"))
                 elif isinstance(value, str) and "." in value.split(",")[0]:
-                    # 已是 operator=value 格式 (gte.xxx, eq.xxx, like.xxx 等)，直接用
-                    params[f"{field}"] = value
+                    params_list.append((field, value))
                 else:
-                    params[f"{field}"] = f"eq.{value}"
+                    params_list.append((field, f"eq.{value}"))
         if order:
-            params["order"] = order
+            params_list.append(("order", order))
         if limit:
-            params["limit"] = limit
+            params_list.append(("limit", str(limit)))
         headers = dict(self.headers)
         if range_start is not None and range_end is not None:
             headers["Range"] = f"{range_start}-{range_end}"
 
-        resp = self.client.get(f"/rest/v1/{table}", params=params, headers=headers)
+        resp = self.client.get(f"/rest/v1/{table}", params=params_list, headers=headers)
         resp.raise_for_status()
 
         if single:

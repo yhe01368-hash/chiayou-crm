@@ -26,7 +26,7 @@ def get_revenue_details(
             filters["shipment_date"] = f"gte.{start_date or '1900-01-01'}" if "shipment_date" not in filters else filters["shipment_date"]
             # 兩個都有就用 and... 但 Supabase REST 不支援 range，我們分開處理
 
-        # 如果有 start 和 end
+        # 如果有 start 和 end，用 POST /rpc 查詢繞過 filter 限制
         if start_date and end_date:
             rows = sb.select(
                 "shipments",
