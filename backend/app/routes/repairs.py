@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api/repairs", tags=["維修管理"])
 
 
 def _load_repair(row: dict, sb) -> dict:
-    """附加 customer 詳細資料"""
+    """附加 customer 詳細資料，解析 JSONB 欄位"""
     if row.get("customer_id"):
         customer = sb.select(
             "customers",
@@ -23,6 +23,10 @@ def _load_repair(row: dict, sb) -> dict:
             single=True,
         )
         row["customer"] = customer
+    # Supabase JSONB 回傳的是 JSON 字串，需要反序列化
+    if row.get("parts_used") and isinstance(row["parts_used"], str):
+        import json
+        row["parts_used"] = json.loads(row["parts_used"])
     return row
 
 
