@@ -10,7 +10,9 @@ export default function RevenueDetail() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const getEndDate = (y: number, m: number) => {
-    return new Date(y, m, 0).toISOString().split('T')[0];
+    // new Date(y, m, 0) = m 月的第 0 天 = m-1 月的最後一天
+    // 要傳 m+1 才能得到 m 月最後一天
+    return new Date(y, m + 1, 0).toISOString().split('T')[0];
   };
 
   const { data, isLoading } = useQuery({
