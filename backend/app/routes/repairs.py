@@ -75,7 +75,15 @@ def get_repairs_raw(
         order="created_at.desc",
         limit=limit,
     )
-    return {"rows": rows, "type": str(type(rows))}
+
+    # 測試 _load_repair 的效果
+    from app.routes.repairs import _load_repair
+    try:
+        loaded = [_load_repair(r, sb) for r in rows]
+        return {"ok": True, "rows_loaded": loaded}
+    except Exception as e:
+        import traceback
+        return {"ok": False, "error": str(e), "tb": traceback.format_exc()}
 
 @router.get("", response_model=List[RepairResponse])
 def get_repairs(
