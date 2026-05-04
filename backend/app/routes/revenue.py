@@ -17,44 +17,44 @@ def get_revenue_details(
     sb = get_client()
 
     try:
-        # 組過濾條件
+        # 組過濾條件：list 格式讓 httpx 產生多個同名 query param
         filters = {"status": "completed"}
 
-        if start_date:
-            filters["shipment_date"] = f"gte.{start_date}"
-        if end_date:
-            filters["shipment_date"] = f"gte.{start_date or '1900-01-01'}" if "shipment_date" not in filters else filters["shipment_date"]
-            # 兩個都有就用 and... 但 Supabase REST 不支援 range，我們分開處理
-
-        # 如果有 start 和 end，用 POST /rpc 查詢繞過 filter 限制
         if start_date and end_date:
+            # 兩者都有 → list 產生 shipment_date=gte.XXX & shipment_date=lte.XXX
+            filters["shipment_date"] = [f"gte.{start_date}", f"lte.{end_date}"]
             rows = sb.select(
                 "shipments",
                 select="*",
-                filters={"status": "completed", "shipment_date": [f"gte.{start_date}", f"lte.{end_date}"]},
+                filters=filters,
                 order="shipment_date.desc",
             )
         elif start_date:
+            # 只有起始日
+            filters["shipment_date"] = f"gte.{start_date}"
             rows = sb.select(
                 "shipments",
                 select="*",
-                filters={"status": "completed", "shipment_date": f"gte.{start_date}"},
+                filters=filters,
                 order="shipment_date.desc",
             )
         elif end_date:
+            # 只有結束日
+            filters["shipment_date"] = f"lte.{end_date}"
             rows = sb.select(
                 "shipments",
                 select="*",
-                filters={"status": "completed", "shipment_date": f"lte.{end_date}"},
+                filters=filters,
                 order="shipment_date.desc",
             )
         else:
             # 預設本月
             first_day = datetime.now().replace(day=1).date().isoformat()
+            filters["shipment_date"] = f"gte.{first_day}"
             rows = sb.select(
                 "shipments",
                 select="*",
-                filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
+                filters=filters,
                 order="shipment_date.desc",
             )
 
