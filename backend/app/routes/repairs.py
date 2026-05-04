@@ -4,6 +4,7 @@ from uuid import UUID
 from datetime import date, datetime
 import httpx
 import json
+import ast
 
 from app.core.supabase_client import get_client
 from app.schemas.schemas import (
@@ -15,7 +16,7 @@ router = APIRouter(prefix="/api/repairs", tags=["維修管理"])
 
 
 def _parse_jsonb(obj):
-    """遞迴將 JSONB 字串欄位反序列化"""
+    """遞迴將 JSONB 字串欄位反序列化（支援JSON和Python repr格式）"""
     if isinstance(obj, dict):
         return {k: _parse_jsonb(v) for k, v in obj.items()}
     elif isinstance(obj, list):
@@ -24,7 +25,10 @@ def _parse_jsonb(obj):
         try:
             return json.loads(obj)
         except (json.JSONDecodeError, TypeError):
-            return obj
+            try:
+                return ast.literal_eval(obj)
+            except (ValueError, SyntaxError):
+                return obj
     return obj
 
 
