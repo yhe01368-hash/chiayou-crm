@@ -198,13 +198,16 @@ def update_repair_status(repair_id: UUID, status_update: RepairStatusUpdate, _cu
 
         # ── 有使用零件 → 自動建立出貨單草稿 ──────────────────────
         if old_repair.get("parts_used") and len(old_repair["parts_used"]) > 0:
+            # 取出客戶名稱
+            cust = sb.select("customers", select="name", filters={"id": str(old_repair["customer_id"])}, single=True)
+            cust_name = cust.get("name", "未知客戶") if cust else "未知客戶"
             shipment_number = f"SH{datetime.now().strftime('%Y%m%d%H%M%S')}"
             shipment_payload = {
                 "shipment_number": shipment_number,
                 "customer_id": old_repair["customer_id"],
                 "shipment_date": date.today().isoformat(),
                 "status": "draft",
-                "note": f"維修單 {repair_id} 完成後自動建立",
+                "note": f"維修單（{cust_name}）完成後自動建立",
             }
             created_shipment = sb.insert("shipments", shipment_payload)
             shipment_id = created_shipment["id"]
