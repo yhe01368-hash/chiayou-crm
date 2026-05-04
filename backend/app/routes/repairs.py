@@ -70,14 +70,27 @@ def get_repairs(
             order="created_at.desc",
             limit=limit,
         )
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
     except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"[select] {type(e).__name__}: {str(e)}")
+
+    # DEBUG
+    import sys
+    print(f"[DEBUG get_repairs] rows type={type(rows)}, len={len(rows) if rows else 0}", flush=True)
+    for i, r in enumerate(rows or []):
+        print(f"[DEBUG row{i}] keys={list(r.keys())}", flush=True)
+        pu = r.get("parts_used")
+        print(f"[DEBUG row{i}] parts_used type={type(pu)}, repr={repr(pu)[:100]}", flush=True)
 
     # 在 Pydantic 驗證前先解析 JSONB 字串
-    rows = [_parse_jsonb(r) for r in rows]
-    return [_load_repair(r, sb) for r in rows]
+    try:
+        rows = [_parse_jsonb(r) for r in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"[_parse_jsonb] {type(e).__name__}: {str(e)}")
+
+    try:
+        return [_load_repair(r, sb) for r in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"[_load_repair] {type(e).__name__}: {str(e)}")
 
 
 @router.get("/{repair_id}", response_model=RepairResponse)
