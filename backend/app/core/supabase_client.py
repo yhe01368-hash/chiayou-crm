@@ -50,12 +50,22 @@ class SupabaseClient:
         params = {"select": select}
         if filters:
             for field, value in filters.items():
-                if isinstance(value, str) and "." in value.split(",")[0]:
-                    # 已是 operator=value 格式 (gte.xxx, eq.xxx, in.(...), like.xxx 等)，直接用
+                if isinstance(value, list):
+                    # 同一欄位多個條件：["gte.xxx", "lte.yyy"] → and(gte.field.eq.xxx,lte.field.eq.yyy)
+                    if all(isinstance(v, str) and "." in v for v in value):
+                        op1, val1 = value[0].split(".", 1)
+                        if len(value) == 2:
+                            op2, val2 = value[1].split(".", 1)
+                            params[field] = f"and({op1}.{field}.eq.{val1},{op2}.{field}.eq.{val2})"
+                        else:
+                            # 3+ conditions
+                            conditions = ",".join(f"{op}.{field}.eq.{v.split('.',1)[1]}" for op, v in (x.split(".",1) for x in value))
+                            params[field] = f"and({conditions})"
+                    else:
+                        params[field] = f"in.({','.join(str(v) for v in value)})"
+                elif isinstance(value, str) and "." in value.split(",")[0]:
+                    # 已是 operator=value 格式 (gte.xxx, eq.xxx, like.xxx 等)，直接用
                     params[f"{field}"] = value
-                elif isinstance(value, list):
-                    # in 查詢：['a','b'] → in.(a,b)
-                    params[f"{field}"] = f"in.({','.join(str(v) for v in value)})"
                 else:
                     params[f"{field}"] = f"eq.{value}"
         if order:

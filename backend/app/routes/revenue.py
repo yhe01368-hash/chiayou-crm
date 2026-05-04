@@ -31,7 +31,7 @@ def get_revenue_details(
             rows = sb.select(
                 "shipments",
                 select="*",
-                filters={"status": "completed", "shipment_date": f"gte.{start_date}", "shipment_date": f"lte.{end_date}"},
+                filters={"status": "completed", "shipment_date": [f"gte.{start_date}", f"lte.{end_date}"]},
                 order="shipment_date.desc",
             )
         elif start_date:
