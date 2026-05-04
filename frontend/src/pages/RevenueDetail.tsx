@@ -24,6 +24,7 @@ export default function RevenueDetail() {
         params: { start_date: startDate, end_date: endDate },
       }).then(res => res.data);
     },
+    staleTime: 0,
   });
 
   const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
