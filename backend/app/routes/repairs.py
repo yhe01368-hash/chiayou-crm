@@ -75,6 +75,8 @@ def get_repairs(
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
 
+    # 在 Pydantic 驗證前先解析 JSONB 字串
+    rows = [_parse_jsonb(r) for r in rows]
     return [_load_repair(r, sb) for r in rows]
 
 
