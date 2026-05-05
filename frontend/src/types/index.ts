@@ -96,6 +96,8 @@ export interface CustomerFormData {
   tax_id?: string;
   address?: string;
   email?: string;
+  contact_person?: string;
+  fax?: string;
   note?: string;
 }
 
@@ -109,6 +111,7 @@ export interface RepairFormData {
   status: RepairStatus;
   repair_detail?: string;
   cost?: number;
+  parts_used?: { product_id: string; quantity: number }[];
 }
 
 export interface InventoryFormData {

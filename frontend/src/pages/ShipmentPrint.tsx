@@ -157,8 +157,6 @@ export default function ShipmentPrint() {
         }
       `}</style>
 
-      <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
-
       <div className="min-h-screen bg-gray-100 print:bg-white flex flex-col items-center pt-4">
         <div className="no-print flex gap-2 mb-4 sticky top-0 z-50 bg-white p-2 shadow-md">
           <Link to="/shipments" className="btn btn-secondary flex items-center gap-2">
@@ -168,7 +166,7 @@ export default function ShipmentPrint() {
             <Printer size={16} /> 列印
           </button>
           <button onClick={() => setShowDialog(true)} className="btn btn-secondary flex items-center gap-2">
-            <Download size={16} /> 下載 PDF
+            <Download size={16} /> 稅額選擇
           </button>
         </div>
 
@@ -215,8 +213,9 @@ export default function ShipmentPrint() {
           backgroundColor: '#fff',
           padding: '2pt',
           boxSizing: 'border-box',
-          fontFamily: '"Noto Sans CJK TC", "Microsoft JhengHei", sans-serif',
+          fontFamily: '"新細明體", "Microsoft JhengHei", sans-serif',
           fontSize: '9.5pt',
+          fontWeight: 'bold',
           color: '#1a1a1a',
           lineHeight: 1.3,
         }}>

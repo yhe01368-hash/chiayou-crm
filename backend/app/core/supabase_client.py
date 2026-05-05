@@ -47,26 +47,30 @@ class SupabaseClient:
         GET /{table}?select=...&eq.field=value&order=...&limit=...
         filters: { "field": value }  →  field=eq.{value}
         """
-        params = {"select": select}
+        # 用 list of tuples 支援同一欄位多個 filter（如 gte + lte）
+        params_list: list[tuple[str, str]] = [("select", select)]
         if filters:
             for field, value in filters.items():
-                if isinstance(value, str) and "." in value.split(",")[0]:
-                    # 已是 operator=value 格式 (gte.xxx, eq.xxx, in.(...), like.xxx 等)，直接用
-                    params[f"{field}"] = value
-                elif isinstance(value, list):
-                    # in 查詢：['a','b'] → in.(a,b)
-                    params[f"{field}"] = f"in.({','.join(str(v) for v in value)})"
+                if isinstance(value, list):
+                    for v in value:
+                        if isinstance(v, str) and "." in v:
+                            op, val = v.split(".", 1)
+                            params_list.append((field, f"{op}.{val}"))
+                        else:
+                            params_list.append((field, f"eq.{v}"))
+                elif isinstance(value, str) and "." in value.split(",")[0]:
+                    params_list.append((field, value))
                 else:
-                    params[f"{field}"] = f"eq.{value}"
+                    params_list.append((field, f"eq.{value}"))
         if order:
-            params["order"] = order
+            params_list.append(("order", order))
         if limit:
-            params["limit"] = limit
+            params_list.append(("limit", str(limit)))
         headers = dict(self.headers)
         if range_start is not None and range_end is not None:
             headers["Range"] = f"{range_start}-{range_end}"
 
-        resp = self.client.get(f"/rest/v1/{table}", params=params, headers=headers)
+        resp = self.client.get(f"/rest/v1/{table}", params=params_list, headers=headers)
         resp.raise_for_status()
 
         if single:

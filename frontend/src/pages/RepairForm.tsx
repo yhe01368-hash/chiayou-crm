@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
-import { repairApi, customerApi } from '../services/api';
+import { repairApi, customerApi, inventoryApi } from '../services/api';
 import type { RepairFormData } from '../types';
 import { ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
 
@@ -32,7 +32,13 @@ export default function RepairForm() {
     status: 'pending',
     repair_detail: '',
     cost: undefined,
+    parts_used: [],
   });
+
+  // 零件狀態
+  const [partsUsed, setPartsUsed] = useState<{ product_id: string; quantity: number }[]>([]);
+  const [partSearch, setPartSearch] = useState('');
+  const [showPartDropdown, setShowPartDropdown] = useState<number | null>(null);
 
   // 編輯器是否已初始化過
   const editorInitializedRef = useRef(false);
@@ -44,6 +50,11 @@ export default function RepairForm() {
   const { data: customers = [] } = useQuery({
     queryKey: ['customers'],
     queryFn: () => customerApi.getAll().then(res => res.data),
+  });
+
+  const { data: inventory = [] } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => inventoryApi.getAll().then(res => res.data),
   });
 
   const { data: editData } = useQuery({
@@ -131,6 +142,10 @@ export default function RepairForm() {
       }
       const cust = customers.find((c: any) => c.id === editData.customer_id);
       if (cust) setCustomerSearch(cust.name);
+      // 初始化使用零件
+      if (editData.parts_used) {
+        setPartsUsed(editData.parts_used);
+      }
     }
   }, [editData, customers, problemEditor, repairDetailEditor]);
 
@@ -152,6 +167,7 @@ export default function RepairForm() {
       ...form,
       problem: problemText,
       repair_detail: repairDetailText,
+      parts_used: partsUsed,
     };
     mutation.mutate(formData);
   };
@@ -336,6 +352,73 @@ export default function RepairForm() {
             onChange={(e) => setForm({...form, cost: e.target.value ? Number(e.target.value) : undefined})}
           />
         </div>
+
+        {/* 使用零件 */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700">使用零件</label>
+            <button
+              type="button"
+              onClick={() => setPartsUsed([...partsUsed, { product_id: '', quantity: 1 }])}
+              className="text-sm text-primary-600 hover:text-primary-700"
+            >
+              + 新增零件
+            </button>
+          </div>
+          {partsUsed.length === 0 ? (
+            <p className="text-sm text-gray-400">尚無使用零件</p>
+          ) : (
+            <div className="space-y-2">
+              {partsUsed.map((part, idx) => {
+                const product = inventory.find((p: any) => p.id === part.product_id);
+                const filtered = inventory.filter((p: any) =>
+                  partSearch[idx] ? p.product_name.includes(partSearch[idx] || '') : true
+                );
+                return (
+                  <div key={idx} className="flex gap-2 items-start">
+                    <div className="relative flex-1">
+                      <select
+                        className="input"
+                        value={part.product_id}
+                        onChange={(e) => {
+                          const updated = [...partsUsed];
+                          updated[idx] = { ...updated[idx], product_id: e.target.value };
+                          setPartsUsed(updated);
+                        }}
+                      >
+                        <option value="">選擇零件...</option>
+                        {inventory.map((p: any) => (
+                          <option key={p.id} value={p.id}>
+                            {p.product_name} (庫存:{p.quantity})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      type="number"
+                      className="input w-20"
+                      min="1"
+                      value={part.quantity}
+                      onChange={(e) => {
+                        const updated = [...partsUsed];
+                        updated[idx] = { ...updated[idx], quantity: Number(e.target.value) };
+                        setPartsUsed(updated);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setPartsUsed(partsUsed.filter((_, i) => i !== idx))}
+                      className="text-red-500 hover:text-red-700 p-2"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         <div className="flex gap-3 pt-4">
           <button type="submit" className="btn btn-primary" disabled={mutation.isPending}>
             {mutation.isPending ? '儲存中...' : '儲存'}

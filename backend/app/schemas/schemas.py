@@ -1,9 +1,12 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, field_validator
+from typing import Optional, List, Union
 from datetime import datetime, date
 from uuid import UUID
 from decimal import Decimal
 from enum import Enum
+
+# ===== Utility Types =====
+StrInt = Union[str, int]  # 接受字串或整數（如統編 tax_id）
 
 # ===== Enums =====
 class RepairStatusEnum(str, Enum):
@@ -22,10 +25,17 @@ class CustomerBase(BaseModel):
     name: str
     phone: str
     phone2: Optional[str] = None
-    tax_id: Optional[str] = None
+    tax_id: Optional[StrInt] = None
     address: Optional[str] = None
     email: Optional[str] = None
+    contact_person: Optional[str] = None
+    fax: Optional[str] = None
     note: Optional[str] = None
+
+    @field_validator("tax_id", mode="before")
+    @classmethod
+    def tax_id_int_to_str(cls, v):
+        return str(v) if isinstance(v, int) else v
 
 class CustomerCreate(CustomerBase):
     pass
@@ -37,6 +47,8 @@ class CustomerUpdate(BaseModel):
     tax_id: Optional[str] = None
     address: Optional[str] = None
     email: Optional[str] = None
+    contact_person: Optional[str] = None
+    fax: Optional[str] = None
     note: Optional[str] = None
 
 class CustomerResponse(CustomerBase):
@@ -51,14 +63,20 @@ class CustomerResponse(CustomerBase):
 class RepairBase(BaseModel):
     customer_id: UUID
     device_type: str
-    device_brand: Optional[str] = None
-    device_model: Optional[str] = None
-    serial_number: Optional[str] = None
+    device_brand: Optional[StrInt] = None
+    device_model: Optional[StrInt] = None
+    serial_number: Optional[StrInt] = None
     problem: str
     status: RepairStatusEnum = RepairStatusEnum.pending
-    repair_detail: Optional[str] = None
+    repair_detail: Optional[StrInt] = None
     cost: Optional[Decimal] = None
     completed_at: Optional[datetime] = None
+    parts_used: Optional[List[dict]] = None  # [{product_id, quantity}]
+
+    @field_validator("device_brand", "device_model", "serial_number", "repair_detail", mode="before")
+    @classmethod
+    def str_int_to_str(cls, v):
+        return str(v) if isinstance(v, int) else v
 
 class RepairCreate(RepairBase):
     pass
@@ -74,6 +92,7 @@ class RepairUpdate(BaseModel):
     repair_detail: Optional[str] = None
     cost: Optional[Decimal] = None
     completed_at: Optional[datetime] = None
+    parts_used: Optional[List[dict]] = None
 
 class RepairResponse(RepairBase):
     id: UUID

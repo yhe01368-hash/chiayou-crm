@@ -136,6 +136,21 @@ export default function RepairDetail() {
         </div>
       </div>
 
+      {/* Parts Used */}
+      {repair.parts_used && repair.parts_used.length > 0 && (
+        <div className="card p-6">
+          <h2 className="font-semibold text-gray-900 mb-4">使用零件</h2>
+          <div className="space-y-2">
+            {repair.parts_used.map((part: any, idx: number) => (
+              <div key={idx} className="flex justify-between text-sm border-b pb-2">
+                <span className="text-gray-700">{part.product_name || part.product_id}</span>
+                <span className="text-gray-500">x{part.quantity}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-3">
         <Link to="/repairs" className="btn btn-secondary">返回列表</Link>

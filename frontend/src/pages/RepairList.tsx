@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { repairApi } from '../services/api';
 import type { Repair } from '../types';
-import { Plus, Edit2, Trash2, Wrench } from 'lucide-react';
+import { Plus, Edit2, Trash2, Wrench, Search } from 'lucide-react';
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   pending: { label: '待處理', color: 'bg-yellow-100 text-yellow-700' },
@@ -16,6 +16,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 export default function RepairList() {
   const [searchParams] = useSearchParams();
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 
   const { data: repairs = [], isLoading } = useQuery({
@@ -28,6 +29,21 @@ export default function RepairList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['repairs'] }),
   });
 
+  // Client-side search filter
+  const filteredRepairs = repairs.filter((repair: Repair) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      repair.device_type?.toLowerCase().includes(q) ||
+      repair.device_brand?.toLowerCase().includes(q) ||
+      repair.device_model?.toLowerCase().includes(q) ||
+      repair.problem?.toLowerCase().includes(q) ||
+      repair.customer?.name?.toLowerCase().includes(q) ||
+      repair.customer?.phone?.includes(q) ||
+      String(repair.cost ?? '').includes(q)
+    );
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -35,6 +51,18 @@ export default function RepairList() {
         <Link to="/repairs/new" className="btn btn-primary flex items-center gap-2">
           <Plus size={20} /> 新增維修單
         </Link>
+      </div>
+
+      {/* Search bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <input
+          type="text"
+          placeholder="搜尋維修單（客戶、設備、問題、費用）..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        />
       </div>
 
       {/* Status filter */}
@@ -59,11 +87,13 @@ export default function RepairList() {
         <div className="animate-pulse space-y-4">
           {[1,2,3].map(i => <div key={i} className="h-32 bg-gray-200 rounded-xl" />)}
         </div>
-      ) : repairs.length === 0 ? (
-        <div className="card p-12 text-center text-gray-500">尚無維修記錄</div>
+      ) : filteredRepairs.length === 0 ? (
+        <div className="card p-12 text-center text-gray-500">
+          {searchQuery ? '無符合「' + searchQuery + '」的維修記錄' : '尚無維修記錄'}
+        </div>
       ) : (
         <div className="grid gap-4">
-          {repairs.map((repair: Repair) => (
+          {filteredRepairs.map((repair: Repair) => (
             <div key={repair.id} className="card p-4">
               <div className="flex flex-col sm:flex-row justify-between gap-4">
                 <div className="flex-1">

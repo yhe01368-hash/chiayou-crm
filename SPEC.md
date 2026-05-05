@@ -22,6 +22,8 @@
 | tax_id | VARCHAR(20) | 統一編號（選填，8碼）|
 | address | TEXT | 地址 |
 | email | VARCHAR(100) | Email（選填）|
+| contact_person | VARCHAR(100) | 聯絡人（選填）|
+| fax | VARCHAR(20) | 傳真（選填）|
 | note | TEXT | 備註（選填）|
 | created_at | TIMESTAMP | 建立時間 |
 | updated_at | TIMESTAMP | 更新時間 |

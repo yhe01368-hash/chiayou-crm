@@ -10,7 +10,52 @@ const api = axios.create({
   },
 });
 
-// ===== 客戶 API =====
+// ── 請求攔截器：自動附加 JWT Token ───────────────────────────────────────────
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('chiayou_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// ── 回應攔截器：401 時清除 Token 並跳轉登入 ─────────────────────────────────
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('chiayou_token');
+      localStorage.removeItem('chiayou_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// ── Auth API ────────────────────────────────────────────────────────────────
+export const authApi = {
+  login: (username: string, password: string) =>
+    api.post('/auth/login', new URLSearchParams({ username, password }), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    }),
+  logout: () => api.post('/auth/logout'),
+  me: () => api.get('/auth/me'),
+};
+
+// ── Users API ────────────────────────────────────────────────────────────────
+export const userApi = {
+  getAll: () => api.get('/users'),
+  getById: (id: string) => api.get(`/users/${id}`),
+  create: (data: { username: string; password: string; full_name: string; role: string }) =>
+    api.post('/users', data),
+  update: (id: string, data: { full_name?: string; role?: string; is_active?: boolean }) =>
+    api.patch(`/users/${id}`, data),
+  delete: (id: string) => api.delete(`/users/${id}`),
+  resetPassword: (id: string, new_password: string) =>
+    api.post(`/users/${id}/reset-password`, { new_password }),
+};
+
+// ── 客戶 API ────────────────────────────────────────────────────────────────
 export const customerApi = {
   getAll: (search?: string) =>
     api.get('/customers', { params: { search } }),
@@ -24,7 +69,7 @@ export const customerApi = {
     api.delete(`/customers/${id}`),
 };
 
-// ===== 維修 API =====
+// ── 維修 API ────────────────────────────────────────────────────────────────
 export const repairApi = {
   getAll: (params?: { status?: string; customer_id?: string }) =>
     api.get('/repairs', { params }),
@@ -40,7 +85,7 @@ export const repairApi = {
     api.delete(`/repairs/${id}`),
 };
 
-// ===== 庫存 API =====
+// ── 庫存 API ────────────────────────────────────────────────────────────────
 export const inventoryApi = {
   getAll: (params?: { category?: string; search?: string; low_stock?: boolean }) =>
     api.get('/inventory', { params }),
@@ -56,7 +101,7 @@ export const inventoryApi = {
     api.delete(`/inventory/${id}`),
 };
 
-// ===== 出貨單 API =====
+// ── 出貨單 API ──────────────────────────────────────────────────────────────
 export const shipmentApi = {
   getAll: (params?: { status?: string; customer_id?: string }) =>
     api.get('/shipments', { params }),
@@ -70,12 +115,13 @@ export const shipmentApi = {
     api.delete(`/shipments/${id}`),
 };
 
-// ===== 儀表板 API =====
+// ── 儀表板 API ──────────────────────────────────────────────────────────────
 export const dashboardApi = {
   get: () => api.get('/dashboard'),
+  getRevenueDetails: () => api.get('/dashboard/revenue/details'),
 };
 
-// ===== 維修知識庫 API =====
+// ── 維修知識庫 API ─────────────────────────────────────────────────────────
 export const knowledgeApi = {
   getAll: (params?: { search?: string; category?: string }) =>
     api.get('/knowledge', { params }),

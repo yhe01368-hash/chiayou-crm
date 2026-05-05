@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Optional
 from uuid import UUID
 import httpx
 
 from app.core.supabase_client import get_client
 from app.schemas.schemas import InventoryCreate, InventoryUpdate, InventoryResponse, StockAdjust
+from app.routes.auth import get_current_user
 
 router = APIRouter(prefix="/api/inventory", tags=["庫存管理"])
 
@@ -21,6 +22,7 @@ def get_inventory(
     low_stock: bool = Query(False),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
+    _current_user: dict = Depends(get_current_user),
 ):
     sb = get_client()
 
@@ -51,7 +53,7 @@ def get_inventory(
 
 
 @router.get("/{item_id}", response_model=InventoryResponse)
-def get_inventory_item(item_id: UUID):
+def get_inventory_item(item_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         row = sb.select(
@@ -71,7 +73,7 @@ def get_inventory_item(item_id: UUID):
 
 
 @router.post("", response_model=InventoryResponse, status_code=201)
-def create_inventory_item(item: InventoryCreate):
+def create_inventory_item(item: InventoryCreate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = item.model_dump()
 
@@ -105,7 +107,7 @@ def create_inventory_item(item: InventoryCreate):
 
 
 @router.put("/{item_id}", response_model=InventoryResponse)
-def update_inventory_item(item_id: UUID, item: InventoryUpdate):
+def update_inventory_item(item_id: UUID, item: InventoryUpdate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     payload = item.model_dump(exclude_unset=True)
     if not payload:
@@ -132,7 +134,7 @@ def update_inventory_item(item_id: UUID, item: InventoryUpdate):
 
 
 @router.patch("/{item_id}/stock", response_model=InventoryResponse)
-def adjust_stock(item_id: UUID, adjustment: StockAdjust):
+def adjust_stock(item_id: UUID, adjustment: StockAdjust, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
 
     # 先取得目前的 quantity
@@ -170,7 +172,7 @@ def adjust_stock(item_id: UUID, adjustment: StockAdjust):
 
 
 @router.delete("/{item_id}", status_code=204)
-def delete_inventory_item(item_id: UUID):
+def delete_inventory_item(item_id: UUID, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
     try:
         sb.delete("inventory", filters={"id": str(item_id)})
