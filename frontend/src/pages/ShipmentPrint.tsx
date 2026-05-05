@@ -215,6 +215,7 @@ export default function ShipmentPrint() {
           boxSizing: 'border-box',
           fontFamily: '"新細明體", "Microsoft JhengHei", sans-serif',
           fontSize: '9.5pt',
+          fontWeight: 'bold',
           color: '#1a1a1a',
           lineHeight: 1.3,
         }}>
