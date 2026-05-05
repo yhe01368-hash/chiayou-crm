@@ -166,7 +166,7 @@ export default function ShipmentPrint() {
             <Printer size={16} /> 列印
           </button>
           <button onClick={() => setShowDialog(true)} className="btn btn-secondary flex items-center gap-2">
-            <Download size={16} /> 稅額選擇
+            <Download size={16} /> 下載PDF
           </button>
         </div>
 
@@ -174,8 +174,8 @@ export default function ShipmentPrint() {
         {showDialog && (
           <div className="no-print" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="bg-white rounded-lg p-6 shadow-xl max-w-sm w-full mx-4" style={{ position: 'relative', zIndex: 10000 }}>
-              <h3 className="text-lg font-bold mb-4">選擇列印選項</h3>
-              <p className="text-gray-600 mb-4">是否要列印稅額與總計？</p>
+              <h3 className="text-lg font-bold mb-4">選擇下載選項</h3>
+              <p className="text-gray-600 mb-4">是否要包含稅額與總計？</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => {
