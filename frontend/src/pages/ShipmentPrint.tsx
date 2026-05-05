@@ -224,11 +224,11 @@ export default function ShipmentPrint() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3pt' }}>
             <div>
               <div style={{ fontSize: '11.5pt', fontWeight: 'bold', color: '#1a1a1a' }}>嘉祐資訊企業有限公司</div>
-              <div style={{ fontSize: '8pt', color: '#444', lineHeight: 1.2 }}>台中市豐原區中正路 737 巷 23 弄 2 號</div>
+              <div style={{ fontSize: '10pt', fontWeight: 'bold', color: '#444', lineHeight: 1.2 }}>台中市豐原區中正路 737 巷 23 弄 2 號</div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2pt', fontSize: '8pt' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2pt', fontSize: '10pt', fontWeight: 'bold' }}>
               <div>電話：04-25279968 傳真：04-25279997</div>
-              <div style={{ background: '#e0e0e0', color: '#1a1a1a', padding: '2pt 4pt', fontSize: '8pt', fontWeight: 'bold' }}>
+              <div style={{ background: '#e0e0e0', color: '#1a1a1a', padding: '2pt 4pt', fontSize: '10pt', fontWeight: 'bold' }}>
                 貨單號碼：{shipment.shipment_number}
               </div>
             </div>
@@ -242,24 +242,24 @@ export default function ShipmentPrint() {
           {/* 客戶資料區 - 兩列 */}
           <div style={{ border, padding: '3pt', marginBottom: '3pt' }}>
             {/* 第一列：客戶名稱 + 客戶地址 */}
-            <div style={{ display: 'flex', gap: '2pt', fontSize: '10pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between', marginBottom: '2pt' }}>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶名稱：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.name || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>客戶地址：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 2, fontWeight: 'bold' }}>{shipment.customer?.address || '-'}</span>
+            <div style={{ display: 'flex', gap: '2pt', fontSize: '10pt', fontWeight: 'bold', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between', marginBottom: '2pt' }}>
+              <span style={{ whiteSpace: 'nowrap' }}>客戶名稱：</span>
+              <span style={{ flex: 1 }}>{shipment.customer?.name || '-'}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>客戶地址：</span>
+              <span style={{ flex: 2 }}>{shipment.customer?.address || '-'}</span>
             </div>
             {/* 第二列：電話、傳真、手機、統編、聯絡人 */}
-            <div style={{ display: 'flex', gap: '2pt', fontSize: '10pt', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>電 話：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.phone || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>傳 真：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.fax || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>手 機：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.phone2 || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>統 編：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.tax_id || '-'}</span>
-              <span style={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>聯絡人：</span>
-              <span style={{ borderBottom: '1px dotted #aaa', flex: 1, fontWeight: 'bold' }}>{shipment.customer?.contact || '-'}</span>
+            <div style={{ display: 'flex', gap: '2pt', fontSize: '10pt', fontWeight: 'bold', lineHeight: 1.6, alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ whiteSpace: 'nowrap' }}>電 話：</span>
+              <span style={{ flex: 1 }}>{shipment.customer?.phone || '-'}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>傳 真：</span>
+              <span style={{ flex: 1 }}>{shipment.customer?.fax || '-'}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>手 機：</span>
+              <span style={{ flex: 1 }}>{shipment.customer?.phone2 || '-'}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>統 編：</span>
+              <span style={{ flex: 1 }}>{shipment.customer?.tax_id || '-'}</span>
+              <span style={{ whiteSpace: 'nowrap' }}>聯絡人：</span>
+              <span style={{ flex: 1 }}>{shipment.customer?.contact || '-'}</span>
             </div>
           </div>
 
@@ -332,8 +332,8 @@ export default function ShipmentPrint() {
           </div>
 
           {/* 注意事項 */}
-          <div style={{ border, padding: '3pt', marginBottom: '3pt', fontSize: '9.75pt', lineHeight: 1.3 }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '1pt', fontSize: '10.4pt' }}>注意事項：</div>
+          <div style={{ border, padding: '3pt', marginBottom: '3pt', fontSize: '9pt', lineHeight: 1.3 }}>
+            <div style={{ fontWeight: 'bold', marginBottom: '1pt', fontSize: '10pt' }}>注意事項：</div>
             <div>1. 請注意客戶送修電腦其內裝所有軟體，有關版權問題一律與本公司無關，特此聲明！</div>
             <div>2. 如有需要安裝新軟體，請客戶自備版權軟體，或由本公司代購。</div>
             <div>3. 客戶取回之產品，三日內同問題應立即告知，逾期無效；不同原因之問題視為計費維修。</div>
@@ -376,4 +376,5 @@ const td: React.CSSProperties = {
   padding: '2pt 3pt',
   verticalAlign: 'middle',
   lineHeight: 1.2,
+  fontWeight: 'bold',
 };
