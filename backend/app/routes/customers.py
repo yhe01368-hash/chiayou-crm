@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api/customers", tags=["客戶管理"])
 def get_customers(
     search: Optional[str] = Query(None, description="搜尋姓名或電話"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=500),
+    limit: int = Query(500, ge=1, le=500),
     _current_user: dict = Depends(get_current_user),
 ):
     sb = get_client()
