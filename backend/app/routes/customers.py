@@ -24,11 +24,12 @@ def get_customers(
         # PostgREST or filter — name.ilike or phone.ilike
         # 用 text search 用 or 串接
         try:
+            # Fetch all rows for client-side filtering (limit=500 to cover all customers)
             rows = sb.select(
                 "customers",
                 select="*",
                 order="created_at.desc",
-                limit=limit,
+                limit=500,
             )
         except httpx.HTTPStatusError as e:
             raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
