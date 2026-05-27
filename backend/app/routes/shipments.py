@@ -103,100 +103,65 @@ def get_shipment(shipment_id: UUID, _current_user: dict = Depends(get_current_us
 def create_shipment(shipment: ShipmentCreate, _current_user: dict = Depends(get_current_user)):
     sb = get_client()
 
-    # 驗證客戶存在
-    try:
-        customer = sb.select(
-            "customers",
-            select="id",
-            filters={"id": str(shipment.customer_id)},
-            single=True,
-        )
-    except Exception:
-        customer = None
-    if not customer:
-        raise HTTPException(status_code=404, detail="客戶不存在")
+    # 把商品清單轉成 JSONB 格式
+    items_jsonb = [
+        {"product_id": str(item.product_id), "quantity": item.quantity}
+        for item in shipment.items
+    ]
 
-    shipment_id = None
-    created_shipment = None
+    # 直接呼叫 PostgreSQL function，一次完成所有寫入
+    result = sb.rpc(
+        "create_shipment_with_items",
+        {
+            "p_customer_id": str(shipment.customer_id),
+            "p_shipment_date": (shipment.shipment_date or date.today()).isoformat(),
+            "p_note": shipment.note,
+            "p_tax_included": shipment.tax_included if shipment.tax_included is not None else True,
+            "p_items": items_jsonb,
+        },
+        postgrest_rpc=True,
+    )
 
-    try:
-        # 建立出貨單主表
-        shipment_payload = {
-            "shipment_number": _generate_shipment_number(),
-            "customer_id": str(shipment.customer_id),
-            "shipment_date": (shipment.shipment_date or date.today()).isoformat(),
-            "status": "draft",
-            "note": shipment.note,
-            "tax_included": shipment.tax_included if shipment.tax_included is not None else True,
-        }
-        created_shipment = sb.insert("shipments", shipment_payload)
-        shipment_id = created_shipment["id"]
+    # RPC 回傳會是 list，取第一筆
+    if isinstance(result, list) and len(result) > 0:
+        row = result[0]
+    elif isinstance(result, dict):
+        row = result
+    else:
+        raise HTTPException(status_code=500, detail="建立出貨單失敗")
 
-        total = Decimal("0")
+    # 將 items JSONB 轉換成乾淨的 dict list
+    items_from_db = row.get("items", []) or []
+    clean_items = []
+    for it in items_from_db:
+        clean_items.append({
+            "product_id": str(it.get("product_id")),
+            "product_name": it.get("product_name", ""),
+            "quantity": it.get("quantity", 0),
+            "unit_price": it.get("unit_price", 0),
+            "subtotal": it.get("subtotal", 0),
+        })
+    row["items"] = clean_items
 
-        # 建立明細並扣庫存
-        for item in shipment.items:
-            # 取得商品
-            try:
-                product = sb.select(
-                    "inventory",
-                    select="*",
-                    filters={"id": str(item.product_id)},
-                    single=True,
-                )
-            except Exception:
-                product = None
+    # 載入客戶詳細資料
+    customer = sb.select(
+        "customers",
+        select="*",
+        filters={"id": str(shipment.customer_id)},
+        single=True,
+    )
+    row["customer"] = customer
 
-            if not product:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"商品 ID {item.product_id} 不存在"
-                )
+    # 建立正式明細 record（因為 RPC 只回 JSON，補充 ID）
+    # 重新查一次確保前端要的 items 結构完整
+    db_items = sb.select(
+        "shipment_items",
+        select="*",
+        filters={"shipment_id": row["id"]},
+    )
+    row["items"] = db_items
 
-            if product["quantity"] < item.quantity:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"商品「{product['product_name']}」庫存不足，目前庫存：{product['quantity']}"
-                )
-
-            # 扣庫存
-            new_qty = product["quantity"] - item.quantity
-            sb.update(
-                "inventory",
-                {"quantity": new_qty},
-                filters={"id": str(item.product_id)},
-            )
-
-            subtotal = Decimal(str(item.quantity)) * Decimal(str(product["selling_price"]))
-            total += subtotal
-
-            item_payload = {
-                "shipment_id": shipment_id,
-                "product_id": str(item.product_id),
-                "product_name": product["product_name"],
-                "quantity": item.quantity,
-                "unit_price": float(product["selling_price"]),
-                "subtotal": float(subtotal),
-            }
-            sb.insert("shipment_items", item_payload)
-
-        # 更新總金額
-        sb.update(
-            "shipments",
-            {"total_amount": float(total)},
-            filters={"id": shipment_id},
-        )
-        created_shipment["total_amount"] = float(total)
-
-    except HTTPException:
-        raise
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=str(e))
-
-    # 重新載入完整資料
-    return _load_shipment(sb, shipment_id)
+    return row
 
 
 @router.put("/{shipment_id}", response_model=ShipmentResponse)

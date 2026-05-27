@@ -158,3 +158,104 @@ CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 
 -- 完成
 SELECT 'CRM 資料庫設定完成！' AS status;
+
+-- ===============================================
+-- 出貨單快速建立函式（效能優化）
+-- 一次交易完成：建立主表、寫入明細、扣庫存
+-- ===============================================
+CREATE OR REPLACE FUNCTION create_shipment_with_items(
+    p_customer_id UUID,
+    p_shipment_date DATE,
+    p_note TEXT,
+    p_tax_included BOOLEAN,
+    p_items JSONB  -- [{"product_id": "uuid", "quantity": int}]
+)
+RETURNS TABLE(
+    shipment_id UUID,
+    shipment_number VARCHAR(20),
+    customer_id UUID,
+    shipment_date DATE,
+    total_amount DECIMAL(12,2),
+    tax_included BOOLEAN,
+    status VARCHAR(20),
+    note TEXT,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    items JSONB
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_shipment_number VARCHAR(20);
+    v_shipment_id UUID;
+    v_item JSONB;
+    v_product_id UUID;
+    v_qty INTEGER;
+    v_unit_price DECIMAL(10,2);
+    v_subtotal DECIMAL(12,2);
+    v_total DECIMAL(12,2) := 0;
+    v_items JSONB := '[]'::JSONB;
+BEGIN
+    -- 產生單號
+    v_shipment_number := 'SH' || TO_CHAR(NOW(), 'YYYYMMDDHH24MISS');
+
+    -- 驗證客戶存在
+    IF NOT EXISTS (SELECT 1 FROM customers WHERE id = p_customer_id) THEN
+        RAISE EXCEPTION '客戶不存在';
+    END IF;
+
+    -- 建立出貨單主表
+    INSERT INTO shipments (shipment_number, customer_id, shipment_date, note, tax_included, status, total_amount)
+    VALUES (v_shipment_number, p_customer_id, COALESCE(p_shipment_date, CURRENT_DATE), p_note, COALESCE(p_tax_included, true), 'draft', 0)
+    RETURNING id INTO v_shipment_id;
+
+    -- 處理每個商品
+    FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
+    LOOP
+        v_product_id := (v_item->>'product_id')::UUID;
+        v_qty := (v_item->>'quantity')::INTEGER;
+
+        -- 檢查商品存在與庫存
+        IF NOT EXISTS (SELECT 1 FROM inventory WHERE id = v_product_id) THEN
+            RAISE EXCEPTION '商品不存在: %', v_product_id;
+        END IF;
+
+        IF (SELECT quantity FROM inventory WHERE id = v_product_id) < v_qty THEN
+            RAISE EXCEPTION '庫存不足: % (庫存: %)', v_product_id, (SELECT quantity FROM inventory WHERE id = v_product_id);
+        END IF;
+
+        -- 扣庫存
+        UPDATE inventory SET quantity = quantity - v_qty WHERE id = v_product_id;
+
+        -- 取得單價
+        SELECT selling_price INTO v_unit_price FROM inventory WHERE id = v_product_id;
+        v_subtotal := v_unit_price * v_qty;
+        v_total := v_total + v_subtotal;
+
+        -- 寫入明細
+        INSERT INTO shipment_items (shipment_id, product_id, product_name, quantity, unit_price, subtotal)
+        SELECT v_shipment_id, id, product_name, v_qty, v_unit_price, v_subtotal FROM inventory WHERE id = v_product_id;
+
+        -- 蒐集 items JSONB
+        v_items := v_items || jsonb_build_object(
+            'product_id', v_product_id,
+            'product_name', (SELECT product_name FROM inventory WHERE id = v_product_id),
+            'quantity', v_qty,
+            'unit_price', v_unit_price,
+            'subtotal', v_subtotal
+        );
+    END LOOP;
+
+    -- 更新總金額
+    UPDATE shipments SET total_amount = v_total WHERE id = v_shipment_id;
+
+    -- 回傳結果
+    RETURN QUERY
+    SELECT
+        s.id, s.shipment_number, s.customer_id, s.shipment_date,
+        s.total_amount, s.tax_included, s.status, s.note,
+        s.created_at, s.updated_at, v_items
+    FROM shipments s
+    WHERE s.id = v_shipment_id;
+END;
+$$;

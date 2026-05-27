@@ -142,13 +142,21 @@ class SupabaseClient:
         resp.raise_for_status()
         return resp.status_code in (200, 204, 404)
 
-    def rpc(self, function: str, params: dict[str, Any] | None = None) -> Any:
+    def rpc(self, function: str, params: dict[str, Any] | None = None, *, postgrest_rpc: bool = False) -> Any:
         """
         呼叫 PostgREST RPC (stored procedure)
+
+        postgrest_rpc=True 時，直接用 named parameters（不走 args 包裝），
+        適用於 CREATE OR REPLACE FUNCTION 的多參數場景。
         """
         headers = dict(self.headers)
         headers["Content-Type"] = "application/json"
-        body = {"args": params or {}}
+        if postgrest_rpc:
+            # PostgREST RPC 直接接受 named parameters JSON body
+            body = params or {}
+        else:
+            # 標準格式：包在 args 裡
+            body = {"args": params or {}}
         resp = self.client.post(f"/rest/v1/rpc/{function}", json=body, headers=headers)
         resp.raise_for_status()
         return resp.json()
