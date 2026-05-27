@@ -12,7 +12,7 @@ export default function ShipmentPrint() {
   const { id } = useParams();
   const paperRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
-  const [showTax, setShowTax] = useState(shipment?.tax_included ?? true);
+  const [showTax, setShowTax] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
 
   const { data: shipment, isLoading } = useQuery({
