@@ -273,7 +273,9 @@ export default function ShipmentForm() {
                 含稅
               </label>
               <div className="text-lg font-bold">
-                總金額：{taxIncluded ? '' : '(未稅)'}${total.toLocaleString()}
+                總金額：{taxIncluded ? '' : '(未稅)'}${taxIncluded
+                  ? Math.round(total * 1.05).toLocaleString()
+                  : total.toLocaleString()}
                 {taxIncluded && <span className="text-sm text-gray-500 ml-1">含稅</span>}
               </div>
             </div>
