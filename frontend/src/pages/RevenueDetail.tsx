@@ -120,6 +120,7 @@ export default function RevenueDetail() {
                   <td className="px-4 py-3 text-gray-600">{item.customer_name}</td>
                   <td className="px-4 py-3 text-right font-medium text-green-700">
                     ${Number(item.total_amount ?? 0).toLocaleString()}
+                    {item.tax_included === false && <span className="text-xs text-gray-400 ml-1">(未稅)</span>}
                   </td>
                 </tr>
               ))}

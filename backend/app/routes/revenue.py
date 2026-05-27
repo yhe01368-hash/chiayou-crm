@@ -66,12 +66,16 @@ def get_revenue_details(
                 cust = sb.select("customers", select="name", filters={"id": row["customer_id"]}, single=True)
                 if cust:
                     customer_name = cust.get("name", "")
+            raw_amount = row.get("total_amount", 0) or 0
+            # 含稅出貨單 → 加計5%
+            display_amount = raw_amount * 1.05 if row.get("tax_included") else raw_amount
             result.append({
                 "id": sid,
                 "shipment_number": row.get("shipment_number", ""),
                 "customer_name": customer_name,
                 "shipment_date": row.get("shipment_date", ""),
-                "total_amount": row.get("total_amount", 0),
+                "total_amount": display_amount,
+                "tax_included": row.get("tax_included", False),
             })
 
         total = sum(r["total_amount"] or 0 for r in result)
