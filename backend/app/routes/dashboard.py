@@ -27,15 +27,16 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
         )
         low_stock_items = len([r for r in low_rows if r.get("quantity", 0) <= r.get("min_stock", 0)]) if low_rows else 0
 
-        # 3. 本月營收 (completed shipments，日期 >= 本月1號)
+        # 3. 本月營收 (completed shipments，日期 >= 本月1號，含稅則加計5%)
         first_day = datetime.now().replace(day=1).date().isoformat()
         completed_rows = sb.select(
             "shipments",
-            select="total_amount",
+            select="total_amount,tax_included",
             filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
         )
         monthly_revenue = float(sum(
-            r.get("total_amount", 0) or 0
+            (r.get("total_amount", 0) or 0) * 1.05
+            if r.get("tax_included") else (r.get("total_amount", 0) or 0)
             for r in (completed_rows or [])
             if isinstance(r.get("total_amount"), (int, float))
         ))
