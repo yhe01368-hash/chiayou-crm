@@ -113,7 +113,9 @@ export default function ShipmentList() {
                   <div className="text-right">
                     <div className="text-sm text-gray-500">總金額</div>
                     <div className="text-lg font-bold text-gray-900">
-                      ${Number(shipment.total_amount).toLocaleString()}
+                      ${Number(shipment.tax_included
+                        ? Math.round(Number(shipment.total_amount) * 1.05)
+                        : shipment.total_amount).toLocaleString()}
                       {shipment.tax_included === false && <span className="text-xs text-gray-400 ml-1">(未稅)</span>}
                     </div>
                   </div>
