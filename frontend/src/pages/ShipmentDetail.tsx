@@ -56,7 +56,10 @@ export default function ShipmentDetail() {
           </div>
           <div className="text-right">
             <div className="text-sm text-gray-500">總金額</div>
-            <div className="text-3xl font-bold text-primary-600">${Number(shipment.total_amount).toLocaleString()}</div>
+            <div className="text-3xl font-bold text-primary-600">
+              ${Number(shipment.total_amount).toLocaleString()}
+              {shipment.tax_included === false && <span className="text-base text-gray-400 ml-1">(未稅)</span>}
+            </div>
           </div>
         </div>
       </div>
@@ -116,7 +119,9 @@ export default function ShipmentDetail() {
               </tbody>
               <tfoot>
                 <tr className="text-right">
-                  <td colSpan={3} className="pt-4 text-lg font-semibold">總金額</td>
+                  <td colSpan={3} className="pt-4 text-lg font-semibold">
+                    總金額{shipment.tax_included === false && <span className="text-sm text-gray-400 ml-1">(未稅)</span>}
+                  </td>
                   <td className="pt-4 text-lg font-bold text-primary-600">
                     ${Number(shipment.total_amount).toLocaleString()}
                   </td>

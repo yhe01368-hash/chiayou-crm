@@ -23,6 +23,7 @@ export default function ShipmentForm() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<ShipmentItemInput[]>([]);
+  const [taxIncluded, setTaxIncluded] = useState(true);
   // 追蹤是否已初始化
   const editorInitializedRef = useRef(false);
 
@@ -85,6 +86,7 @@ export default function ShipmentForm() {
         product_id: item.product_id,
         quantity: item.quantity,
       })));
+      setTaxIncluded(editData.tax_included !== undefined ? editData.tax_included : true);
       if (editor && editData.note) {
         editor.commands.setContent(editData.note);
       }
@@ -108,7 +110,7 @@ export default function ShipmentForm() {
     if (!customerId) return alert('請選擇客戶');
     if (items.length === 0) return alert('請新增商品');
     const noteText = editor?.getHTML() || '';
-    mutation.mutate({ customer_id: customerId, items, note: noteText, status: 'completed' });
+    mutation.mutate({ customer_id: customerId, items, note: noteText, status: 'completed', tax_included: taxIncluded });
   };
 
   const addItem = () => {
@@ -260,8 +262,20 @@ export default function ShipmentForm() {
             </div>
           )}
           {items.length > 0 && (
-            <div className="mt-4 text-right text-lg font-bold">
-              總金額：${total.toLocaleString()}
+            <div className="mt-4 flex items-center justify-end gap-4">
+              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={taxIncluded}
+                  onChange={(e) => setTaxIncluded(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                含稅
+              </label>
+              <div className="text-lg font-bold">
+                總金額：{taxIncluded ? '' : '(未稅)'}${total.toLocaleString()}
+                {taxIncluded && <span className="text-sm text-gray-500 ml-1">含稅</span>}
+              </div>
             </div>
           )}
         </div>

@@ -112,7 +112,10 @@ export default function ShipmentList() {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <div className="text-sm text-gray-500">總金額</div>
-                    <div className="text-lg font-bold text-gray-900">${Number(shipment.total_amount).toLocaleString()}</div>
+                    <div className="text-lg font-bold text-gray-900">
+                      ${Number(shipment.total_amount).toLocaleString()}
+                      {shipment.tax_included === false && <span className="text-xs text-gray-400 ml-1">(未稅)</span>}
+                    </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <Link to={`/shipments/${shipment.id}`} className="btn btn-secondary text-sm">

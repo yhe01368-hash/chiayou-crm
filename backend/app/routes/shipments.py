@@ -127,6 +127,7 @@ def create_shipment(shipment: ShipmentCreate, _current_user: dict = Depends(get_
             "shipment_date": (shipment.shipment_date or date.today()).isoformat(),
             "status": "draft",
             "note": shipment.note,
+            "tax_included": shipment.tax_included if shipment.tax_included is not None else True,
         }
         created_shipment = sb.insert("shipments", shipment_payload)
         shipment_id = created_shipment["id"]

@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS shipments (
     total_amount DECIMAL(12,2) DEFAULT 0,
     status VARCHAR(20) DEFAULT 'draft',
     note TEXT,
+    tax_included BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

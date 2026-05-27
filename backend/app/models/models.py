@@ -80,6 +80,7 @@ class Shipment(Base):
     customer_id = Column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=False)
     shipment_date = Column(Date, default=date.today)
     total_amount = Column(Numeric(12, 2), default=0)
+    tax_included = Column(Boolean, default=True)
     status = Column(SQLEnum(ShipmentStatus), default=ShipmentStatus.draft)
     note = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

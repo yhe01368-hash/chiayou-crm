@@ -12,13 +12,19 @@ export default function ShipmentPrint() {
   const { id } = useParams();
   const paperRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
-  const [showTax, setShowTax] = useState(true);
+  const [showTax, setShowTax] = useState(shipment?.tax_included ?? true);
   const [showDialog, setShowDialog] = useState(false);
 
   const { data: shipment, isLoading } = useQuery({
     queryKey: ['shipment', id],
     queryFn: () => shipmentApi.getById(id!).then(res => res.data),
   });
+
+  useEffect(() => {
+    if (shipment && shipment.tax_included !== undefined) {
+      setShowTax(shipment.tax_included);
+    }
+  }, [shipment]);
 
   useEffect(() => {
     // 不要在頁面載入時自動列印，等待使用者選擇

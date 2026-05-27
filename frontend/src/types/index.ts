@@ -65,6 +65,7 @@ export interface Shipment {
   customer_id: string;
   shipment_date: string;
   total_amount: number;
+  tax_included?: boolean;
   status: ShipmentStatus;
   note?: string;
   created_at: string;

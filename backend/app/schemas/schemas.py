@@ -168,6 +168,7 @@ class ShipmentItemResponse(BaseModel):
 class ShipmentBase(BaseModel):
     customer_id: UUID
     shipment_date: Optional[date] = None
+    tax_included: Optional[bool] = True
     status: ShipmentStatusEnum = ShipmentStatusEnum.draft
     note: Optional[str] = None
 
@@ -175,6 +176,7 @@ class ShipmentCreate(BaseModel):
     customer_id: UUID
     shipment_date: Optional[date] = None
     items: List[ShipmentItemCreate]
+    tax_included: Optional[bool] = True
     note: Optional[str] = None
 
 class ShipmentUpdate(BaseModel):
@@ -182,6 +184,7 @@ class ShipmentUpdate(BaseModel):
     status: Optional[ShipmentStatusEnum] = None
     note: Optional[str] = None
     items: Optional[List[ShipmentItemCreate]] = None
+    tax_included: Optional[bool] = None
 
 class ShipmentResponse(ShipmentBase):
     id: UUID
