@@ -92,7 +92,7 @@ export default function Dashboard() {
                     <span className="font-medium">{shipment.shipment_number}</span>
                     <span className="text-gray-500 ml-2">{shipment.customer?.name}</span>
                   </div>
-                  <span className="text-gray-600">${Number(shipment.total_amount).toLocaleString()}</span>
+                  <span className="text-gray-600">${Number(shipment.tax_included ? Math.round(Number(shipment.total_amount) * 1.05) : shipment.total_amount).toLocaleString()}</span>
                 </div>
               ))}
             </div>
