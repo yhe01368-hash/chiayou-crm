@@ -13,7 +13,7 @@ def list_knowledge(search: str = None, category: str = None):
     if category:
         filters["category"] = category
     
-    result = sb.select("knowledge", filters=filters if filters else None)
+    result = sb.select("knowledge", filters=filters if filters else None, order="created_at.desc")
     return result or []
 
 @router.get("/{knowledge_id}", response_model=KnowledgeBaseResponse)
