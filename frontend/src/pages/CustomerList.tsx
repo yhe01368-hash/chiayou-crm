@@ -3,10 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { customerApi } from '../services/api';
 import type { Customer } from '../types';
-import { Plus, Search, Edit2, Trash2, Phone, MapPin } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Phone, MapPin, Download, Upload } from 'lucide-react';
+import CustomerImportDialog from '../components/CustomerImportDialog';
 
 export default function CustomerList() {
   const [search, setSearch] = useState('');
+  const [showImport, setShowImport] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: customers = [], isLoading } = useQuery({
@@ -19,14 +23,60 @@ export default function CustomerList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['customers'] }),
   });
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const res = await customerApi.exportCSV();
+      const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      a.href = url;
+      a.download = `customers_${yyyy}${mm}${dd}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setExportError(err.response?.data?.detail || err.message || '匯出失敗');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-gray-900">客戶管理</h1>
-        <Link to="/customers/new" className="btn btn-primary flex items-center gap-2">
-          <Plus size={20} /> 新增客戶
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={handleExport}
+            disabled={isExporting}
+            className="btn btn-secondary flex items-center gap-2"
+          >
+            <Download size={18} />
+            {isExporting ? '匯出中...' : '匯出 CSV'}
+          </button>
+          <button
+            onClick={() => setShowImport(true)}
+            className="btn btn-secondary flex items-center gap-2"
+          >
+            <Upload size={18} />
+            匯入 CSV
+          </button>
+          <Link to="/customers/new" className="btn btn-primary flex items-center gap-2">
+            <Plus size={20} /> 新增客戶
+          </Link>
+        </div>
       </div>
+
+      {exportError && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+          匯出失敗：{exportError}
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative">
@@ -70,8 +120,12 @@ export default function CustomerList() {
               <div className="flex items-center gap-2">
                 <Link to={`/customers/${customer.id}`} className="btn btn-secondary text-sm">詳情</Link>
                 <Link to={`/customers/${customer.id}/edit`} className="btn btn-secondary text-sm"><Edit2 size={16} /></Link>
-                <button 
-                  onClick={() => deleteMutation.mutate(customer.id)}
+                <button
+                  onClick={() => {
+                    if (window.confirm(`確定要刪除「${customer.name}」嗎？`)) {
+                      deleteMutation.mutate(customer.id);
+                    }
+                  }}
                   className="btn btn-danger text-sm"
                   disabled={deleteMutation.isPending}
                 >
@@ -82,6 +136,8 @@ export default function CustomerList() {
           ))}
         </div>
       )}
+
+      {showImport && <CustomerImportDialog onClose={() => setShowImport(false)} />}
     </div>
   );
 }

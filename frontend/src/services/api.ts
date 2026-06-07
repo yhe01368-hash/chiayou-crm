@@ -67,6 +67,17 @@ export const customerApi = {
     api.put(`/customers/${id}`, data),
   delete: (id: string) =>
     api.delete(`/customers/${id}`),
+  exportCSV: () =>
+    api.get('/customers/export/csv', { responseType: 'blob' }),
+  downloadTemplate: () =>
+    api.get('/customers/export/template', { responseType: 'blob' }),
+  importCSV: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/customers/import/csv', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };
 
 // ── 維修 API ────────────────────────────────────────────────────────────────
