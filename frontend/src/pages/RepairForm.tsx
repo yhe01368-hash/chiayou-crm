@@ -240,7 +240,7 @@ export default function RepairForm() {
               <input
                 type="text"
                 className="input pl-9 pr-8"
-                placeholder="搜尋客戶姓名或電話..."
+                placeholder="搜尋客戶名稱或電話..."
                 value={showDropdown || customerSearch ? customerSearch : ''}
                 onChange={(e) => {
                   setCustomerSearch(e.target.value);

@@ -83,7 +83,7 @@ export default function CustomerList() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
         <input
           type="text"
-          placeholder="搜尋姓名或電話..."
+          placeholder="搜尋名稱或電話..."
           className="input pl-10"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

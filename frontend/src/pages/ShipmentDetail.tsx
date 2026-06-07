@@ -72,7 +72,7 @@ export default function ShipmentDetail() {
         {shipment.customer ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-gray-500">姓名</div>
+              <div className="text-sm text-gray-500">名稱</div>
               <div className="font-medium">{shipment.customer.name}</div>
             </div>
             <div>

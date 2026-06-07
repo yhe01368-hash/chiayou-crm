@@ -114,7 +114,7 @@ export default function CustomerForm() {
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">姓名 *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">名稱 *</label>
           <input
             type="text"
             className="input"

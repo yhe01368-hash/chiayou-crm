@@ -75,7 +75,7 @@ export default function CustomerImportDialog({ onClose }: Props) {
   // 預覽時檢查格式
   const previewIssues = previewData.map((row) => {
     const issues: string[] = [];
-    if (!row['姓名']?.trim()) issues.push('缺少姓名');
+    if (!row['名稱']?.trim()) issues.push('缺少名稱');
     if (!row['電話']?.trim()) issues.push('缺少電話');
     return issues;
   });
@@ -107,7 +107,7 @@ export default function CustomerImportDialog({ onClose }: Props) {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
                 <p className="font-medium mb-1">CSV 格式說明</p>
                 <ul className="list-disc list-inside space-y-0.5 text-blue-700">
-                  <li>第一列為標題，需包含：姓名、電話（必填）</li>
+                  <li>第一列為標題，需包含：名稱、電話（必填）</li>
                   <li>選填欄位：行動電話、統一編號、地址、Email、聯絡人、傳真、備註</li>
                   <li>電話或統編已存在時會自動跳過該列</li>
                 </ul>
@@ -177,7 +177,7 @@ export default function CustomerImportDialog({ onClose }: Props) {
                   <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-medium">{previewErrorCount} 筆資料缺少必填欄位</p>
-                    <p className="text-xs mt-0.5">匯入時這些列會被跳過（缺少姓名或電話）</p>
+                    <p className="text-xs mt-0.5">匯入時這些列會被跳過（缺少名稱或電話）</p>
                   </div>
                 </div>
               )}
@@ -188,7 +188,7 @@ export default function CustomerImportDialog({ onClose }: Props) {
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">#</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">名稱</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">電話</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">統編</th>
                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">問題</th>
@@ -200,7 +200,7 @@ export default function CustomerImportDialog({ onClose }: Props) {
                         return (
                           <tr key={i} className={`border-t border-gray-100 ${issues.length > 0 ? 'bg-red-50' : ''}`}>
                             <td className="px-3 py-2 text-gray-500">{i + 2}</td>
-                            <td className="px-3 py-2">{row['姓名'] || <span className="text-red-500">—</span>}</td>
+                            <td className="px-3 py-2">{row['名稱'] || <span className="text-red-500">—</span>}</td>
                             <td className="px-3 py-2">{row['電話'] || <span className="text-red-500">—</span>}</td>
                             <td className="px-3 py-2 text-gray-600">{row['統一編號'] || '—'}</td>
                             <td className="px-3 py-2 text-xs text-red-600">{issues.join('、') || '—'}</td>
@@ -256,7 +256,7 @@ export default function CustomerImportDialog({ onClose }: Props) {
                       <thead className="bg-gray-50 sticky top-0">
                         <tr>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">列</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">姓名</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">名稱</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">電話</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">狀態</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-600">說明</th>

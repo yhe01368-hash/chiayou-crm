@@ -144,7 +144,7 @@ def export_customers_csv(_current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=502, detail=str(e))
 
     # 定義 CSV 欄位順序
-    fieldnames = ["姓名", "電話", "行動電話", "統一編號", "地址", "Email", "聯絡人", "傳真", "備註"]
+    fieldnames = ["名稱", "電話", "行動電話", "統一編號", "地址", "Email", "聯絡人", "傳真", "備註"]
 
     # 寫入 CSV（使用 BOM 讓 Excel 正確顯示中文）
     output = io.StringIO()
@@ -181,7 +181,7 @@ def export_customers_csv(_current_user: dict = Depends(get_current_user)):
 @router.get("/export/template")
 def export_customers_template(_current_user: dict = Depends(get_current_user)):
     """下載空白 CSV 範本（含一筆範例資料）"""
-    fieldnames = ["姓名", "電話", "行動電話", "統一編號", "地址", "Email", "聯絡人", "傳真", "備註"]
+    fieldnames = ["名稱", "電話", "行動電話", "統一編號", "地址", "Email", "聯絡人", "傳真", "備註"]
 
     output = io.StringIO()
     output.write("\ufeff")
@@ -219,7 +219,7 @@ async def import_customers_csv(
 ):
     """
     批次匯入客戶 CSV
-    預期欄位（標題列）：姓名, 電話, [行動電話, 統一編號, 地址, Email, 聯絡人, 傳真, 備註]
+    預期欄位（標題列）：名稱, 電話, [行動電話, 統一編號, 地址, Email, 聯絡人, 傳真, 備註]
     回傳：{success, total, success_count, failed_count, results: [{row, status, error?}]}
     """
     sb = get_client()
@@ -267,7 +267,7 @@ async def import_customers_csv(
     failed_count = 0
 
     for idx, row in enumerate(rows, start=2):  # 第2列開始（第1列是標題）
-        name = row.get("姓名", "").strip()
+        name = row.get("名稱", "").strip()
         phone = row.get("電話", "").strip()
 
         result = {
@@ -281,7 +281,7 @@ async def import_customers_csv(
         # 驗證必填欄位
         if not name or not phone:
             result["status"] = "failed"
-            result["error"] = "姓名與電話為必填"
+            result["error"] = "名稱與電話為必填"
             results.append(result)
             failed_count += 1
             continue
