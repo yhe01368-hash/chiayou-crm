@@ -153,7 +153,7 @@ def export_customers_csv(_current_user: dict = Depends(get_current_user)):
     writer.writeheader()
     for row in rows:
         writer.writerow({
-            "姓名": row.get("name", ""),
+            "名稱": row.get("name", ""),
             "電話": row.get("phone", ""),
             "行動電話": row.get("phone2", ""),
             "統一編號": row.get("tax_id", ""),
