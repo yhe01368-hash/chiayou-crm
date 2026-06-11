@@ -64,9 +64,10 @@ def get_shipments(
         filters["customer_id"] = str(customer_id)
 
     try:
+        # 一次撈 shipments + 嵌入 customer + items（解 N+1 query）
         rows = sb.select(
             "shipments",
-            select="*",
+            select="*,customer:customers(*),items:shipment_items(*)",
             filters=filters if filters else None,
             order="created_at.desc",
             limit=limit,
@@ -76,12 +77,7 @@ def get_shipments(
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
 
-    result = []
-    for row in rows:
-        row = _load_shipment(sb, row["id"]) if row else row
-        if row:
-            result.append(row)
-    return result
+    return rows if rows else []
 
 
 @router.get("/{shipment_id}", response_model=ShipmentResponse)
