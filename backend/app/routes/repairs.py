@@ -63,9 +63,10 @@ def get_repairs(
         filters["customer_id"] = str(customer_id)
 
     try:
+        # 一次撈 repairs + 嵌入 customer（解 N+1 query）
         rows = sb.select(
             "repairs",
-            select="*",
+            select="*,customer:customers(*)",
             filters=filters if filters else None,
             order="created_at.desc",
             limit=limit,
@@ -81,12 +82,7 @@ def get_repairs(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"[_parse_jsonb] {type(e).__name__}: {str(e)}")
 
-    try:
-        result = [_load_repair(r, sb) for r in rows]
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"[_load_repair] {type(e).__name__}: {str(e)[:200]}")
-
-    return result
+    return rows
 
 
 @router.get("/{repair_id}", response_model=RepairResponse)
