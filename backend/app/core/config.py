@@ -6,16 +6,15 @@ from typing import Optional
 class Settings(BaseSettings):
     PROJECT_NAME: str = "嘉祐資訊 CRM"
     VERSION: str = "1.0.0"
-    
-    # Supabase REST API (PostgREST)
-    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
-    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", os.getenv("SUPABASE_SERVICE_KEY", ""))
-    
+
+    # PostgreSQL connection（2026-07-16 從 Supabase REST 遷移到 Neon 直連）
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+
     # JWT
     JWT_SECRET: str = os.getenv("JWT_SECRET", "chiayou-crm-dev-secret-change-in-production")
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = int(os.getenv("JWT_EXPIRE_MINUTES", "1440"))  # 24小時
-    
+
     # CORS
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
