@@ -38,7 +38,7 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
             (r.get("total_amount", 0) or 0) * 1.05
             if r.get("tax_included") else (r.get("total_amount", 0) or 0)
             for r in (completed_rows or [])
-            if isinstance(r.get("total_amount"), (int, float))
+            if isinstance(r.get("total_amount"), (int, float, Decimal))
         ))
 
         # 4. 最近五筆出貨單

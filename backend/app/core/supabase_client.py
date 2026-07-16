@@ -388,14 +388,17 @@ class SupabaseClient:
             return val
 
     def _normalize_uuids(self, rows: list[dict]) -> list[dict]:
-        """把 UUID 物件轉成字串（舊介面回傳字串）。"""
+        """把 UUID 物件轉成字串、Decimal 轉 float（保持舊介面回傳型別一致）。"""
         from uuid import UUID
+        from decimal import Decimal
         out = []
         for r in rows:
             d = {}
             for k, v in r.items():
                 if isinstance(v, UUID):
                     d[k] = str(v)
+                elif isinstance(v, Decimal):
+                    d[k] = float(v)
                 elif isinstance(v, dict):
                     # JSONB 欄位已經是 dict，保持原樣
                     d[k] = v
