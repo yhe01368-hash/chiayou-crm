@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
+from decimal import Decimal
 import httpx
 
 from app.core.supabase_client import get_client
