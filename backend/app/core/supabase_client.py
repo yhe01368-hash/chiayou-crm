@@ -74,6 +74,20 @@ class SupabaseClient:
 
     # ── 通用 CRUD helpers（介面跟舊版完全相同）──────────────────────────
 
+    def select_raw(self, sql: str, params: dict | None = None) -> list[dict]:
+        """
+        直接跑原生 SQL（debug / admin 用）。
+        回傳 list[dict]。
+        """
+        try:
+            with self.engine.connect() as conn:
+                result = conn.execute(text(sql), params or {})
+                rows = [dict(row._mapping) for row in result]
+            rows = self._normalize_uuids(rows)
+            return rows
+        except Exception as e:
+            _raise_db_error("select_raw", e)
+
     def select(
         self,
         table: str,

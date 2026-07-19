@@ -2,8 +2,30 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Union
 from ..schemas import KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
 from app.core.supabase_client import get_client
+import traceback
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
+
+@router.get("/debug/tables")
+def debug_tables():
+    """列出 Neon 裡所有 public schema 的 table 和欄位"""
+    sb = get_client()
+    try:
+        rows = sb.select_raw(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema='public' ORDER BY table_name"
+        )
+        tables = [r["table_name"] for r in (rows or [])]
+        knowledge_cols = []
+        if "knowledge" in tables:
+            col_rows = sb.select_raw(
+                "SELECT column_name, data_type FROM information_schema.columns "
+                "WHERE table_schema='public' AND table_name='knowledge' ORDER BY ordinal_position"
+            )
+            knowledge_cols = col_rows or []
+        return {"tables": tables, "knowledge_columns": knowledge_cols}
+    except Exception as e:
+        return {"error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
 
 @router.get("", response_model=List[KnowledgeBaseResponse])
 def list_knowledge(search: str = None, category: str = None):
