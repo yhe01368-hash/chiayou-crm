@@ -63,13 +63,18 @@ def get_repairs(
         filters["customer_id"] = str(customer_id)
 
     try:
-        # 一次撈 repairs + 嵌入 customer（解 N+1 query）
+        # Neon 直連 PG，select 不支援 embed 語法（PostgREST 才支援）。
+        # 用原本 _load_repair 逐筆補 customer 會 N+1，所以改用「批量查詢」：
+        # 1 次撈 repairs + 1 次 in 撈對應 customers + Python 端 join
+        offset = skip if skip > 0 else 0
         rows = sb.select(
             "repairs",
-            select="*,customer:customers(*)",
+            select="*",
             filters=filters if filters else None,
             order="created_at.desc",
             limit=limit,
+            range_start=offset,
+            range_end=offset + limit - 1,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"[select] {type(e).__name__}: {str(e)}")
@@ -81,6 +86,22 @@ def get_repairs(
         rows = [_parse_jsonb(r) for r in rows]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"[_parse_jsonb] {type(e).__name__}: {str(e)}")
+
+    # 批量補 customer（解 N+1）
+    try:
+        customer_ids = list({r["customer_id"] for r in rows if r.get("customer_id")})
+        if customer_ids:
+            customers = sb.select(
+                "customers",
+                select="*",
+                filters={"id": customer_ids},  # list → IN (...)
+            )
+            cust_map = {c["id"]: c for c in (customers or [])}
+            for r in rows:
+                cid = r.get("customer_id")
+                r["customer"] = cust_map.get(str(cid)) if cid else None
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"[customers batch] {type(e).__name__}: {str(e)}")
 
     return rows
 

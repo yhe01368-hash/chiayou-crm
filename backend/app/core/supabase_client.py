@@ -320,6 +320,16 @@ class SupabaseClient:
         """
         if isinstance(value, list):
             # list 模式：每個元素可能是 "eq.x"、"gte.y" 或純值
+            # 規則：若 list 中完全沒有任何 "op.val" 形式的字串，
+            #       代表是純值 list → 直接組 IN(...)
+            #       否則視為「多個獨立條件」(eq./gte./lte.)，用 AND 串起來
+            has_op = any(isinstance(v, str) and "." in v and v.split(".", 1)[0] in {"eq","neq","gt","gte","lt","lte","like","ilike","in"} for v in value)
+            if not has_op:
+                # 純值 list → IN
+                keys = [f"{field}_{i}" for i in range(len(value))]
+                for i, v in enumerate(value):
+                    params[keys[i]] = v
+                return [f"{field} IN ({', '.join(':' + k for k in keys)})"], params
             clauses = []
             for i, v in enumerate(value):
                 key = f"{field}_{i}"
@@ -328,17 +338,8 @@ class SupabaseClient:
                     clauses.append(f"{field} {self._op_sql(op)} :{key}")
                     params[key] = self._cast_value(val, op)
                 else:
-                    # list of values → IN clause
                     clauses.append(f"{field} = :{key}")
                     params[key] = v
-            # 把多個獨立 filter 改用 IN（如果全部都是 eq）
-            if all((isinstance(v, str) and v.startswith("eq.")) or not isinstance(v, str) for v in value):
-                # 全部都是等值 → 用 IN
-                keys = [f"{field}_{i}" for i in range(len(value))]
-                for i, v in enumerate(value):
-                    val = v.split(".", 1)[1] if isinstance(v, str) and v.startswith("eq.") else v
-                    params[keys[i]] = val
-                clauses = [f"{field} IN ({', '.join(':' + k for k in keys)})"]
             return clauses, params
 
         if isinstance(value, str) and "." in value:

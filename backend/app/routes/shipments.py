@@ -64,10 +64,11 @@ def get_shipments(
         filters["customer_id"] = str(customer_id)
 
     try:
-        # 一次撈 shipments + 嵌入 customer + items（解 N+1 query）
+        # Neon 直連 PG，select 不支援 embed（PostgREST 才支援）。
+        # 改用「批量查詢」：1 次撈 shipments + 1 次 in 撈 customers + 1 次 in 撈 items + Python 端 join
         rows = sb.select(
             "shipments",
-            select="*,customer:customers(*),items:shipment_items(*)",
+            select="*",
             filters=filters if filters else None,
             order="created_at.desc",
             limit=limit,
@@ -77,7 +78,27 @@ def get_shipments(
     except Exception as e:
         raise HTTPException(status_code=502, detail=str(e))
 
-    return rows if rows else []
+    if not rows:
+        return []
+
+    # 批量補 customer + items
+    try:
+        customer_ids = list({r["customer_id"] for r in rows if r.get("customer_id")})
+        shipment_ids = [r["id"] for r in rows]
+        customers = sb.select("customers", select="*", filters={"id": customer_ids}) if customer_ids else []
+        items = sb.select("shipment_items", select="*", filters={"shipment_id": shipment_ids}) if shipment_ids else []
+        cust_map = {c["id"]: c for c in (customers or [])}
+        items_map = {}
+        for it in (items or []):
+            items_map.setdefault(it["shipment_id"], []).append(it)
+        for r in rows:
+            cid = r.get("customer_id")
+            r["customer"] = cust_map.get(str(cid)) if cid else None
+            r["items"] = items_map.get(r["id"], [])
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"[batch join] {type(e).__name__}: {str(e)}")
+
+    return rows
 
 
 @router.get("/{shipment_id}", response_model=ShipmentResponse)
