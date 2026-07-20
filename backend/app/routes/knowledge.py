@@ -28,6 +28,21 @@ def debug_tables():
     except Exception as e:
         return {"error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
 
+@router.post("/debug/test_insert")
+def debug_test_insert():
+    """debug：試 insert 一筆，看真正錯誤訊息"""
+    sb = get_client()
+    try:
+        result = sb.insert("knowledge", {
+            "title": "debug test",
+            "category": "其他",
+            "problem": "debug",
+            "solution": "debug",
+        })
+        return {"status": "ok", "inserted": result}
+    except Exception as e:
+        return {"status": "error", "error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
+
 @router.get("", response_model=List[KnowledgeBaseResponse])
 def list_knowledge(search: str = None, category: str = None):
     sb = get_client()
