@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional, Union
+from sqlalchemy import text
 from ..schemas import KnowledgeBaseCreate, KnowledgeBaseUpdate, KnowledgeBaseResponse
 from app.core.supabase_client import get_client
 import traceback
@@ -42,20 +43,26 @@ def list_knowledge(search: str = None, category: str = None):
 def migrate_knowledge_table():
     """一次性 migration：建立 knowledge table（idempotent，重跑無害）"""
     sb = get_client()
+    ddl_statements = [
+        """
+        CREATE TABLE IF NOT EXISTS knowledge (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            category VARCHAR(50) NOT NULL DEFAULT '其他',
+            problem TEXT NOT NULL DEFAULT '',
+            solution TEXT NOT NULL DEFAULT '',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge(category)",
+        "CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at DESC)",
+    ]
     try:
-        sb.select_raw("""
-            CREATE TABLE IF NOT EXISTS knowledge (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                category VARCHAR(50) NOT NULL DEFAULT '其他',
-                problem TEXT NOT NULL DEFAULT '',
-                solution TEXT NOT NULL DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        sb.select_raw("CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge(category)")
-        sb.select_raw("CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at DESC)")
+        with sb.engine.connect() as conn:
+            for ddl in ddl_statements:
+                conn.execute(text(ddl))
+            conn.commit()
         cols = sb.select_raw(
             "SELECT column_name, data_type FROM information_schema.columns "
             "WHERE table_schema='public' AND table_name='knowledge' ORDER BY ordinal_position"
