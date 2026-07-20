@@ -38,6 +38,32 @@ def list_knowledge(search: str = None, category: str = None):
     result = sb.select("knowledge", filters=filters if filters else None, order="created_at.desc")
     return result or []
 
+@router.post("/migrate")
+def migrate_knowledge_table():
+    """一次性 migration：建立 knowledge table（idempotent，重跑無害）"""
+    sb = get_client()
+    try:
+        sb.select_raw("""
+            CREATE TABLE IF NOT EXISTS knowledge (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                category VARCHAR(50) NOT NULL DEFAULT '其他',
+                problem TEXT NOT NULL DEFAULT '',
+                solution TEXT NOT NULL DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        sb.select_raw("CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge(category)")
+        sb.select_raw("CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at DESC)")
+        cols = sb.select_raw(
+            "SELECT column_name, data_type FROM information_schema.columns "
+            "WHERE table_schema='public' AND table_name='knowledge' ORDER BY ordinal_position"
+        )
+        return {"status": "ok", "knowledge_columns": cols}
+    except Exception as e:
+        return {"status": "error", "error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
+
 @router.get("/{knowledge_id}", response_model=KnowledgeBaseResponse)
 def get_knowledge(knowledge_id: Union[int, str]):
     sb = get_client()
@@ -75,31 +101,3 @@ def delete_knowledge(knowledge_id: Union[int, str]):
     sb = get_client()
     sb.delete("knowledge", filters={"id": str(knowledge_id)})
     return {"message": "刪除成功"}
-
-@router.post("/_migrate")
-def migrate_knowledge_table():
-    """一次性 migration：建立 knowledge table（idempotent，重跑無害）"""
-    sb = get_client()
-    try:
-        # knowledge 沒建過。CREATE TABLE IF NOT EXISTS + 加索引
-        sb.select_raw("""
-            CREATE TABLE IF NOT EXISTS knowledge (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(255) NOT NULL,
-                category VARCHAR(50) NOT NULL DEFAULT '其他',
-                problem TEXT NOT NULL DEFAULT '',
-                solution TEXT NOT NULL DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-        sb.select_raw("CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge(category)")
-        sb.select_raw("CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at DESC)")
-        # 順便驗證：列出 columns
-        cols = sb.select_raw(
-            "SELECT column_name, data_type FROM information_schema.columns "
-            "WHERE table_schema='public' AND table_name='knowledge' ORDER BY ordinal_position"
-        )
-        return {"status": "ok", "knowledge_columns": cols}
-    except Exception as e:
-        return {"status": "error", "error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
