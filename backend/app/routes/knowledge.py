@@ -43,6 +43,27 @@ def debug_test_insert():
     except Exception as e:
         return {"status": "error", "error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
 
+@router.post("/debug/test_response_model")
+def debug_test_response_model():
+    """debug：試 Pydantic KnowledgeBaseResponse 能不能 parse insert 結果"""
+    from ..schemas import KnowledgeBaseResponse
+    import json
+    sb = get_client()
+    try:
+        result = sb.insert("knowledge", {
+            "title": "response model test",
+            "category": "其他",
+            "problem": "rm",
+            "solution": "rm",
+        })
+        try:
+            parsed = KnowledgeBaseResponse(**result)
+            return {"status": "ok", "parsed": parsed.model_dump(), "raw": result}
+        except Exception as e:
+            return {"status": "pydantic_error", "error": f"{type(e).__name__}: {str(e)}", "raw": result}
+    except Exception as e:
+        return {"status": "error", "error": f"{type(e).__name__}: {str(e)}", "tb": traceback.format_exc()}
+
 @router.get("", response_model=List[KnowledgeBaseResponse])
 def list_knowledge(search: str = None, category: str = None):
     sb = get_client()
