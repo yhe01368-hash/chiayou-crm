@@ -259,3 +259,20 @@ BEGIN
     WHERE s.id = v_shipment_id;
 END;
 $$;
+
+-- ============================================================
+-- 維修知識庫 (knowledge) — 2026-07-20 補
+-- 之前 schema.sql 沒建這個 table，導致前端 /knowledge 一直 500
+-- ============================================================
+CREATE TABLE IF NOT EXISTS knowledge (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(50) NOT NULL DEFAULT '其他',
+    problem TEXT NOT NULL DEFAULT '',
+    solution TEXT NOT NULL DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge(category);
+CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at DESC);
