@@ -6,8 +6,4 @@ pydantic-settings==2.1.0
 python-dotenv==1.0.1
 python-multipart==0.0.9
 pyyaml>=6.0
-bcrypt==4.2.0
 python-jose[cryptography]==3.3.0
-# Neon/PostgreSQL — 2026-07-16 從 Supabase 遷移
-psycopg2-binary==2.9.9
-SQLAlchemy==2.0.27

@@ -7,8 +7,10 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "嘉祐資訊 CRM"
     VERSION: str = "1.0.0"
 
-    # PostgreSQL connection（2026-07-16 從 Supabase REST 遷移到 Neon 直連）
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    # Supabase（2026-07-21 從 Neon 遷回）
+    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
+    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
+    SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
 
     # JWT
     JWT_SECRET: str = os.getenv("JWT_SECRET", "chiayou-crm-dev-secret-change-in-production")
