@@ -189,7 +189,10 @@ def update_repair(repair_id: UUID, repair: RepairUpdate, _current_user: dict = D
             single=True,
         )
         if old_repair and old_repair.get("status") != "completed":
-            parts = old_repair.get("parts_used", [])
+            # 編輯頁面會把「狀態 + 使用零件」放在同一次 PUT 送出。
+            # 此時資料庫裡仍是舊的 parts_used，必須優先使用本次 payload，
+            # 否則新填零件後直接按「已完成」不會建立出貨單草稿。
+            parts = payload.get("parts_used", old_repair.get("parts_used", []))
             if parts and len(parts) > 0:
                 cust = sb.select("customers", select="name", filters={"id": str(old_repair["customer_id"])}, single=True)
                 cust_name = cust.get("name", "未知客戶") if cust else "未知客戶"
