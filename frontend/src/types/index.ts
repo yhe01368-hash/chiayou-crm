@@ -81,6 +81,34 @@ export interface DashboardData {
   recent_shipments: Shipment[];
 }
 
+export interface RepairLog {
+  id: string;
+  repair_id?: string;
+  customer_id?: string;
+  customer_name?: string;
+  device_info?: string;
+  log_date: string;
+  title?: string;
+  problem?: string;
+  process?: string;
+  note?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RepairLogFormData {
+  repair_id?: string;
+  customer_id?: string;
+  customer_name?: string;
+  device_info?: string;
+  log_date?: string;
+  title?: string;
+  problem?: string;
+  process?: string;
+  note?: string;
+}
+
 // ===== API Response Types =====
 
 export interface ApiResponse<T> {

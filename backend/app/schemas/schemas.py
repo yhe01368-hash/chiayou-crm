@@ -198,6 +198,40 @@ class ShipmentResponse(ShipmentBase):
     class Config:
         from_attributes = True
 
+# ===== Repair Log =====
+class RepairLogBase(BaseModel):
+    repair_id: Optional[UUID] = None
+    customer_id: Optional[UUID] = None
+    customer_name: Optional[str] = None
+    device_info: Optional[str] = None
+    log_date: Optional[date] = None
+    title: Optional[str] = None
+    problem: Optional[str] = None
+    process: Optional[str] = None
+    note: Optional[str] = None
+
+class RepairLogCreate(RepairLogBase):
+    pass
+
+class RepairLogUpdate(BaseModel):
+    customer_id: Optional[UUID] = None
+    customer_name: Optional[str] = None
+    device_info: Optional[str] = None
+    log_date: Optional[date] = None
+    title: Optional[str] = None
+    problem: Optional[str] = None
+    process: Optional[str] = None
+    note: Optional[str] = None
+
+class RepairLogResponse(RepairLogBase):
+    id: UUID
+    created_by: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
 # ===== Dashboard =====
 class DashboardResponse(BaseModel):
     pending_repairs: int

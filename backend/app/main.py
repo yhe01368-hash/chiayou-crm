@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.routes import customers, repairs, inventory, shipments, dashboard, knowledge, auth, users, revenue
+from app.routes import customers, repairs, repair_logs, inventory, shipments, dashboard, knowledge, auth, users, revenue
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -23,6 +23,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(customers.router)
 app.include_router(repairs.router)
+app.include_router(repair_logs.router)
 app.include_router(inventory.router)
 app.include_router(shipments.router)
 app.include_router(dashboard.router)

@@ -10,6 +10,8 @@ import CustomerForm from './pages/CustomerForm';
 import RepairList from './pages/RepairList';
 import RepairDetail from './pages/RepairDetail';
 import RepairForm from './pages/RepairForm';
+import RepairLogList from './pages/RepairLogList';
+import RepairLogForm from './pages/RepairLogForm';
 import InventoryList from './pages/InventoryList';
 import InventoryForm from './pages/InventoryForm';
 import ShipmentList from './pages/ShipmentList';
@@ -60,6 +62,11 @@ export default function App() {
             <Route path="repairs/new" element={<RepairForm />} />
             <Route path="repairs/:id" element={<RepairDetail />} />
             <Route path="repairs/:id/edit" element={<RepairForm />} />
+
+            {/* 維修日誌 */}
+            <Route path="repair-logs" element={<RepairLogList />} />
+            <Route path="repair-logs/new" element={<RepairLogForm />} />
+            <Route path="repair-logs/:id/edit" element={<RepairLogForm />} />
 
             {/* 庫存管理 */}
             <Route path="inventory" element={<InventoryList />} />

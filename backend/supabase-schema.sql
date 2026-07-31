@@ -276,3 +276,32 @@ CREATE TABLE IF NOT EXISTS knowledge (
 
 CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge(category);
 CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at DESC);
+
+-- ============================================================
+-- 維修日誌 (repair_logs) — 2026-07-31 新增
+-- 從維修單帶入問題描述、維修過程、客戶、日期
+-- 一張維修單可對應多筆日誌
+-- ============================================================
+CREATE TABLE IF NOT EXISTS repair_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    repair_id UUID REFERENCES repairs(id) ON DELETE SET NULL,
+    customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
+    customer_name VARCHAR(100),
+    device_info VARCHAR(255),
+    log_date DATE DEFAULT CURRENT_DATE,
+    title VARCHAR(255),
+    problem TEXT,
+    process TEXT,
+    note TEXT,
+    created_by VARCHAR(50),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_repair_logs_repair_id ON repair_logs(repair_id);
+CREATE INDEX IF NOT EXISTS idx_repair_logs_customer_id ON repair_logs(customer_id);
+CREATE INDEX IF NOT EXISTS idx_repair_logs_log_date ON repair_logs(log_date DESC);
+
+DROP TRIGGER IF EXISTS repair_logs_updated_at ON repair_logs;
+CREATE TRIGGER repair_logs_updated_at BEFORE UPDATE ON repair_logs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();

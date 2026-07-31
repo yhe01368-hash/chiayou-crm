@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, Wrench, Package, Truck, BookOpen,
-  Menu, X, LogOut
+  NotebookPen, Menu, X, LogOut
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { authApi } from '../services/api';
@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
   { path: '/dashboard', label: '儀表板', icon: LayoutDashboard },
   { path: '/customers', label: '客戶管理', icon: Users },
   { path: '/repairs', label: '維修管理', icon: Wrench },
+  { path: '/repair-logs', label: '維修日誌', icon: NotebookPen },
   { path: '/inventory', label: '庫存管理', icon: Package },
   { path: '/shipments', label: '出貨單', icon: Truck },
   { path: '/knowledge', label: '維修知識庫', icon: BookOpen },

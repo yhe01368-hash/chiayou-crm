@@ -1,13 +1,14 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { repairApi } from '../services/api';
-import { ArrowLeft, Wrench, User, Phone } from 'lucide-react';
+import { ArrowLeft, Wrench, User, Phone, NotebookPen } from 'lucide-react';
 import { format } from 'date-fns';
 import { zhTW } from 'date-fns/locale';
 
 export default function RepairDetail() {
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: repair, isLoading } = useQuery({
     queryKey: ['repair', id],
@@ -152,9 +153,16 @@ export default function RepairDetail() {
       )}
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-wrap gap-3">
         <Link to="/repairs" className="btn btn-secondary">返回列表</Link>
         <Link to={`/repairs/${id}/edit`} className="btn btn-primary">編輯</Link>
+        <button
+          onClick={() => navigate(`/repair-logs/new?repair_id=${id}`)}
+          className="btn btn-secondary flex items-center gap-2 bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-200"
+          title="將此維修單的問題描述、維修過程、客戶、日期帶入維修日誌"
+        >
+          <NotebookPen size={16} /> 寫入維修日誌
+        </button>
       </div>
     </div>
   );

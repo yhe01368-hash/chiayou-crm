@@ -132,6 +132,20 @@ export const dashboardApi = {
   getRevenueDetails: () => api.get('/dashboard/revenue/details'),
 };
 
+// ── 維修日誌 API ──────────────────────────────────────────────────────────
+export const repairLogApi = {
+  getAll: (params?: { customer_id?: string; repair_id?: string; search?: string }) =>
+    api.get('/repair-logs', { params }),
+  getById: (id: string) =>
+    api.get(`/repair-logs/${id}`),
+  create: (data: any) =>
+    api.post('/repair-logs', data),
+  update: (id: string, data: any) =>
+    api.put(`/repair-logs/${id}`, data),
+  delete: (id: string) =>
+    api.delete(`/repair-logs/${id}`),
+};
+
 // ── 維修知識庫 API ─────────────────────────────────────────────────────────
 export const knowledgeApi = {
   getAll: (params?: { search?: string; category?: string }) =>
