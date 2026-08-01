@@ -237,4 +237,6 @@ class DashboardResponse(BaseModel):
     pending_repairs: int
     low_stock_items: int
     monthly_revenue: Decimal
+    monthly_cost: Decimal
+    monthly_profit: Decimal
     recent_shipments: List[ShipmentResponse]

@@ -42,6 +42,41 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
             if isinstance(r.get("total_amount"), (int, float, Decimal))
         ))
 
+        # 3.5 本月銷貨成本（COGS）= 本月 completed shipments 的 items.quantity × inventory.cost_price
+        completed_shipments = sb.select(
+            "shipments",
+            select="id",
+            filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
+        ) or []
+        monthly_cost = 0.0
+        if completed_shipments:
+            shipment_ids = [s["id"] for s in completed_shipments if s.get("id")]
+            if shipment_ids:
+                items = sb.select(
+                    "shipment_items",
+                    select="product_id,quantity",
+                    filters={"shipment_id": shipment_ids},
+                ) or []
+                # 一次拿所有產品的進價（避免 N+1）
+                product_ids = list({i.get("product_id") for i in items if i.get("product_id")})
+                cost_map = {}
+                if product_ids:
+                    inv_rows = sb.select(
+                        "inventory",
+                        select="id,cost_price",
+                        filters={"id": product_ids},
+                    ) or []
+                    cost_map = {
+                        r["id"]: (r.get("cost_price") or 0)
+                        for r in inv_rows if r.get("id")
+                    }
+                monthly_cost = float(sum(
+                    (cost_map.get(i.get("product_id"), 0) or 0) * (i.get("quantity", 0) or 0)
+                    for i in items
+                    if isinstance(i.get("quantity"), (int, float))
+                ))
+        monthly_profit = monthly_revenue - monthly_cost
+
         # 4. 最近五筆出貨單
         recent = sb.select(
             "shipments",
@@ -73,5 +108,7 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
         pending_repairs=pending_repairs,
         low_stock_items=low_stock_items,
         monthly_revenue=monthly_revenue,
+        monthly_cost=monthly_cost,
+        monthly_profit=monthly_profit,
         recent_shipments=result_shipments,
     )
