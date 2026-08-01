@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime
 from decimal import Decimal
 import httpx
@@ -11,8 +11,27 @@ router = APIRouter(prefix="/api/dashboard", tags=["儀表板"])
 
 
 @router.get("")
-def get_dashboard(_current_user: dict = Depends(get_current_user)):
+def get_dashboard(
+    month: str = Query(None, description="指定月份 YYYY-MM（debug 用，不給則當月）"),
+    _current_user: dict = Depends(get_current_user),
+):
     sb = get_client()
+
+    # 計算月份區間（給 month=YYYY-MM 就用該月，否則本月）
+    if month:
+        try:
+            y, m = month.split("-")
+            y, m = int(y), int(m)
+            first_day = datetime(y, m, 1).date().isoformat()
+            if m == 12:
+                last_day = datetime(y + 1, 1, 1).date().isoformat()
+            else:
+                last_day = datetime(y, m + 1, 1).date().isoformat()
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=400, detail="month 格式錯誤，要 YYYY-MM")
+    else:
+        first_day = datetime.now().replace(day=1).date().isoformat()
+        last_day = None
 
     try:
         # 1. 待處理維修數量 (pending + processing)
@@ -28,12 +47,14 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
         )
         low_stock_items = len([r for r in low_rows if r.get("quantity", 0) <= r.get("min_stock", 0)]) if low_rows else 0
 
-        # 3. 本月營收 (completed shipments，日期 >= 本月1號，含稅則加計5%)
-        first_day = datetime.now().replace(day=1).date().isoformat()
+        # 3. 本月營收 (completed shipments，含稅則加計5%)
+        date_filters = {"status": "completed", "shipment_date": f"gte.{first_day}"}
+        if last_day:
+            date_filters["shipment_date"] = [f"gte.{first_day}", f"lt.{last_day}"]
         completed_rows = sb.select(
             "shipments",
             select="total_amount,tax_included",
-            filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
+            filters=date_filters,
         )
         monthly_revenue = float(sum(
             (r.get("total_amount", 0) or 0) * 1.05
@@ -46,7 +67,7 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
         completed_shipments = sb.select(
             "shipments",
             select="id",
-            filters={"status": "completed", "shipment_date": f"gte.{first_day}"},
+            filters=date_filters,
         ) or []
         monthly_cost = 0.0
         if completed_shipments:
