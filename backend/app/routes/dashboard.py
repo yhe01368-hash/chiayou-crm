@@ -32,17 +32,17 @@ def get_dashboard(_current_user: dict = Depends(get_current_user)):
         )
         low_stock_items = len([r for r in low_rows if r.get("quantity", 0) <= r.get("min_stock", 0)]) if low_rows else 0
 
-        # 3. 本月營收 (completed shipments，含稅則加計5%)
+        # 3. 本月營收 (completed shipments)
+        # total_amount 已經記錄為該稅別的金額（未稅單就是未稅金額、含稅單就是含稅金額），直接加總
         # ⚠️ 必須 limit=1000 以上，Supabase PostgREST 預設 limit=1 會嚴重截斷
         completed_rows = sb.select(
             "shipments",
-            select="total_amount,tax_included",
+            select="total_amount",
             filters=date_filters,
             limit=1000,
         )
         monthly_revenue = float(sum(
-            (r.get("total_amount", 0) or 0) * 1.05
-            if r.get("tax_included") else (r.get("total_amount", 0) or 0)
+            r.get("total_amount", 0) or 0
             for r in (completed_rows or [])
             if isinstance(r.get("total_amount"), (int, float, Decimal))
         ))
