@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from datetime import datetime
 from decimal import Decimal
 import httpx
@@ -11,12 +11,30 @@ router = APIRouter(prefix="/api/dashboard", tags=["儀表板"])
 
 
 @router.get("")
-def get_dashboard(_current_user: dict = Depends(get_current_user)):
+def get_dashboard(
+    month: str = Query(None, description="debug 暫存：指定月份 YYYY-MM（不給則當月）"),
+    _current_user: dict = Depends(get_current_user),
+):
     sb = get_client()
 
-    # 本月區間
-    first_day = datetime.now().replace(day=1).date().isoformat()
+    # 月份區間（month 參數只為 debug 驗證用，正式環境會移除）
+    if month:
+        try:
+            y, m = month.split("-")
+            y, m = int(y), int(m)
+            first_day = datetime(y, m, 1).date().isoformat()
+            if m == 12:
+                last_day = datetime(y + 1, 1, 1).date().isoformat()
+            else:
+                last_day = datetime(y, m + 1, 1).date().isoformat()
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=400, detail="month 格式錯誤，要 YYYY-MM")
+    else:
+        first_day = datetime.now().replace(day=1).date().isoformat()
+
     date_filters = {"status": "completed", "shipment_date": f"gte.{first_day}"}
+    if month:
+        date_filters["shipment_date"] = [f"gte.{first_day}", f"lt.{last_day}"]
 
     try:
         # 1. 待處理維修數量 (pending + processing)
