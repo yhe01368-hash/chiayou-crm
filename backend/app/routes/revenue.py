@@ -4,6 +4,7 @@ import httpx
 
 from app.core.supabase_client import get_client
 from app.routes.auth import get_current_user
+from app.services.cost import monthly_cost_profit
 
 router = APIRouter(prefix="/api/dashboard/revenue", tags=["營收明細"])
 
@@ -17,48 +18,30 @@ def get_revenue_details(
     sb = get_client()
 
     try:
-        # 組過濾條件：list 格式讓 httpx 產生多個同名 query param
+        # 1. 拿月份區間內所有 completed 出貨單（含明細）
         filters = {"status": "completed"}
 
         if start_date and end_date:
-            # 兩者都有 → list 產生 shipment_date=gte.XXX & shipment_date=lte.XXX
             filters["shipment_date"] = [f"gte.{start_date}", f"lte.{end_date}"]
-            rows = sb.select(
-                "shipments",
-                select="*",
-                filters=filters,
-                order="shipment_date.desc",
-            )
         elif start_date:
-            # 只有起始日
             filters["shipment_date"] = f"gte.{start_date}"
-            rows = sb.select(
-                "shipments",
-                select="*",
-                filters=filters,
-                order="shipment_date.desc",
-            )
         elif end_date:
-            # 只有結束日
             filters["shipment_date"] = f"lte.{end_date}"
-            rows = sb.select(
-                "shipments",
-                select="*",
-                filters=filters,
-                order="shipment_date.desc",
-            )
         else:
-            # 預設本月
             first_day = datetime.now().replace(day=1).date().isoformat()
             filters["shipment_date"] = f"gte.{first_day}"
-            rows = sb.select(
-                "shipments",
-                select="*",
-                filters=filters,
-                order="shipment_date.desc",
-            )
 
+        rows = sb.select(
+            "shipments",
+            select="*",
+            filters=filters,
+            order="shipment_date.desc",
+            limit=1000,
+        )
+
+        # 2. 整理每筆出貨單，並算該區間的總計
         result = []
+        total_revenue = 0.0
         for row in (rows or []):
             sid = row.get("id")
             customer_name = ""
@@ -67,18 +50,39 @@ def get_revenue_details(
                 if cust:
                     customer_name = cust.get("name", "")
             raw_amount = row.get("total_amount", 0) or 0
-            # 含稅出貨單 → 加計5%
-            display_amount = raw_amount * 1.05 if row.get("tax_included") else raw_amount
+            total_revenue += float(raw_amount)
             result.append({
                 "id": sid,
                 "shipment_number": row.get("shipment_number", ""),
                 "customer_name": customer_name,
                 "shipment_date": row.get("shipment_date", ""),
-                "total_amount": display_amount,
+                "total_amount": raw_amount,
                 "tax_included": row.get("tax_included", False),
             })
 
-        total = sum(r["total_amount"] or 0 for r in result)
+        # 3. 算成本：start_date / end_date 對應的年月 → 用 cost service
+        # 若使用者只給單邊日期，預設用年-01 ~ 年-12 整年範圍算
+        if start_date and end_date:
+            sy, sm, _ = start_date.split("-")
+            ey, em, _ = end_date.split("-")
+            sy, sm, ey, em = int(sy), int(sm), int(ey), int(em)
+            # 跨月就分段算，避免兩年跨界的複雜判斷
+            total_cost = 0.0
+            y, m = sy, sm
+            while (y, m) <= (ey, em):
+                r = monthly_cost_profit(sb, y, m)
+                total_cost += r["cost"]
+                m += 1
+                if m > 12:
+                    m = 1
+                    y += 1
+        else:
+            # 沒指定或單邊：算本月成本
+            now = datetime.now()
+            r = monthly_cost_profit(sb, now.year, now.month)
+            total_cost = r["cost"]
+
+        total_profit = total_revenue - total_cost
 
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
@@ -87,6 +91,8 @@ def get_revenue_details(
 
     return {
         "items": result,
-        "total": total,
+        "total": total_revenue,
+        "cost": total_cost,
+        "profit": total_profit,
         "count": len(result),
     }

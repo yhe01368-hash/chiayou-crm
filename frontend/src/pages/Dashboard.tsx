@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '../services/api';
-import { Wrench, DollarSign, Truck, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Wrench, DollarSign, Truck, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -23,18 +23,8 @@ export default function Dashboard() {
     { label: '待處理維修', value: data?.pending_repairs ?? 0, icon: Wrench, color: 'bg-orange-500', textColor: 'text-orange-600', link: '/repairs?status=pending' },
     { label: '低庫存商品', value: data?.low_stock_items ?? 0, icon: AlertTriangle, color: 'bg-red-500', textColor: 'text-red-600', link: '/inventory?low_stock=true' },
     { label: '本月營收', value: `$${Number(data?.monthly_revenue ?? 0).toLocaleString()}`, icon: DollarSign, color: 'bg-green-500', textColor: 'text-green-600', link: '/revenue' },
-    { label: '本月成本', value: `$${Number(data?.monthly_cost ?? 0).toLocaleString()}`, icon: TrendingDown, color: 'bg-rose-500', textColor: 'text-rose-600', link: '/revenue' },
+    { label: '近期出貨', value: data?.recent_shipments?.length ?? 0, icon: Truck, color: 'bg-blue-500', textColor: 'text-blue-600', link: '/shipments' },
   ];
-
-  const profit = Number(data?.monthly_profit ?? 0);
-  const profitCard = {
-    label: '本月淨利',
-    value: `$${profit.toLocaleString()}`,
-    icon: profit >= 0 ? TrendingUp : TrendingDown,
-    color: profit >= 0 ? 'bg-emerald-600' : 'bg-rose-600',
-    textColor: profit >= 0 ? 'text-emerald-700' : 'text-rose-700',
-    link: '/revenue',
-  };
 
   return (
     <div className="space-y-6">
@@ -44,7 +34,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           const card = (
@@ -66,39 +56,6 @@ export default function Dashboard() {
             <div key={stat.label}>{card}</div>
           );
         })}
-        {(() => {
-          const Icon = profitCard.icon;
-          const card = (
-            <div className="card p-5 border-2 border-gray-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">{profitCard.label}</p>
-                  <p className={`text-2xl font-bold mt-1 ${profitCard.textColor}`}>{profitCard.value}</p>
-                  <p className="text-xs text-gray-400 mt-1">本月營收 − 本月成本</p>
-                </div>
-                <div className={`${profitCard.color} p-3 rounded-lg`}>
-                  <Icon className="text-white" size={24} />
-                </div>
-              </div>
-            </div>
-          );
-          return profitCard.link ? (
-            <Link key={profitCard.label} to={profitCard.link} className="block">{card}</Link>
-          ) : (
-            <div key={profitCard.label}>{card}</div>
-          );
-        })()}
-        <div className="card p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">近期出貨</p>
-              <p className="text-2xl font-bold mt-1 text-blue-600">{data?.recent_shipments?.length ?? 0}</p>
-            </div>
-            <Link to="/shipments" className="bg-blue-500 p-3 rounded-lg block">
-              <Truck className="text-white" size={24} />
-            </Link>
-          </div>
-        </div>
       </div>
 
       {/* Quick actions */}

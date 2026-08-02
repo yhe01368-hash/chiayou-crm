@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, DollarSign } from 'lucide-react';
+import { ArrowLeft, DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import api from '../services/api';
 
 export default function RevenueDetail() {
@@ -31,6 +31,10 @@ export default function RevenueDetail() {
 
   const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i);
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  const revenue = Number(data?.total ?? 0);
+  const cost = Number(data?.cost ?? 0);
+  const profit = Number(data?.profit ?? 0);
 
   return (
     <div className="space-y-6">
@@ -78,23 +82,55 @@ export default function RevenueDetail() {
         </button>
       </div>
 
-      {/* 總計卡片 */}
-      <div className="card p-6 bg-green-50 border-green-200">
-        <div className="flex items-center gap-4">
-          <div className="bg-green-500 p-3 rounded-lg">
-            <DollarSign className="text-white" size={28} />
+      {/* 三總計卡：營收 / 成本 / 淨利 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="card p-5 bg-green-50 border-green-200">
+          <div className="flex items-center gap-3">
+            <div className="bg-green-500 p-3 rounded-lg">
+              <DollarSign className="text-white" size={24} />
+            </div>
+            <div>
+              <p className="text-sm text-green-700">營收總計</p>
+              <p className="text-2xl font-bold text-green-800">
+                ${revenue.toLocaleString()}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-green-700">{year} 年 {month} 月營收總計</p>
-            <p className="text-3xl font-bold text-green-800">
-              ${Number(data?.total ?? 0).toLocaleString()}
-            </p>
+        </div>
+        <div className="card p-5 bg-rose-50 border-rose-200">
+          <div className="flex items-center gap-3">
+            <div className="bg-rose-500 p-3 rounded-lg">
+              <TrendingDown className="text-white" size={24} />
+            </div>
+            <div>
+              <p className="text-sm text-rose-700">成本總計</p>
+              <p className="text-2xl font-bold text-rose-800">
+                ${cost.toLocaleString()}
+              </p>
+            </div>
           </div>
-          <div className="ml-auto text-right">
-            <p className="text-sm text-green-600">共 {data?.count ?? 0} 筆完成訂單</p>
+        </div>
+        <div className={`card p-5 ${profit >= 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
+          <div className="flex items-center gap-3">
+            <div className={`${profit >= 0 ? 'bg-emerald-600' : 'bg-rose-600'} p-3 rounded-lg`}>
+              {profit >= 0
+                ? <TrendingUp className="text-white" size={24} />
+                : <TrendingDown className="text-white" size={24} />}
+            </div>
+            <div>
+              <p className={`text-sm ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>淨利總計</p>
+              <p className={`text-2xl font-bold ${profit >= 0 ? 'text-emerald-800' : 'text-rose-800'}`}>
+                ${profit.toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* 訂單筆數副標 */}
+      <p className="text-sm text-gray-500 -mt-2">
+        {year} 年 {month} 月，共 {data?.count ?? 0} 筆完成訂單
+      </p>
 
       {/* 明細列表 */}
       <div className="card overflow-hidden">
