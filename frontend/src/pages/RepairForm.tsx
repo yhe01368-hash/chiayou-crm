@@ -359,7 +359,10 @@ export default function RepairForm() {
             <label className="block text-sm font-medium text-gray-700">使用零件</label>
             <button
               type="button"
-              onClick={() => setPartsUsed([...partsUsed, { product_id: '', quantity: 1 }])}
+              onClick={() => {
+                setPartsUsed([...partsUsed, { product_id: '', quantity: 1 }]);
+                setPartSearch([...partSearch, '']);
+              }}
               className="text-sm text-primary-600 hover:text-primary-700"
             >
               + 新增零件
@@ -371,50 +374,110 @@ export default function RepairForm() {
             <div className="space-y-2">
               {partsUsed.map((part, idx) => {
                 const product = inventory.find((p: any) => p.id === part.product_id);
-                const filtered = inventory.filter((p: any) =>
-                  partSearch[idx] ? p.product_name.includes(partSearch[idx] || '') : true
-                );
+                const keyword = (partSearch[idx] || '').toLowerCase();
+                const filtered = keyword
+                  ? inventory.filter((p: any) =>
+                      (p.product_name || '').toLowerCase().includes(keyword) ||
+                      (p.product_code || '').toLowerCase().includes(keyword)
+                    )
+                  : inventory;
+                const subtotal = product ? product.selling_price * part.quantity : 0;
                 return (
                   <div key={idx} className="flex gap-2 items-start">
                     <div className="relative flex-1">
-                      <select
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className="input pr-8"
+                          placeholder="搜尋零件名稱或編號..."
+                          value={partSearch[idx] || ''}
+                          onChange={(e) => {
+                            const updated = [...partSearch];
+                            updated[idx] = e.target.value;
+                            setPartSearch(updated);
+                            setShowPartDropdown(idx);
+                          }}
+                          onFocus={() => setShowPartDropdown(idx)}
+                        />
+                        <Search size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+                      </div>
+                      {showPartDropdown === idx && filtered.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {filtered.slice(0, 50).map((p: any) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => {
+                                const updated = [...partsUsed];
+                                updated[idx] = { ...updated[idx], product_id: p.id };
+                                setPartsUsed(updated);
+                                const updatedSearch = [...partSearch];
+                                updatedSearch[idx] = '';
+                                setPartSearch(updatedSearch);
+                                setShowPartDropdown(null);
+                              }}
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                            >
+                              <div className="text-sm text-gray-900">{p.product_name}</div>
+                              <div className="text-xs text-gray-500 flex gap-2 mt-0.5">
+                                {p.product_code && <span>編號: {p.product_code}</span>}
+                                <span>庫存: {p.quantity}</span>
+                                <span>${p.selling_price?.toLocaleString()}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {product && (
+                        <div className="text-xs text-gray-500 mt-1 flex gap-2 flex-wrap">
+                          {product.product_code && <span>編號: {product.product_code}</span>}
+                          <span>單價: ${product.selling_price?.toLocaleString()}</span>
+                          <span>庫存: {product.quantity}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-20">
+                      <input
+                        type="number"
                         className="input"
-                        value={part.product_id}
+                        min="1"
+                        value={part.quantity}
                         onChange={(e) => {
                           const updated = [...partsUsed];
-                          updated[idx] = { ...updated[idx], product_id: e.target.value };
+                          updated[idx] = { ...updated[idx], quantity: Number(e.target.value) || 1 };
                           setPartsUsed(updated);
                         }}
-                      >
-                        <option value="">選擇零件...</option>
-                        {inventory.map((p: any) => (
-                          <option key={p.id} value={p.id}>
-                            {p.product_name} (庫存:{p.quantity})
-                          </option>
-                        ))}
-                      </select>
+                      />
+                      {product && (
+                        <div className="text-xs text-gray-500 mt-1 text-right">
+                          小計 ${subtotal.toLocaleString()}
+                        </div>
+                      )}
                     </div>
-                    <input
-                      type="number"
-                      className="input w-20"
-                      min="1"
-                      value={part.quantity}
-                      onChange={(e) => {
-                        const updated = [...partsUsed];
-                        updated[idx] = { ...updated[idx], quantity: Number(e.target.value) };
-                        setPartsUsed(updated);
-                      }}
-                    />
                     <button
                       type="button"
-                      onClick={() => setPartsUsed(partsUsed.filter((_, i) => i !== idx))}
-                      className="text-red-500 hover:text-red-700 p-2"
+                      onClick={() => {
+                        setPartsUsed(partsUsed.filter((_, i) => i !== idx));
+                        setPartSearch(partSearch.filter((_, i) => i !== idx));
+                      }}
+                      className="text-red-500 hover:text-red-700 p-2 mt-1"
                     >
                       <X size={16} />
                     </button>
                   </div>
                 );
               })}
+              {partsUsed.length > 0 && (() => {
+                const total = partsUsed.reduce((sum, part) => {
+                  const p = inventory.find((x: any) => x.id === part.product_id);
+                  return sum + (p ? p.selling_price * part.quantity : 0);
+                }, 0);
+                return (
+                  <div className="text-right text-sm text-gray-700 pt-2 border-t border-gray-200">
+                    零件合計：<span className="font-semibold text-primary-600">${total.toLocaleString()}</span>
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
