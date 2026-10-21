@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { shipmentApi } from '../services/api';
+import { shipmentApi, inventoryApi } from '../services/api';
 import type { Shipment } from '../types';
 import { Plus, Edit2, Trash2, Truck, Eye, Search } from 'lucide-react';
 import { format } from 'date-fns';
@@ -28,6 +28,22 @@ export default function ShipmentList() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shipments'] }),
   });
 
+  // 商品編號索引：shipment_items 只存 product_id + product_name，沒有 product_code。
+  // 這裡用 product_id 對照 inventory 清單，組出「編號 → 商品」對照表，
+  // 讓搜尋框可以直接用商品編號（例如 INV-A002）找到出貨單。
+  const { data: allInventory = [] } = useQuery({
+    queryKey: ['inventory', 'all'],
+    queryFn: () => inventoryApi.getAll({ limit: 500 }).then(res => res.data),
+  });
+
+  const productCodeMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const p of allInventory) {
+      if (p?.id && p.product_code) map[p.id] = p.product_code;
+    }
+    return map;
+  }, [allInventory]);
+
   // Client-side search filter
   const filteredShipments = shipments.filter((shipment: Shipment) => {
     if (!searchQuery) return true;
@@ -36,7 +52,13 @@ export default function ShipmentList() {
       shipment.shipment_number?.toLowerCase().includes(q) ||
       shipment.customer?.name?.toLowerCase().includes(q) ||
       shipment.customer?.phone?.includes(q) ||
-      String(shipment.total_amount ?? '').includes(q)
+      String(shipment.total_amount ?? '').includes(q) ||
+      // 商品項目：商品名稱 或 商品編號，兩者都能搜
+      (shipment.items || []).some((item) => {
+        if ((item.product_name || '').toLowerCase().includes(q)) return true;
+        const code = productCodeMap[item.product_id];
+        return Boolean(code && code.toLowerCase().includes(q));
+      })
     );
   });
 
@@ -54,7 +76,7 @@ export default function ShipmentList() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
         <input
           type="text"
-          placeholder="搜尋出貨單（單號、客戶名稱、電話、金額）..."
+          placeholder="搜尋出貨單（單號、客戶、電話、金額、商品名稱/編號）..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
