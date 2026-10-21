@@ -24,6 +24,10 @@ export default function ShipmentForm() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [items, setItems] = useState<ShipmentItemInput[]>([]);
+  // 商品搜尋：itemSearch[idx] 是第 idx 列的搜尋字串，showItemDropdown 是目前展開的列
+  const [itemSearch, setItemSearch] = useState<string[]>([]);
+  const [showItemDropdown, setShowItemDropdown] = useState<number | null>(null);
+  const itemSearchRef = useRef<HTMLDivElement>(null);
   const [taxIncluded, setTaxIncluded] = useState(true);
   // 追蹤是否已初始化
   const editorInitializedRef = useRef(false);
@@ -89,6 +93,8 @@ export default function ShipmentForm() {
         product_id: item.product_id,
         quantity: item.quantity,
       })));
+      // 編輯模式：同步初始化搜尋字串陣列，避免 itemSearch[index] 對不到
+      setItemSearch(editData.items.map(() => ''));
       setTaxIncluded(editData.tax_included !== undefined ? editData.tax_included : true);
       if (editor && editData.note) {
         editor.commands.setContent(editData.note);
@@ -122,11 +128,24 @@ export default function ShipmentForm() {
 
   const addItem = () => {
     setItems([...items, { product_id: '', quantity: 1 }]);
+    setItemSearch([...itemSearch, '']);
   };
 
   const removeItem = (index: number) => {
     setItems(items.filter((_, i) => i !== index));
+    setItemSearch(itemSearch.filter((_, i) => i !== index));
   };
+
+  // 點擊商品搜尋框外面時關閉下拉
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (itemSearchRef.current && !itemSearchRef.current.contains(e.target as Node)) {
+        setShowItemDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const updateItem = (index: number, field: 'product_id' | 'quantity', value: string | number) => {
     const newItems = [...items];
@@ -238,28 +257,81 @@ export default function ShipmentForm() {
             <div className="space-y-3">
               {items.map((item, index) => {
                 const product = products.find((p: any) => p.id === item.product_id);
+                const keyword = (itemSearch[index] || '').toLowerCase();
+                const filtered = keyword
+                  ? products.filter((p: any) =>
+                      (p.product_name || '').toLowerCase().includes(keyword) ||
+                      (p.product_code || '').toLowerCase().includes(keyword)
+                    )
+                  : products;
                 return (
-                  <div key={index} className="flex gap-3 items-center">
-                    <select
-                      className="input flex-1"
-                      value={item.product_id}
-                      onChange={(e) => updateItem(index, 'product_id', e.target.value)}
-                    >
-                      <option value="">選擇商品</option>
-                      {products.map((p: any) => (
-                        <option key={p.id} value={p.id}>
-                          {p.product_name} (庫存: {p.quantity})
-                        </option>
-                      ))}
-                    </select>
-                    <input
-                      type="number"
-                      className="input w-24"
-                      value={item.quantity}
-                      onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
-                      min="1"
-                    />
-                    <span className="text-sm text-gray-600 w-24 text-right">
+                  <div key={index} className="flex gap-3 items-start">
+                    <div className="relative flex-1" ref={itemSearchRef}>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className="input pr-8"
+                          placeholder="搜尋商品名稱或編號..."
+                          value={itemSearch[index] || ''}
+                          onChange={(e) => {
+                            const updated = [...itemSearch];
+                            updated[index] = e.target.value;
+                            setItemSearch(updated);
+                            setShowItemDropdown(index);
+                          }}
+                          onFocus={() => setShowItemDropdown(index)}
+                        />
+                        <Search size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+                      </div>
+                      {showItemDropdown === index && !item.product_id && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                          {filtered.length === 0 ? (
+                            <div className="px-3 py-2 text-gray-500 text-sm">找不到商品</div>
+                          ) : (
+                            filtered.slice(0, 50).map((p: any) => (
+                              <button
+                                key={p.id}
+                                type="button"
+                                onClick={() => {
+                                  const updated = [...items];
+                                  updated[index] = { ...updated[index], product_id: p.id };
+                                  setItems(updated);
+                                  const updatedSearch = [...itemSearch];
+                                  updatedSearch[index] = '';
+                                  setItemSearch(updatedSearch);
+                                  setShowItemDropdown(null);
+                                }}
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                              >
+                                <div className="text-sm text-gray-900">{p.product_name}</div>
+                                <div className="text-xs text-gray-500 flex gap-2 mt-0.5">
+                                  {p.product_code && <span>編號: {p.product_code}</span>}
+                                  <span>庫存: {p.quantity}</span>
+                                  <span>${Number(p.selling_price).toLocaleString()}</span>
+                                </div>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                      {product && (
+                        <div className="text-xs text-gray-500 mt-1 flex gap-2 flex-wrap">
+                          {product.product_code && <span>編號: {product.product_code}</span>}
+                          <span>單價: ${Number(product.selling_price).toLocaleString()}</span>
+                          <span>庫存: {product.quantity}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-24 pt-0">
+                      <input
+                        type="number"
+                        className="input"
+                        value={item.quantity}
+                        onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
+                        min="1"
+                      />
+                    </div>
+                    <span className="text-sm text-gray-600 w-24 text-right pt-2">
                       NT${product ? (Number(product.selling_price) * item.quantity).toLocaleString() : 0}
                     </span>
                     <button
