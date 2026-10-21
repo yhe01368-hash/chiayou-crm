@@ -26,12 +26,19 @@ def get_inventory(
 ):
     sb = get_client()
 
+    # 【重要】過濾條件是在 Python 端做的，所以必須先把「足夠多」的資料抓回來，
+    # 否則像 INV-A002（排在第 111 名）這種會因為先被 limit 截斷而永遠搜不到。
+    # 因此：只要有任一過濾條件，就抓 MAX_FETCH 筆；沒有過濾條件才用呼叫端指定的 limit。
+    MAX_FETCH = 500
+    needs_full_scan = bool(search or category or low_stock)
+    fetch_limit = MAX_FETCH if needs_full_scan else limit
+
     try:
         rows = sb.select(
             "inventory",
             select="*",
             order="product_name.asc",
-            limit=limit,
+            limit=fetch_limit,
         )
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=502, detail=f"Supabase 錯誤: {e.response.text}")
@@ -48,6 +55,9 @@ def get_inventory(
                 or q in (r.get("product_code") or "").lower()]
     if low_stock:
         rows = [r for r in rows if r.get("quantity", 0) <= r.get("min_stock", 0)]
+
+    # 過濾完才套用 skip / limit（沒有過濾條件時本來就是全部，直接切）
+    rows = rows[skip:skip + limit]
 
     return [_enrich(r) for r in rows]
 
