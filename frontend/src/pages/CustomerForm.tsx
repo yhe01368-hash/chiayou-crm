@@ -5,8 +5,9 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import { customerApi } from '../services/api';
+import { extractErrorMessage } from '../utils/errorMessage';
 import type { CustomerFormData } from '../types';
-import { ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, AlertCircle } from 'lucide-react';
 
 export default function CustomerForm() {
   const { id } = useParams();
@@ -76,6 +77,8 @@ export default function CustomerForm() {
     }
   }, [existingCustomer, editor]);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   const mutation = useMutation({
     mutationFn: (data: CustomerFormData) =>
       isEditMode ? customerApi.update(id!, data) : customerApi.create(data),
@@ -83,10 +86,12 @@ export default function CustomerForm() {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       navigate('/customers');
     },
+    onError: (err: any) => setErrorMsg(extractErrorMessage(err, '儲存失敗，請稍後再試')),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     const noteText = editor?.getHTML() || form.note || '';
     const formData = { ...form, note: noteText };
     mutation.mutate(formData);
@@ -113,6 +118,12 @@ export default function CustomerForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">名稱 *</label>
           <input

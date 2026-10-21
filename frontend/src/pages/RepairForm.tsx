@@ -5,8 +5,9 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import { repairApi, customerApi, inventoryApi } from '../services/api';
+import { extractErrorMessage } from '../utils/errorMessage';
 import type { RepairFormData } from '../types';
-import { ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, AlertCircle } from 'lucide-react';
 
 const deviceTypes = ['筆電', '桌機', '螢幕', '印表機', '其他'];
 const statusOptions = [
@@ -149,6 +150,8 @@ export default function RepairForm() {
     }
   }, [editData, customers, problemEditor, repairDetailEditor]);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   const mutation = useMutation({
     mutationFn: (data: RepairFormData) =>
       isEdit ? repairApi.update(id!, data) : repairApi.create(data),
@@ -156,10 +159,12 @@ export default function RepairForm() {
       queryClient.invalidateQueries({ queryKey: ['repairs'] });
       navigate('/repairs');
     },
+    onError: (err: any) => setErrorMsg(extractErrorMessage(err, '儲存失敗，請稍後再試')),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     // 直接從編輯器讀取內容，不依賴 state
     const problemText = problemEditor?.getHTML() || form.problem || '';
     const repairDetailText = repairDetailEditor?.getHTML() || form.repair_detail || '';
@@ -232,6 +237,12 @@ export default function RepairForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">客戶 *</label>
           <div className="relative" ref={dropdownRef}>

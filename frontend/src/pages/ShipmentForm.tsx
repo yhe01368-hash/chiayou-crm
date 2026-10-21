@@ -5,7 +5,8 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 
 import { shipmentApi, customerApi, inventoryApi } from '../services/api';
-import { ArrowLeft, Plus, Trash2, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
+import { extractErrorMessage } from '../utils/errorMessage';
+import { ArrowLeft, Plus, Trash2, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, AlertCircle } from 'lucide-react';
 
 interface ShipmentItemInput {
   product_id: string;
@@ -95,6 +96,8 @@ export default function ShipmentForm() {
     }
   }, [editData, customers, editor]);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   const mutation = useMutation({
     mutationFn: (data: any) =>
       isEdit ? shipmentApi.update(id!, data) : shipmentApi.create(data),
@@ -103,10 +106,12 @@ export default function ShipmentForm() {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       navigate('/shipments');
     },
+    onError: (err: any) => setErrorMsg(extractErrorMessage(err, '儲存失敗，請稍後再試')),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     if (!customerId) return alert('請選擇客戶');
     if (items.length === 0) return alert('請新增商品');
     const noteText = editor?.getHTML() || '';
@@ -153,6 +158,12 @@ export default function ShipmentForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-6">
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">客戶 *</label>
           <div className="relative" ref={dropdownRef}>

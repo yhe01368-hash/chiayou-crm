@@ -6,11 +6,9 @@ import StarterKit from '@tiptap/starter-kit';
 import { format } from 'date-fns';
 
 import { repairLogApi, repairApi, customerApi } from '../services/api';
+import { extractErrorMessage } from '../utils/errorMessage';
 import type { RepairLogFormData } from '../types';
-import {
-  ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon,
-  Strikethrough, List, ListOrdered, Link as LinkIcon, FileInput
-} from 'lucide-react';
+import { ArrowLeft, Search, X, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, FileInput, AlertCircle } from 'lucide-react';
 
 export default function RepairLogForm() {
   const { id } = useParams();
@@ -187,6 +185,8 @@ export default function RepairLogForm() {
     return c.name?.toLowerCase().includes(q) || c.phone?.includes(q);
   });
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   const mutation = useMutation({
     mutationFn: (data: RepairLogFormData) =>
       isEdit ? repairLogApi.update(id!, data) : repairLogApi.create(data),
@@ -194,10 +194,12 @@ export default function RepairLogForm() {
       queryClient.invalidateQueries({ queryKey: ['repair-logs'] });
       navigate('/repair-logs');
     },
+    onError: (err: any) => setErrorMsg(extractErrorMessage(err, '儲存失敗，請稍後再試')),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     const data: RepairLogFormData = {
       ...form,
       problem: problemEditor?.getHTML() || form.problem || '',
@@ -271,6 +273,12 @@ export default function RepairLogForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         {/* 從維修單帶入 */}
         <div ref={repairDropdownRef}>
           <label className="block text-sm font-medium text-gray-700 mb-1">

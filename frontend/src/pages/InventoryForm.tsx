@@ -6,7 +6,8 @@ import StarterKit from '@tiptap/starter-kit';
 
 import { inventoryApi } from '../services/api';
 import type { InventoryFormData } from '../types';
-import { ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon } from 'lucide-react';
+import { extractErrorMessage } from '../utils/errorMessage';
+import { ArrowLeft, Bold, Italic, Underline as UnderlineIcon, Strikethrough, List, ListOrdered, Link as LinkIcon, AlertCircle } from 'lucide-react';
 
 const categories = ['CPU', '硬碟', '記憶體', '顯示卡', '主機板', '電源供應器', '機殼', '其他'];
 const units = ['個', '片', '條', '顆', '台', '盒'];
@@ -80,6 +81,8 @@ export default function InventoryForm() {
     }
   }, [editData, editor]);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   const mutation = useMutation({
     mutationFn: (data: InventoryFormData) =>
       isEdit ? inventoryApi.update(id!, data) : inventoryApi.create(data),
@@ -87,10 +90,12 @@ export default function InventoryForm() {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       navigate('/inventory');
     },
+    onError: (err: any) => setErrorMsg(extractErrorMessage(err, '儲存失敗，請稍後再試')),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
     const noteText = editor?.getHTML() || form.note || '';
     const formData = { ...form, note: noteText };
     mutation.mutate(formData);
@@ -117,6 +122,12 @@ export default function InventoryForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="card p-6 space-y-4">
+        {errorMsg && (
+          <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <AlertCircle size={18} className="flex-shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">商品編號 *</label>

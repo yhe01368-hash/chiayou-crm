@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userApi } from '../services/api';
+import { extractErrorMessage } from '../utils/errorMessage';
 import { Plus, Trash2, RefreshCw, Shield } from 'lucide-react';
 
 export default function UserList() {
@@ -24,7 +25,7 @@ export default function UserList() {
       setShowForm(false);
       setForm({ username: '', password: '', full_name: '', role: 'user' });
     },
-    onError: (err: any) => setError(err.response?.data?.detail || '新增失敗'),
+    onError: (err: any) => setError(extractErrorMessage(err, '新增失敗')),
   });
 
   const updateMut = useMutation({
@@ -33,11 +34,13 @@ export default function UserList() {
       qc.invalidateQueries({ queryKey: ['users'] });
       setEditingId(null);
     },
+    onError: (err: any) => setError(extractErrorMessage(err, '更新失敗')),
   });
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => userApi.delete(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+    onError: (err: any) => setError(extractErrorMessage(err, '刪除失敗')),
   });
 
   const resetPwMut = useMutation({
@@ -48,6 +51,7 @@ export default function UserList() {
       setResetPwId(null);
       setNewPassword('');
     },
+    onError: (err: any) => setError(extractErrorMessage(err, '重設密碼失敗')),
   });
 
   const handleCreate = (e: React.FormEvent) => {
