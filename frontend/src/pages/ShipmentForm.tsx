@@ -33,9 +33,11 @@ export default function ShipmentForm() {
     queryFn: () => customerApi.getAll().then(res => res.data),
   });
 
+  // 出貨單選商品同樣在記憶體過濾，需要完整清單（limit=500）。
+  // 不帶參數會被後端預設 limit=100 截斷，排序在第 100 名後的商品會消失。
   const { data: products = [] } = useQuery({
-    queryKey: ['inventory'],
-    queryFn: () => inventoryApi.getAll().then(res => res.data),
+    queryKey: ['inventory', 'all'],
+    queryFn: () => inventoryApi.getAll({ limit: 500 }).then(res => res.data),
   });
 
   const { data: editData } = useQuery({

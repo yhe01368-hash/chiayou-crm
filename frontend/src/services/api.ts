@@ -98,7 +98,7 @@ export const repairApi = {
 
 // ── 庫存 API ────────────────────────────────────────────────────────────────
 export const inventoryApi = {
-  getAll: (params?: { category?: string; search?: string; low_stock?: boolean }) =>
+  getAll: (params?: { category?: string; search?: string; low_stock?: boolean; limit?: number }) =>
     api.get('/inventory', { params }),
   getById: (id: string) =>
     api.get(`/inventory/${id}`),

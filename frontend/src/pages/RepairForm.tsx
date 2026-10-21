@@ -53,9 +53,12 @@ export default function RepairForm() {
     queryFn: () => customerApi.getAll().then(res => res.data),
   });
 
+  // 零件下拉需要「完整」商品清單在記憶體裡過濾，所以明確帶 limit=500。
+  // 不帶參數會用到後端預設 limit=100，導致排序在第 100 名後的商品（例如 INV-A002）
+  // 永遠搜不到。
   const { data: inventory = [] } = useQuery({
-    queryKey: ['inventory'],
-    queryFn: () => inventoryApi.getAll().then(res => res.data),
+    queryKey: ['inventory', 'all'],
+    queryFn: () => inventoryApi.getAll({ limit: 500 }).then(res => res.data),
   });
 
   const { data: editData } = useQuery({
