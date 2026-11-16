@@ -37,6 +37,16 @@ class CustomerBase(BaseModel):
     def tax_id_int_to_str(cls, v):
         return str(v) if isinstance(v, int) else v
 
+    @field_validator("phone", "phone2", "fax", mode="before")
+    @classmethod
+    def phone_int_to_str(cls, v):
+        """電話 / 傳真欄位可能是純數字字串被誤轉成 int（例如大陸手機號 13361730638）。
+
+        純數字字串是合法的電話格式，所以要保留前導 0（例如 0422911314），
+        這裡不能用 str(int) 轉換（會把 0422911314 變成 422911314）。
+        """
+        return str(v) if isinstance(v, int) else v
+
 class CustomerCreate(CustomerBase):
     pass
 
