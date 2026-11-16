@@ -43,6 +43,8 @@ export default function RepairForm() {
 
   // 編輯器是否已初始化過
   const editorInitializedRef = useRef(false);
+  // 客戶名稱是否已初始化（獨立於編輯器，因為客戶清單可能比維修單晚載入）
+  const customerNameInitializedRef = useRef(false);
 
   const [customerSearch, setCustomerSearch] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -144,14 +146,24 @@ export default function RepairForm() {
       if (repairDetailEditor && editData.repair_detail) {
         repairDetailEditor.commands.setContent(editData.repair_detail);
       }
-      const cust = customers.find((c: any) => c.id === editData.customer_id);
-      if (cust) setCustomerSearch(cust.name);
       // 初始化使用零件
       if (editData.parts_used) {
         setPartsUsed(editData.parts_used);
       }
     }
   }, [editData, customers, problemEditor, repairDetailEditor]);
+
+  // 客戶名稱初始化：客戶清單（customers）可能比維修單（editData）晚載入，
+  // 所以不能放在上面的初始化 effect 裡，否則 customers 為空時就永遠不會補上，
+  // 造成「編輯維修單時客戶欄位是空的」（2026-11-17 發現）。
+  useEffect(() => {
+    if (!editData || customerNameInitializedRef.current) return;
+    const cust = customers.find((c: any) => c.id === editData.customer_id);
+    if (cust) {
+      customerNameInitializedRef.current = true;
+      setCustomerSearch(cust.name);
+    }
+  }, [editData, customers]);
 
   const [errorMsg, setErrorMsg] = useState('');
 

@@ -31,6 +31,8 @@ export default function ShipmentForm() {
   const [taxIncluded, setTaxIncluded] = useState(true);
   // 追蹤是否已初始化
   const editorInitializedRef = useRef(false);
+  // 客戶名稱是否已初始化（獨立於編輯器，因為客戶清單可能比出貨單晚載入）
+  const customerNameInitializedRef = useRef(false);
 
   const { data: customers = [] } = useQuery({
     queryKey: ['customers'],
@@ -99,10 +101,20 @@ export default function ShipmentForm() {
       if (editor && editData.note) {
         editor.commands.setContent(editData.note);
       }
-      const cust = customers.find((c: any) => c.id === editData.customer_id);
-      if (cust) setCustomerSearch(cust.name);
     }
   }, [editData, customers, editor]);
+
+  // 客戶名稱初始化：客戶清單（customers）可能比出貨單（editData）晚載入，
+  // 不能放在上面的初始化 effect 裡，否則 customers 為空時就永遠不會補上，
+  // 造成「編輯出貨單時客戶欄位是空的」（2026-11-17 發現）。
+  useEffect(() => {
+    if (!editData || customerNameInitializedRef.current) return;
+    const cust = customers.find((c: any) => c.id === editData.customer_id);
+    if (cust) {
+      customerNameInitializedRef.current = true;
+      setCustomerSearch(cust.name);
+    }
+  }, [editData, customers]);
 
   const [errorMsg, setErrorMsg] = useState('');
 
